@@ -11,9 +11,9 @@ import {RevertContext, RevertOptions} from "@zetachain/protocol-contracts/contra
 import "@zetachain/protocol-contracts/contracts/evm/interfaces/IGatewayEVM.sol";
 import {GatewayEVM} from "@zetachain/protocol-contracts/contracts/evm/GatewayEVM.sol";
 
-import {IPermit2} from "../lib/permit2/IPermit2.sol";
-import {ISignatureTransfer} from "../lib/permit2/ISignatureTransfer.sol";
-import {IAllowanceTransfer} from "../lib/permit2/IAllowanceTransfer.sol";
+import {IPermit2} from "./lib/permit2/IPermit2.sol";
+import {ISignatureTransfer} from "./lib/permit2/ISignatureTransfer.sol";
+import {IAllowanceTransfer} from "./lib/permit2/IAllowanceTransfer.sol";
 
 // Interface for WETH9 to allow withdrawals
 interface IWETH is IERC20 {

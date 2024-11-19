@@ -1,3 +1,4 @@
 @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts
 @zetachain/toolkit/=lib/toolkit
 @zetachain/protocol-contracts/=lib/protocol-contracts/v2
+@uniswap/v3-periphery/=lib/v3-periphery
