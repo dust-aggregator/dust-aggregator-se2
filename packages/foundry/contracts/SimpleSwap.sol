@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "./ISwapRouter.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
+import "./TransferHelper.sol";
 
-import {RevertContext, RevertOptions} from "@zetachain/protocol-contracts/contracts/Revert.sol";
-import "@zetachain/protocol-contracts/contracts/evm/interfaces/IGatewayEVM.sol";
-import {GatewayEVM} from "@zetachain/protocol-contracts/contracts/evm/GatewayEVM.sol";
+import {RevertContext, RevertOptions} from "./Revert.sol";
+import "./IGatewayEVM.sol";
+import {GatewayEVM} from "./GatewayEVM.sol";
 
 // Interface for WETH9 to allow withdrawals
 interface IWETH is IERC20 {
