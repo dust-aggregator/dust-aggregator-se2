@@ -10,6 +10,3 @@
 [submodule "packages/foundry/lib/toolkit"]
 	path = packages/foundry/lib/toolkit
 	url = https://github.com/zeta-chain/toolkit
-[submodule "packages/foundry/lib/protocol-contracts"]
-	path = packages/foundry/lib/protocol-contracts
-	url = https://github.com/zeta-chain/protocol-contracts
