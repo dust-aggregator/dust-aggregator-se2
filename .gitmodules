@@ -13,6 +13,3 @@
 [submodule "packages/foundry/lib/protocol-contracts"]
 	path = packages/foundry/lib/protocol-contracts
 	url = https://github.com/zeta-chain/protocol-contracts
-[submodule "packages/foundry/lib/v3-periphery"]
-	path = packages/foundry/lib/v3-periphery
-	url = https://github.com/uniswap/v3-periphery
