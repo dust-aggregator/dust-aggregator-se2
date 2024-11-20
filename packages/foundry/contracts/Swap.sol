@@ -6,10 +6,10 @@ import {SwapHelperLib} from "@zetachain/toolkit/contracts/SwapHelperLib.sol";
 import {BytesHelperLib} from "@zetachain/toolkit/contracts/BytesHelperLib.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import {RevertContext, RevertOptions} from "@zetachain/protocol-contracts/contracts/Revert.sol";
-import "@zetachain/protocol-contracts/contracts/zevm/interfaces/UniversalContract.sol";
-import "@zetachain/protocol-contracts/contracts/zevm/interfaces/IGatewayZEVM.sol";
-import {GatewayZEVM} from "@zetachain/protocol-contracts/contracts/zevm/GatewayZEVM.sol";
+import {RevertContext, RevertOptions} from "./Revert.sol";
+import "./UniversalContract.sol";
+import "./IGatewayZEVM.sol";
+import {GatewayZEVM} from "./GatewayZEVM.sol";
 
 contract Swap is UniversalContract {
     SystemContract public systemContract;
