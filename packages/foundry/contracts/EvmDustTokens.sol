@@ -8,8 +8,8 @@ import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 
 import {RevertContext, RevertOptions} from "./Revert.sol";
-import "@zetachain/protocol-contracts/contracts/evm/interfaces/IGatewayEVM.sol";
-import {GatewayEVM} from "@zetachain/protocol-contracts/contracts/evm/GatewayEVM.sol";
+import "./IGatewayEVM.sol";
+import {GatewayEVM} from "./GatewayEVM.sol";
 
 import {IPermit2} from "../lib/permit2/IPermit2.sol";
 import {ISignatureTransfer} from "../lib/permit2/ISignatureTransfer.sol";
