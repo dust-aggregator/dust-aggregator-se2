@@ -90,9 +90,15 @@ contract TestHelpers is Test {
                 }
 
                 string memory element = string.concat(
-                    '{ "address2": "',
+                    '{ "chain": "',
+                    newAddressesArr[i].chain,
+                    '", ',
+                    '"type2": "',
+                    newAddressesArr[i].type2,
+                    '", ',
+                    '"address2": "',
                     addressToString(newAddressesArr[i].address2),
-                    '", }',
+                    '" }',
                     comma
                 );
 
