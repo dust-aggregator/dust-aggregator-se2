@@ -120,7 +120,7 @@ contract YourContractTest is Test, ZetachainUtils {
             payable(ZETA_GATEWAY_ADDRESS)
         );
 
-        vm.deal(user1, 15 ether);
+        vm.deal(user1, 50 ether);
 
         vm.startPrank(user1);
         WETH.approve(permit2, type(uint256).max);
@@ -146,10 +146,12 @@ contract YourContractTest is Test, ZetachainUtils {
         DEFAULT_SWAPS.push(address(UNI));
     }
 
+    uint256 WETHAmount = 10 ether;
+
     modifier beforeEach() {
         vm.startPrank(user1);
-        WETH.deposit{value: 10 ether}();
-        WETH.approve(address(simpleSwap), 10 ether);
+        WETH.deposit{value: WETHAmount}();
+        WETH.approve(address(simpleSwap), WETHAmount);
 
         uint256 swapAmount = 1 ether;
         address[] memory erc20s = new address[](5);
@@ -168,6 +170,8 @@ contract YourContractTest is Test, ZetachainUtils {
         public
         beforeEach
     {
+        vm.startPrank(user1);
+
         bytes memory destinationPayload = encodeDestinationPayload(
             user2,
             address(UNI)
@@ -183,26 +187,137 @@ contract YourContractTest is Test, ZetachainUtils {
             DEFAULT_AMOUNT,
             DEFAULT_SLIPPAGE
         );
-        (
-            CompletePermitData memory permit,
-            bytes memory hash
-        ) = preparePermitData(
-                30 seconds * 60 seconds,
-                swaps,
-                address(dustTokens)
-            );
+        // (
+        //     CompletePermitData memory permit,
+        //     bytes memory hash
+        // ) = preparePermitData(
+        //         30 seconds * 60 seconds * 1000,
+        //         swaps,
+        //         address(dustTokens)
+        //     );
+
+        signPermit(swaps);
         // uint256 receiverStartBalance = UNI.balanceOf(receiver);
-        vm.startPrank(user1);
-        dustTokens.SwapAndBridgeTokens(
-            swaps,
-            address(universalApp),
-            encodedParameters,
-            permit.nonce,
-            permit.deadline,
-            hash
-        );
+
+        // for (uint256 i = 0; i < DEFAULT_SWAPS.length; i++) {
+        //     console.log()
+        // }
+        for (uint256 i = 0; i < swaps.length; i++) {
+            console.log(swaps[i].token);
+            console.log(swaps[i].amount);
+            console.log(IERC20(swaps[i].token).balanceOf(user1));
+        }
+
+        // dustTokens.SwapAndBridgeTokens(
+        //     swaps,
+        //     address(universalApp),
+        //     encodedParameters,
+        //     permit.nonce,
+        //     permit.deadline,
+        //     hash
+        // );
         vm.stopPrank();
-        // getPermitData(permit, permit2, block.chainid, Witness(""));
+    }
+
+    // function testSwapInputTokensAndOutputNativeTokenOnDestinationChain()
+    //     public
+    //     beforeEach
+    // {
+    //     vm.startPrank(user1);
+
+    //     bytes memory destinationPayload = encodeDestinationPayload(
+    //         user2,
+    //         address(0)
+    //     );
+    //     bytes memory encodedParameters = encodeZetachainPayload(
+    //         ZETA_ETH_ADDRESS,
+    //         address(dustTokens),
+    //         user2,
+    //         destinationPayload
+    //     );
+    //     SwapInput[] memory swaps = getTokenSwaps(
+    //         DEFAULT_SWAPS,
+    //         DEFAULT_AMOUNT,
+    //         DEFAULT_SLIPPAGE
+    //     );
+    //     (
+    //         CompletePermitData memory permit,
+    //         bytes memory hash
+    //     ) = preparePermitData(
+    //             30 seconds * 60 seconds * 1000,
+    //             swaps,
+    //             address(dustTokens)
+    //         );
+
+    //     dustTokens.SwapAndBridgeTokens(
+    //         swaps,
+    //         address(universalApp),
+    //         encodedParameters,
+    //         permit.nonce,
+    //         permit.deadline,
+    //         hash
+    //     );
+    //     vm.stopPrank();
+    // }
+
+    function signPermit(
+        SwapInput[] memory swaps
+    ) public returns (uint256, uint256, bytes memory) {
+        (
+            bytes32 domain,
+            bytes memory types, // Replace with your actual type definition for `types`
+            bytes memory values, // Replace with your actual type definition for `values`
+            uint256 deadline,
+            uint256 nonce
+        ) = preparePermitData(swaps, address(dustTokens));
+
+        bytes memory signature; // generate signature
+        return (deadline, nonce, signature);
+
+        // bytes memory hash = getHash(complete);
+    }
+
+    function preparePermitData(
+        SwapInput[] memory swaps,
+        address spender
+    )
+        public
+        view
+        returns (
+            bytes32,
+            bytes memory, // Replace with your actual type definition for `types`
+            bytes memory, // Replace with your actual type definition for `values`
+            uint256,
+            uint256
+        )
+    {
+        uint256 nonce = uint256(
+            keccak256(abi.encodePacked(block.timestamp, msg.sender))
+        ) % 1e15;
+
+        uint256 deadline = calculateDeadline(
+            30 seconds * 60 seconds * 1000 seconds
+        );
+
+        PreparedPermitData memory permit = PreparedPermitData({
+            deadline: deadline,
+            nonce: nonce,
+            permitted: swaps,
+            spender: spender
+        });
+
+        (
+            bytes32 domain,
+            bytes memory types, // Replace with your actual type definition for `types`
+            bytes memory values // Replace with your actual type definition for `values`
+        ) = getPermitDataBatchTransferFrom(
+                permit,
+                permit2,
+                block.chainid,
+                Witness("")
+            );
+
+        return (domain, types, values, deadline, nonce);
     }
 
     // Example function to calculate a deadline
@@ -215,42 +330,6 @@ contract YourContractTest is Test, ZetachainUtils {
         uint256 nonce;
         SwapInput[] permitted;
         address spender;
-    }
-
-    function preparePermitData(
-        uint256 duration, // e.g., 30 * 60 = 1800 seconds for 30 minutes
-        SwapInput[] memory swaps,
-        address spender
-    ) public view returns (CompletePermitData memory, bytes memory) {
-        uint256 nonce = uint256(
-            keccak256(abi.encodePacked(block.timestamp, msg.sender))
-        ) % 1e15;
-        uint256 deadline = calculateDeadline(duration);
-
-        PreparedPermitData memory permit = PreparedPermitData({
-            deadline: deadline,
-            nonce: nonce,
-            permitted: swaps,
-            spender: spender
-        });
-
-        PermitData memory permitData = getPermitDataBatchTransferFrom(
-            permit,
-            permit2,
-            block.chainid,
-            Witness("")
-        );
-
-        CompletePermitData memory complete = CompletePermitData({
-            deadline: permit.deadline,
-            nonce: permit.nonce,
-            domain: permitData.domain,
-            types: permitData.types,
-            values: permitData.values
-        });
-
-        bytes memory hash = getHash(complete);
-        return (complete, hash);
     }
 
     bytes32 private constant EIP712_DOMAIN_TYPEHASH =
@@ -346,6 +425,7 @@ contract YourContractTest is Test, ZetachainUtils {
 
             // Calculate the input amount in token decimals
             uint8 decimals = token.decimals();
+
             uint256 amount = swapAmount * (10 ** decimals);
 
             // Get the estimated amount out from Uniswap Quoter
@@ -407,25 +487,31 @@ contract YourContractTest is Test, ZetachainUtils {
         address permit2Address,
         uint256 chainId,
         Witness memory witness
-    ) public view returns (PermitData memory) {
+    )
+        public
+        view
+        returns (
+            bytes32 domain,
+            bytes memory types, // Replace with your actual type definition for `types`
+            bytes memory values // Replace with your actual type definition for `values`
+        )
+    {
         require(permit.deadline <= MaxSigDeadline, "SIG_DEADLINE_OUT_OF_RANGE");
         require(permit.nonce <= MaxUnorderedNonce, "NONCE_OUT_OF_RANGE");
 
-        bytes32 domain = getPermit2Domain(permit2Address, chainId);
+        domain = getPermit2Domain(permit2Address, chainId);
 
         for (uint256 i = 0; i < permit.permitted.length; i++) {
             validateTokenPermissions(permit.permitted[i]);
         }
 
-        bytes memory types = witness.witness.length > 0
+        types = witness.witness.length > 0
             ? getPermitTransferFromWithWitnessType(witness)
             : getPermitTransferFromTypes();
 
-        bytes memory values = witness.witness.length > 0
+        values = witness.witness.length > 0
             ? abi.encode(permit, witness.witness)
             : abi.encode(permit);
-
-        return PermitData({domain: domain, types: types, values: values});
     }
 
     // function getPermitDataTransferFrom(
