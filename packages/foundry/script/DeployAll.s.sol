@@ -42,9 +42,17 @@ contract DeployAll is ScaffoldETHDeploy, ZetachainUtils {
         console.log(ZETA_GATEWAY_ADDRESS);
         console.log(GATEWAY_ADDRESS);
 
-        address uniswapRouterV3 = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
-        address weth = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
+        //Defaults to Arbitrum addresses
         address permit2 = 0x000000000022D473030F116dDEE9F6B43aC78BA3;
+
+        address uniswapRouterV3 = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
+        address uniswapQuoterV3 = 0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6;
+        address weth = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
+        address dai = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
+        address usdc = 0xaf88d065e77c8cC2239327C5EDb3A432268e5831;
+        address uni = 0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0;
+        address wbtc = 0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f;
+        address link = 0xf97f4df75117a78c1A5a0DBb814Af92458539FB4;
 
         (, address _deployer, ) = vm.readCallers();
 
@@ -71,5 +79,15 @@ contract DeployAll is ScaffoldETHDeploy, ZetachainUtils {
         );
 
         writeAddressToFile("zetachain", "Swap", address(swap));
+
+        writeAddressToFile("ethereum", "EvmDustTokens", address(evmDustTokens));
+        writeAddressToFile("ethereum", "uniswapRouterV3", uniswapRouterV3);
+        writeAddressToFile("ethereum", "uniswapQuoterV3", uniswapQuoterV3);
+        writeAddressToFile("ethereum", "weth", weth);
+        writeAddressToFile("ethereum", "dai", dai);
+        writeAddressToFile("ethereum", "usdc", usdc);
+        writeAddressToFile("ethereum", "uni", uni);
+        writeAddressToFile("ethereum", "wbtc", wbtc);
+        writeAddressToFile("ethereum", "link", link);
     }
 }
