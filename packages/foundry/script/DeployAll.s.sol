@@ -38,6 +38,13 @@ contract DeployAll is ScaffoldETHDeploy {
         }
     }
 
+    function getLocalnetPath(
+        string memory fileName
+    ) public returns (string memory path) {
+        string memory root = vm.projectRoot();
+        path = string.concat(root, "/", fileName);
+    }
+
     function getJson(
         string memory fileName
     ) internal view returns (Localnet memory) {
@@ -101,5 +108,8 @@ contract DeployAll is ScaffoldETHDeploy {
                 vm.toString(address(evmDustTokens))
             )
         );
+
+        string memory jsonObj = '{ "pid": "This is a test" }';
+        vm.writeJson(jsonObj, getLocalnetPath("localnet.json"));
     }
 }
