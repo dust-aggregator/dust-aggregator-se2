@@ -79,7 +79,7 @@ lint:
 
 # Run tests
 test:
-	forge test
+	forge test --fork-url=https://arb1.arbitrum.io/rpc
 
 # Verify contracts
 verify:
