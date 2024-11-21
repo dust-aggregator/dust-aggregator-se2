@@ -49,14 +49,14 @@ contract ZetachainUtils is Script {
             }
 
             string memory element = string.concat(
-                '{ "chain": "',
+                '{ "address2": "',
+                vm.toString(addresses[i].address2),
+                '", ',
+                '"chain": "',
                 addresses[i].chain,
                 '", ',
                 '"type2": "',
                 addresses[i].type2,
-                '", ',
-                '"address2": "',
-                vm.toString(addresses[i].address2),
                 '" }',
                 comma
             );
