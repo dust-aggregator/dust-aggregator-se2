@@ -41,6 +41,37 @@ contract TestHelpers is Test {
         }
     }
 
+    function _writeAddresses(LocalnetAddress[] memory addresses) public {
+        string memory finalObj;
+        for (uint256 i = 0; i < addresses.length; i++) {
+            string memory comma;
+            if (i < addresses.length - 1) {
+                comma = ",";
+            }
+
+            string memory element = string.concat(
+                '{ "chain": "',
+                addresses[i].chain,
+                '", ',
+                '"type2": "',
+                addresses[i].type2,
+                '", ',
+                '"address2": "',
+                addressToString(addresses[i].address2),
+                '" }',
+                comma
+            );
+
+            finalObj = string.concat(finalObj, element);
+        }
+
+        vm.writeJson(
+            string.concat("[", finalObj, "]"),
+            getLocalnetPath("localnet.json"),
+            ".addresses"
+        );
+    }
+
     function writeAddressToFile(
         string memory chain,
         string memory contractType,
@@ -57,12 +88,18 @@ contract TestHelpers is Test {
                 keccak256(bytes(contractType))
             ) {
                 doesExist = true;
+
+                ln.addresses[i] = LocalnetAddress(
+                    address2,
+                    ln.addresses[i].chain,
+                    ln.addresses[i].type2
+                );
                 break;
             }
         }
 
         if (doesExist) {
-            //update the existing entry
+            _writeAddresses(ln.addresses);
         } else {
             //add a new entry
             LocalnetAddress[] memory newAddressesArr = new LocalnetAddress[](
@@ -82,39 +119,7 @@ contract TestHelpers is Test {
                 contractType
             );
 
-            string memory finalObj;
-            for (uint256 i = 0; i < newAddressesArr.length; i++) {
-                string memory comma;
-                if (i < newAddressesArr.length - 1) {
-                    comma = ",";
-                }
-
-                string memory element = string.concat(
-                    '{ "chain": "',
-                    newAddressesArr[i].chain,
-                    '", ',
-                    '"type2": "',
-                    newAddressesArr[i].type2,
-                    '", ',
-                    '"address2": "',
-                    addressToString(newAddressesArr[i].address2),
-                    '" }',
-                    comma
-                );
-
-                finalObj = string.concat(finalObj, element);
-            }
-
-            // string
-            //     memory jsonObj = '[{ "address2": "Hello", "chain": "ethereum", "type2": "yoooo" }]';
-
-            vm.writeJson(
-                string.concat("[", finalObj, "]"),
-                getLocalnetPath("localnet.json"),
-                ".addresses"
-            );
-
-            // vm.writeJson()
+            _writeAddresses(newAddressesArr);
         }
     }
 
