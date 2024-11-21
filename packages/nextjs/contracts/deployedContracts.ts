@@ -6,24 +6,24 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
   31337: {
-    Swap: {
-      address: "0xed1db453c3156ff3155a97ad217b3087d5dc5f6e",
+    UniversalDApp: {
+      address: "0xe1aa25618fa0c7a1cfdab5d6b456af611873b629",
       abi: [
         {
           type: "constructor",
           inputs: [
             {
-              name: "systemContractAddress",
+              name: "_systemContract",
               type: "address",
               internalType: "address",
             },
             {
-              name: "gatewayAddress",
+              name: "_gateway",
               type: "address",
-              internalType: "address payable",
+              internalType: "address",
             },
           ],
-          stateMutability: "nonpayable",
+          stateMutability: "payable",
         },
         {
           type: "function",
@@ -33,7 +33,7 @@ const deployedContracts = {
             {
               name: "",
               type: "address",
-              internalType: "contract GatewayZEVM",
+              internalType: "contract IGatewayZEVM",
             },
           ],
           stateMutability: "view",
@@ -116,7 +116,7 @@ const deployedContracts = {
             },
           ],
           outputs: [],
-          stateMutability: "payable",
+          stateMutability: "nonpayable",
         },
         {
           type: "function",
@@ -188,6 +188,16 @@ const deployedContracts = {
         },
         {
           type: "error",
+          name: "InvalidAddress",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "InvalidChainToken",
+          inputs: [],
+        },
+        {
+          type: "error",
           name: "InvalidPath",
           inputs: [],
         },
@@ -203,24 +213,29 @@ const deployedContracts = {
         },
         {
           type: "error",
+          name: "NotGateway",
+          inputs: [],
+        },
+        {
+          type: "error",
           name: "ZeroAddress",
           inputs: [],
         },
       ],
       inheritedFunctions: {
-        onCall: "contracts/UniversalContract.sol",
+        onCall: "contracts/interfaces/IUniversalContract.sol",
       },
     },
     EvmDustTokens: {
-      address: "0xf7cd8fa9b94db2aa972023b379c7f72c65e4de9d",
+      address: "0xe1da8919f262ee86f9be05059c9280142cf23f48",
       abi: [
         {
           type: "constructor",
           inputs: [
             {
-              name: "gatewayAddress",
+              name: "_gateway",
               type: "address",
-              internalType: "address payable",
+              internalType: "contract IGatewayEVM",
             },
             {
               name: "_swapRouter",
@@ -228,7 +243,12 @@ const deployedContracts = {
               internalType: "contract ISwapRouter",
             },
             {
-              name: "_WETH9",
+              name: "_universalDApp",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "_nativeToken",
               type: "address",
               internalType: "address payable",
             },
@@ -242,8 +262,13 @@ const deployedContracts = {
               type: "address",
               internalType: "contract IPermit2",
             },
+            {
+              name: "_tokenList",
+              type: "address[]",
+              internalType: "address[]",
+            },
           ],
-          stateMutability: "nonpayable",
+          stateMutability: "payable",
         },
         {
           type: "receive",
@@ -294,11 +319,6 @@ const deployedContracts = {
               ],
             },
             {
-              name: "universalApp",
-              type: "address",
-              internalType: "address",
-            },
-            {
               name: "payload",
               type: "bytes",
               internalType: "bytes",
@@ -324,16 +344,10 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "WETH9",
+          name: "acceptOwnership",
           inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address payable",
-            },
-          ],
-          stateMutability: "view",
+          outputs: [],
+          stateMutability: "nonpayable",
         },
         {
           type: "function",
@@ -350,13 +364,13 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "feeTier",
+          name: "collectedFees",
           inputs: [],
           outputs: [
             {
               name: "",
-              type: "uint24",
-              internalType: "uint24",
+              type: "uint256",
+              internalType: "uint256",
             },
           ],
           stateMutability: "view",
@@ -369,14 +383,27 @@ const deployedContracts = {
             {
               name: "",
               type: "address",
-              internalType: "contract GatewayEVM",
+              internalType: "contract IGatewayEVM",
             },
           ],
           stateMutability: "view",
         },
         {
           type: "function",
-          name: "getBalances",
+          name: "getTokenList",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address[]",
+              internalType: "address[]",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getTokensMetadata",
           inputs: [
             {
               name: "user",
@@ -401,7 +428,7 @@ const deployedContracts = {
               internalType: "string[]",
             },
             {
-              name: "decimalsArray",
+              name: "decimals",
               type: "uint8[]",
               internalType: "uint8[]",
             },
@@ -415,52 +442,10 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "getTokens",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address[]",
-              internalType: "address[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "hasPermit2Allowance",
+          name: "isWhitelisted",
           inputs: [
             {
-              name: "user",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "requiredAmount",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          outputs: [
-            {
               name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "isTokenWhitelisted",
-          inputs: [
-            {
-              name: "token",
               type: "address",
               internalType: "address",
             },
@@ -524,6 +509,19 @@ const deployedContracts = {
         },
         {
           type: "function",
+          name: "pendingOwner",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "permit2",
           inputs: [],
           outputs: [
@@ -537,12 +535,30 @@ const deployedContracts = {
         },
         {
           type: "function",
+          name: "protocolFee",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "removeToken",
           inputs: [
             {
               name: "token",
               type: "address",
               internalType: "address",
+            },
+            {
+              name: "index",
+              type: "uint256",
+              internalType: "uint256",
             },
           ],
           outputs: [],
@@ -557,48 +573,16 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "signatureBatchTransfer",
-          inputs: [
+          name: "swapFee",
+          inputs: [],
+          outputs: [
             {
-              name: "swaps",
-              type: "tuple[]",
-              internalType: "struct SwapInput[]",
-              components: [
-                {
-                  name: "token",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "amount",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-                {
-                  name: "minAmountOut",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-              ],
-            },
-            {
-              name: "nonce",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "deadline",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "signature",
-              type: "bytes",
-              internalType: "bytes",
+              name: "",
+              type: "uint24",
+              internalType: "uint24",
             },
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          stateMutability: "view",
         },
         {
           type: "function",
@@ -609,25 +593,6 @@ const deployedContracts = {
               name: "",
               type: "address",
               internalType: "contract ISwapRouter",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "tokenList",
-          inputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
             },
           ],
           stateMutability: "view",
@@ -647,22 +612,68 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "whitelistedTokens",
-          inputs: [
+          name: "universalDApp",
+          inputs: [],
+          outputs: [
             {
               name: "",
               type: "address",
               internalType: "address",
             },
           ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "wNativeToken",
+          inputs: [],
           outputs: [
             {
               name: "",
-              type: "bool",
-              internalType: "bool",
+              type: "address",
+              internalType: "address payable",
             },
           ],
           stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "withdrawFees",
+          inputs: [],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "event",
+          name: "FeesWithdrawn",
+          inputs: [
+            {
+              name: "amount",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "OwnershipTransferStarted",
+          inputs: [
+            {
+              name: "previousOwner",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "newOwner",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
         },
         {
           type: "event",
@@ -808,6 +819,64 @@ const deployedContracts = {
         },
         {
           type: "error",
+          name: "FeeWithdrawalFailed",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "InsufficientAllowance",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "InsufficientBalance",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "InvalidAddress",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "InvalidMsgValue",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "InvalidToken",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "NoSwaps",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "NotGateway",
+          inputs: [],
+        },
+        {
+          type: "error",
           name: "OwnableInvalidOwner",
           inputs: [
             {
@@ -828,13 +897,60 @@ const deployedContracts = {
             },
           ],
         },
+        {
+          type: "error",
+          name: "SwapFailed",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "TokenIsNotWhitelisted",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "TokenIsWhitelisted",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "TransferFailed",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "WrongIndex",
+          inputs: [],
+        },
       ],
       inheritedFunctions: {
-        owner: "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+        acceptOwnership:
+          "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
+        owner: "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
+        pendingOwner:
+          "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
         renounceOwnership:
-          "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+          "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
         transferOwnership:
-          "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+          "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
       },
     },
   },
