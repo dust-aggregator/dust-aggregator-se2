@@ -38,6 +38,8 @@ contract YourContractTest is Test, ZetachainUtils {
 
     address deployer;
 
+    SimpleSwap simpleSwap;
+
     function setUp() public {
         UNISWAP_ROUTER = readLocalnetAddresses("ethereum", "uniswapRouterV3");
         UNISWAP_QUOTER = readLocalnetAddresses("ethereum", "uniswapQuoterV3");
@@ -61,7 +63,7 @@ contract YourContractTest is Test, ZetachainUtils {
 
         deployer = vm.addr(1);
 
-        SimpleSwap simpleSwap = new SimpleSwap(
+        simpleSwap = new SimpleSwap(
             ISwapRouter(UNISWAP_ROUTER),
             payable(WETH_ADDRESS)
         );
@@ -105,11 +107,28 @@ contract YourContractTest is Test, ZetachainUtils {
         UNI.approve(permit2, type(uint256).max);
         WBTC.approve(permit2, type(uint256).max);
 
-        WETH.deposit{value: 10 ether}();
         vm.stopPrank();
     }
 
-    function testSimpleSwap() public {
+    modifier beforeEach() {
+        vm.startPrank(deployer);
+        WETH.deposit{value: 10 ether}();
+        WETH.approve(address(simpleSwap), 10 ether);
+
+        uint256 swapAmount = 1 ether;
+        address[] memory erc20s = new address[](5);
+        erc20s[0] = DAI_ADDRESS;
+        erc20s[1] = USDC_ADDRESS;
+        erc20s[2] = LINK_ADDRESS;
+        erc20s[3] = UNI_ADDRESS;
+        erc20s[4] = WBTC_ADDRESS;
+
+        simpleSwap.ExecuteMultiSwapFromWETH(erc20s, swapAmount);
+        vm.stopPrank();
+        _;
+    }
+
+    function testSimpleSwap() public beforeEach {
         // uint256 balanceOf = WETH.balanceOf(deployer);
         // console.log(balanceOf);
 
