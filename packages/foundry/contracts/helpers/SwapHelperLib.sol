@@ -3,9 +3,9 @@ pragma solidity 0.8.26;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
-import "../IZRC20.sol";
+import "../interfaces/IZRC20.sol";
 import "./SystemContract.sol";
-import "../UniswapV2Library.sol";
+import "../uniswap/UniswapV2Library.sol";
 
 library SwapHelperLib {
     uint16 internal constant MAX_DEADLINE = 200;

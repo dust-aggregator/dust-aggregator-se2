@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {CallOptions, IGatewayZEVM} from "./IGatewayZEVM.sol";
+import {CallOptions, IGatewayZEVM} from "../interfaces/IGatewayZEVM.sol";
 
 import {INotSupportedMethods} from "./Errors.sol";
 import {RevertContext, RevertOptions, Revertable} from "./Revert.sol";
-import "./IWZETA.sol";
-import {IZRC20} from "./IZRC20.sol";
-import {MessageContext, UniversalContract} from "./UniversalContract.sol";
+import "../interfaces/IWZETA.sol";
+import {IZRC20} from "../interfaces/IZRC20.sol";
+import {MessageContext, IUniversalContract} from "../interfaces/IUniversalContract.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -371,7 +371,7 @@ contract GatewayZEVM is
     ) external nonReentrant onlyProtocol whenNotPaused {
         if (zrc20 == address(0) || target == address(0)) revert ZeroAddress();
 
-        UniversalContract(target).onCall(context, zrc20, amount, message);
+        IUniversalContract(target).onCall(context, zrc20, amount, message);
     }
 
     /// @notice Deposit foreign coins into ZRC20 and call a user-specified contract on ZEVM.
@@ -393,7 +393,7 @@ contract GatewayZEVM is
             revert InvalidTarget();
 
         if (!IZRC20(zrc20).deposit(target, amount)) revert ZRC20DepositFailed();
-        UniversalContract(target).onCall(context, zrc20, amount, message);
+        IUniversalContract(target).onCall(context, zrc20, amount, message);
     }
 
     /// @notice Deposit ZETA and call a user-specified contract on ZEVM.
@@ -413,7 +413,7 @@ contract GatewayZEVM is
             revert InvalidTarget();
 
         _transferZETA(amount, target);
-        UniversalContract(target).onCall(context, zetaToken, amount, message);
+        IUniversalContract(target).onCall(context, zetaToken, amount, message);
     }
 
     /// @notice Revert a user-specified contract on ZEVM.
