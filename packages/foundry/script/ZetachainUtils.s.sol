@@ -56,7 +56,7 @@ contract ZetachainUtils is Script {
                 addresses[i].type2,
                 '", ',
                 '"address2": "',
-                addressToString(addresses[i].address2),
+                vm.toString(addresses[i].address2),
                 '" }',
                 comma
             );
@@ -132,21 +132,5 @@ contract ZetachainUtils is Script {
         bytes memory data = vm.parseJson(json);
 
         return abi.decode(data, (Localnet));
-    }
-
-    function addressToString(
-        address _address
-    ) public pure returns (string memory) {
-        bytes32 value = bytes32(uint256(uint160(_address)));
-        bytes memory alphabet = "0123456789abcdef";
-
-        bytes memory str = new bytes(42); // 2 for '0x' + 40 for the address
-        str[0] = "0";
-        str[1] = "x";
-        for (uint256 i = 0; i < 20; i++) {
-            str[2 + i * 2] = alphabet[uint8(value[i + 12] >> 4)]; // Extract the first nibble
-            str[3 + i * 2] = alphabet[uint8(value[i + 12] & 0x0f)]; // Extract the second nibble
-        }
-        return string(str);
     }
 }

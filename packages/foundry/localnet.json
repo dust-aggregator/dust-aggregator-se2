@@ -1,100 +1,140 @@
 {
-  "pid": 62431,
+  "pid": 79058,
   "addresses": [
     {
       "chain": "zetachain",
-      "type2": "gatewayZEVM",
-      "address2": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707"
+      "type": "gatewayZEVM",
+      "address": "0x5DE9Ff054084071ca111f35180Cb44c2e413be92"
     },
     {
       "chain": "zetachain",
-      "type2": "systemContract",
-      "address2": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+      "type": "systemContract",
+      "address": "0x263a5ad450bD51cea3c818ba87c80608Cb283508"
     },
     {
       "chain": "zetachain",
-      "type2": "wzeta",
-      "address2": "0x5fbdb2315678afecb367f032d93f642f64180aa3"
+      "type": "wzeta",
+      "address": "0x4fd715125CD4E604A89130a8d573db91B086CB60"
     },
     {
       "chain": "zetachain",
-      "type2": "uniswapFactoryInstance",
-      "address2": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512"
+      "type": "uniswapFactoryInstance",
+      "address": "0x58F5a2711c7464B950361529ca81713B35D487b1"
     },
     {
       "chain": "zetachain",
-      "type2": "uniswapRouterInstance",
-      "address2": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+      "type": "uniswapRouterInstance",
+      "address": "0xDeb76598eDce92ae77F2D4f88542ED2C91b8De82"
     },
     {
       "chain": "zetachain",
-      "type2": "ZRC-20 ETH on 5",
-      "address2": "0x2ca7d64a7efe2d62a725e2b35cf7230d6677ffee"
+      "type": "ZRC-20 ETH on 5",
+      "address": "0x2ca7d64A7EFE2D62A725E2B35Cf7230D6677FfEe"
     },
     {
       "chain": "zetachain",
-      "type2": "ZRC-20 USDC on 5",
-      "address2": "0xd97b1de3619ed2c6beb3860147e30ca8a7dc9891"
+      "type": "ZRC-20 USDC on 5",
+      "address": "0xd97B1de3619ed2c6BEb3860147E30cA8A7dC9891"
     },
     {
       "chain": "zetachain",
-      "type2": "ZRC-20 BNB on 97",
-      "address2": "0x65a45c57636f9bcced4fe193a602008578bca90b"
+      "type": "ZRC-20 BNB on 97",
+      "address": "0x65a45c57636f9BcCeD4fe193A602008578BcA90b"
     },
     {
       "chain": "zetachain",
-      "type2": "ZRC-20 USDC on 97",
-      "address2": "0x05ba149a7bd6dc1f937fa9046a9e05c05f3b18b0"
+      "type": "ZRC-20 USDC on 97",
+      "address": "0x05BA149A7bd6dC1F937fA9046A9e05C05f3b18b0"
     },
     {
       "chain": "zetachain",
-      "type2": "tss",
-      "address2": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
+      "type": "tss",
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
     },
     {
       "chain": "ethereum",
-      "type2": "zetaConnector",
-      "address2": "0xb7f8bc63bbcad18155201308c8f3540b07f84f5e"
+      "type": "zetaConnector",
+      "address": "0xD9d684546ED4c727B136503016E137822DD9b4D7"
     },
     {
       "chain": "ethereum",
-      "type2": "gatewayEVM",
-      "address2": "0x610178da211fef7d417bc0e6fed39f05609ad788"
+      "type": "gatewayEVM",
+      "address": "0xBdd3AEAE360384410BFB65529B113bf13712cA2F"
     },
     {
       "chain": "ethereum",
-      "type2": "custody",
-      "address2": "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0"
+      "type": "custody",
+      "address": "0x79b3f34855c3478Fa45f65344a3f5E3c7b94405c"
     },
     {
       "chain": "ethereum",
-      "type2": "testEVMZeta",
-      "address2": "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6"
+      "type": "testEVMZeta",
+      "address": "0x866bF431d7043c9A0AD8E9259ca291EeB2305a8a"
     },
     {
       "chain": "bnb",
-      "type2": "zetaConnector",
-      "address2": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d"
+      "type": "zetaConnector",
+      "address": "0xD516492bb58F07bc91c972DCCB2DF654653d4D33"
     },
     {
       "chain": "bnb",
-      "type2": "gatewayEVM",
-      "address2": "0x3aa5ebb10dc797cac828524e59a333d0a371443c"
+      "type": "gatewayEVM",
+      "address": "0x12604a5B388a1E1834693bfe94dDdF81A60B56A2"
     },
     {
       "chain": "bnb",
-      "type2": "custody",
-      "address2": "0x59b670e9fa9d0a427751af201d676719a970857b"
+      "type": "custody",
+      "address": "0xd23BF69104cC640E68ebeE83B9833d6Db6F220E6"
     },
     {
       "chain": "bnb",
-      "type2": "testEVMZeta",
-      "address2": "0x9a9f2ccfde556a7e9ff0848998aa4a0cfd8863ae"
+      "type": "testEVMZeta",
+      "address": "0x9A213F53334279C128C37DA962E5472eCD90554f"
     },
     {
-      "chain": "momma",
-      "type2": "WETH",
-      "address2": "0x0000000000000000000000000000000000000000"
+      "address": "0x409C36E5Cd41DC79b8B6E13B2371aB6dA506Cb01",
+      "chain": "ethereum",
+      "type": "EvmDustTokens"
+    },
+    {
+      "address": "0xE592427A0AEce92De3Edee1F18E0157C05861564",
+      "chain": "ethereum",
+      "type": "uniswapRouterV3"
+    },
+    {
+      "address": "0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6",
+      "chain": "ethereum",
+      "type": "uniswapQuoterV3"
+    },
+    {
+      "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "chain": "ethereum",
+      "type": "weth"
+    },
+    {
+      "address": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+      "chain": "ethereum",
+      "type": "dai"
+    },
+    {
+      "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "chain": "ethereum",
+      "type": "usdc"
+    },
+    {
+      "address": "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0",
+      "chain": "ethereum",
+      "type": "uni"
+    },
+    {
+      "address": "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
+      "chain": "ethereum",
+      "type": "wbtc"
+    },
+    {
+      "address": "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4",
+      "chain": "ethereum",
+      "type": "link"
     }
   ]
 }
