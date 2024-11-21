@@ -4,92 +4,97 @@
     {
       "chain": "zetachain",
       "type2": "gatewayZEVM",
-      "address2": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
+      "address2": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707"
     },
     {
       "chain": "zetachain",
       "type2": "systemContract",
-      "address2": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+      "address2": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
     },
     {
       "chain": "zetachain",
       "type2": "wzeta",
-      "address2": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      "address2": "0x5fbdb2315678afecb367f032d93f642f64180aa3"
     },
     {
       "chain": "zetachain",
       "type2": "uniswapFactoryInstance",
-      "address2": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      "address2": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512"
     },
     {
       "chain": "zetachain",
       "type2": "uniswapRouterInstance",
-      "address2": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+      "address2": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
     },
     {
       "chain": "zetachain",
       "type2": "ZRC-20 ETH on 5",
-      "address2": "0x2ca7d64A7EFE2D62A725E2B35Cf7230D6677FfEe"
+      "address2": "0x2ca7d64a7efe2d62a725e2b35cf7230d6677ffee"
     },
     {
       "chain": "zetachain",
       "type2": "ZRC-20 USDC on 5",
-      "address2": "0xd97B1de3619ed2c6BEb3860147E30cA8A7dC9891"
+      "address2": "0xd97b1de3619ed2c6beb3860147e30ca8a7dc9891"
     },
     {
       "chain": "zetachain",
       "type2": "ZRC-20 BNB on 97",
-      "address2": "0x65a45c57636f9BcCeD4fe193A602008578BcA90b"
+      "address2": "0x65a45c57636f9bcced4fe193a602008578bca90b"
     },
     {
       "chain": "zetachain",
       "type2": "ZRC-20 USDC on 97",
-      "address2": "0x05BA149A7bd6dC1F937fA9046A9e05C05f3b18b0"
+      "address2": "0x05ba149a7bd6dc1f937fa9046a9e05c05f3b18b0"
     },
     {
       "chain": "zetachain",
       "type2": "tss",
-      "address2": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+      "address2": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
     },
     {
       "chain": "ethereum",
       "type2": "zetaConnector",
-      "address2": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"
+      "address2": "0xb7f8bc63bbcad18155201308c8f3540b07f84f5e"
     },
     {
       "chain": "ethereum",
       "type2": "gatewayEVM",
-      "address2": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788"
+      "address2": "0x610178da211fef7d417bc0e6fed39f05609ad788"
     },
     {
       "chain": "ethereum",
       "type2": "custody",
-      "address2": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"
+      "address2": "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0"
     },
     {
       "chain": "ethereum",
       "type2": "testEVMZeta",
-      "address2": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6"
+      "address2": "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6"
     },
     {
       "chain": "bnb",
       "type2": "zetaConnector",
-      "address2": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d"
+      "address2": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d"
     },
     {
       "chain": "bnb",
       "type2": "gatewayEVM",
-      "address2": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c"
+      "address2": "0x3aa5ebb10dc797cac828524e59a333d0a371443c"
     },
     {
       "chain": "bnb",
       "type2": "custody",
-      "address2": "0x59b670e9fA9D0A427751Af201D676719a970857b"
+      "address2": "0x59b670e9fa9d0a427751af201d676719a970857b"
     },
     {
       "chain": "bnb",
       "type2": "testEVMZeta",
-      "address2": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE"
+      "address2": "0x9a9f2ccfde556a7e9ff0848998aa4a0cfd8863ae"
+    },
+    {
+      "chain": "momma",
+      "type2": "WETH",
+      "address2": "0x0000000000000000000000000000000000000000"
     }
   ]
 }

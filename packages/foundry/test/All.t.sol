@@ -4,10 +4,10 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 // import "../contracts/YourContract.sol";
 import {SimpleSwap} from "../contracts/SimpleSwap.sol";
-import {TestHelpers} from "./TestHelpers.t.sol";
+import {ZetachainUtils} from "../script/ZetachainUtils.s.sol";
 import {ISwapRouter} from "../contracts/ISwapRouter.sol";
 
-contract YourContractTest is Test, TestHelpers {
+contract YourContractTest is Test, ZetachainUtils {
     address UNISWAP_ROUTER;
     address UNISWAP_QUOTER;
     address WETH_ADDRESS;

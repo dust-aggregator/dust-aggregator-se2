@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "forge-std/Test.sol";
-import {SimpleSwap} from "../contracts/SimpleSwap.sol";
+import {Script, console} from "forge-std/Script.sol";
 
 struct LocalnetAddress {
     address address2;
@@ -15,7 +14,7 @@ struct Localnet {
     uint256 pid;
 }
 
-contract TestHelpers is Test {
+contract ZetachainUtils is Script {
     function getLocalnetPath(
         string memory fileName
     ) public view returns (string memory path) {
