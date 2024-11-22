@@ -1,21 +1,21 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 // import "../contracts/YourContract.sol";
-import {EvmDustTokens, SwapInput} from "../contracts/EvmDustTokens.sol";
-import {SimpleSwap} from "../contracts/SimpleSwap.sol";
-import {Swap} from "../contracts/Swap.sol";
+import {EvmDustTokens, SwapInput, IGatewayEVM} from "../contracts/EvmDustTokens.sol";
+import {SimpleSwap} from "./SimpleSwap.sol";
+import {UniversalDApp} from "../contracts/UniversalDApp.sol";
 import {IQuoter} from "./IQuoter.sol";
 
 import {ZetachainUtils} from "../script/ZetachainUtils.s.sol";
-import {ISwapRouter} from "../contracts/ISwapRouter.sol";
-import {IPermit2} from "../contracts/lib/permit2/IPermit2.sol";
+import {ISwapRouter} from "../contracts/interfaces/ISwapRouter.sol";
+import {IPermit2} from "../contracts/interfaces/IPermit2.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 
 import {WETH9} from "./WETH9.sol";
-import {ISignatureTransfer} from "../contracts/lib/permit2/ISignatureTransfer.sol";
+import {ISignatureTransfer} from "../contracts/interfaces/ISignatureTransfer.sol";
 
 contract YourContractTest is Test, ZetachainUtils {
     using stdJson for string;
@@ -49,7 +49,7 @@ contract YourContractTest is Test, ZetachainUtils {
 
     SimpleSwap simpleSwap;
     EvmDustTokens dustTokens;
-    Swap universalApp;
+    UniversalDApp universalApp;
 
     string json;
 
@@ -92,21 +92,26 @@ contract YourContractTest is Test, ZetachainUtils {
         );
 
         // (, address _deployer, ) = vm.readCallers();
-
-        dustTokens = new EvmDustTokens(
-            payable(GATEWAY_ADDRESS),
-            ISwapRouter(UNISWAP_ROUTER),
-            payable(WETH_ADDRESS),
-            deployer,
-            IPermit2(permit2)
+        universalApp = new UniversalDApp(
+            ZETA_SYSTEM_CONTRACT_ADDRESS,
+            payable(ZETA_GATEWAY_ADDRESS)
         );
 
-        vm.startPrank(deployer);
-        dustTokens.addToken(DAI_ADDRESS);
-        dustTokens.addToken(LINK_ADDRESS);
-        dustTokens.addToken(UNI_ADDRESS);
-        dustTokens.addToken(WBTC_ADDRESS);
-        vm.stopPrank();
+        address[] memory tokenList = new address[](4);
+        tokenList[0] = DAI_ADDRESS;
+        tokenList[1] = LINK_ADDRESS;
+        tokenList[2] = UNI_ADDRESS;
+        tokenList[3] = WBTC_ADDRESS;
+
+        dustTokens = new EvmDustTokens(
+            IGatewayEVM(GATEWAY_ADDRESS),
+            ISwapRouter(UNISWAP_ROUTER),
+            address(universalApp),
+            payable(WETH_ADDRESS),
+            deployer,
+            IPermit2(permit2),
+            tokenList
+        );
 
         WETH = WETH9(payable(WETH_ADDRESS));
         DAI = IERC20(DAI_ADDRESS);
@@ -114,11 +119,6 @@ contract YourContractTest is Test, ZetachainUtils {
         LINK = IERC20(LINK_ADDRESS);
         UNI = IERC20(UNI_ADDRESS);
         WBTC = IERC20(WBTC_ADDRESS);
-
-        universalApp = new Swap(
-            ZETA_SYSTEM_CONTRACT_ADDRESS,
-            payable(ZETA_GATEWAY_ADDRESS)
-        );
 
         vm.deal(user1, 50 ether);
 
@@ -191,7 +191,6 @@ contract YourContractTest is Test, ZetachainUtils {
 
         dustTokens.SwapAndBridgeTokens(
             swaps,
-            address(universalApp),
             encodedParameters,
             nonce,
             deadline,

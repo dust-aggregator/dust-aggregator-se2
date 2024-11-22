@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {RevertContext} from "./Revert.sol";
+import {RevertContext} from "../zetachain/Revert.sol";
 
 /// @title IZetaConnectorEvents
 /// @notice Interface for the events emitted by the ZetaConnector contracts.

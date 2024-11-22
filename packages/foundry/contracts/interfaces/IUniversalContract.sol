@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {RevertContext} from "./Revert.sol";
+import {RevertContext} from "../zetachain/Revert.sol";
 
 /// @custom:deprecated should be removed once v2 SystemContract is not used anymore.
 /// MessageContext should be used
@@ -28,7 +28,7 @@ struct MessageContext {
     uint256 chainID;
 }
 
-interface UniversalContract {
+interface IUniversalContract {
     function onCall(
         MessageContext calldata context,
         address zrc20,

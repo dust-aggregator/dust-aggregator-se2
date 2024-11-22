@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import "./Revert.sol";
+import "../zetachain/Revert.sol";
 
 /// @title IGatewayEVMEvents
 /// @notice Interface for the events emitted by the GatewayEVM contract.

@@ -4,8 +4,8 @@ pragma solidity 0.8.26;
 import {INotSupportedMethods} from "./Errors.sol";
 import {RevertContext, RevertOptions, Revertable} from "./Revert.sol";
 import {ZetaConnectorBase} from "./ZetaConnectorBase.sol";
-import {IERC20Custody} from "./IERC20Custody.sol";
-import {Callable, IGatewayEVM, MessageContext} from "./IGatewayEVM.sol";
+import {IERC20Custody} from "../interfaces/IERC20Custody.sol";
+import {Callable, IGatewayEVM, MessageContext} from "../interfaces/IGatewayEVM.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";

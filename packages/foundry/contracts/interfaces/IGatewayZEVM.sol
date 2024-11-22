@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import "./Revert.sol";
-import "./UniversalContract.sol";
+import "../zetachain/Revert.sol";
+import "../interfaces/IUniversalContract.sol";
 
 /// @title IGatewayZEVMEvents
 /// @notice Interface for the events emitted by the GatewayZEVM contract.

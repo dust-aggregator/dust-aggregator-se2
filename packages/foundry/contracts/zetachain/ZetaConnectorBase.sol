@@ -10,8 +10,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {RevertContext} from "./Revert.sol";
-import {IGatewayEVM, IGatewayEVMErrors, IGatewayEVMEvents, MessageContext} from "./IGatewayEVM.sol";
-import "./IZetaConnector.sol";
+import {IGatewayEVM, IGatewayEVMErrors, IGatewayEVMEvents, MessageContext} from "../interfaces/IGatewayEVM.sol";
+import "../interfaces/IZetaConnector.sol";
 
 /// @title ZetaConnectorBase
 /// @notice Abstract base contract for ZetaConnector.
