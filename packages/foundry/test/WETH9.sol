@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
 contract WETH9 {
     string public name = "Wrapped Ether";
     string public symbol = "WETH";
@@ -10,6 +13,10 @@ contract WETH9 {
 
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
+
+    receive() external payable {
+        deposit();
+    }
 
     fallback() external payable {
         deposit();
