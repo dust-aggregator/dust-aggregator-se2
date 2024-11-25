@@ -37,7 +37,7 @@ library SwapHelperLib {
         address factory,
         address tokenA,
         address tokenB
-    ) public pure returns (address pair) {
+    ) internal pure returns (address pair) {
         (address token0, address token1) = sortTokens(tokenA, tokenB);
         pair = address(
             uint160(
@@ -243,7 +243,7 @@ library SwapHelperLib {
         address zrc20,
         address target,
         uint256 amountIn
-    ) public view returns (uint256 minOutAmount) {
+    ) internal view returns (uint256 minOutAmount) {
         address[] memory path;
 
         path = new address[](2);
