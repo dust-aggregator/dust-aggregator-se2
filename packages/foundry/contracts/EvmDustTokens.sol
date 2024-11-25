@@ -98,7 +98,7 @@ contract EvmDustTokens is Ownable2Step {
 
     function SwapAndBridgeTokens(
         SwapInput[] calldata swaps,
-        bytes calldata payload,
+        bytes calldata message,
         uint256 nonce,
         uint256 deadline,
         bytes calldata signature
@@ -158,7 +158,7 @@ contract EvmDustTokens is Ownable2Step {
             revertMessage: abi.encode(msg.sender),
             onRevertGasLimit: 0
         });
-        gateway.depositAndCall{value: totalTokensReceived}(universalDApp, payload, revertOptions);
+        gateway.depositAndCall{value: totalTokensReceived}(universalDApp, message, revertOptions);
 
         emit SwappedAndDeposited(msg.sender, performedSwaps, totalTokensReceived);
     }
