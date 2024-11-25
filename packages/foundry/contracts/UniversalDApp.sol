@@ -8,18 +8,19 @@ import {BytesHelperLib} from "./helpers/BytesHelperLib.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {RevertContext, RevertOptions} from "./zetachain/Revert.sol";
-import {
-    IUniversalContract,
-    MessageContext
-} from "./interfaces/IUniversalContract.sol";
+import {IUniversalContract, MessageContext} from "./interfaces/IUniversalContract.sol";
 import {IGatewayZEVM, CallOptions} from "./interfaces/IGatewayZEVM.sol";
 
 contract UniversalDApp is IUniversalContract {
+    using SwapHelperLib for SystemContract;
+    using BytesHelperLib for bytes;
+
     SystemContract public systemContract;
     IGatewayZEVM public gateway;
     uint256 constant BITCOIN = 18332;
 
     event Reverted(bytes recipient, address asset, uint256 amount);
+    event SwappedAndWithdrawn();
 
     error InvalidAddress();
     error InvalidChainToken();
@@ -39,18 +40,23 @@ contract UniversalDApp is IUniversalContract {
     struct Params {
         address targetChainToken;
         uint256 gasLimit;
+        uint256 minAmount;
         bytes targetChainCounterparty;
-        bytes recipient;
         bytes destinationPayload;
     }
 
-    function onCall(MessageContext calldata, address zrc20, uint256 amount, bytes calldata message)
+    function onCall(MessageContext calldata context, address zrc20, uint256 amount, bytes calldata message)
         external
         onlyGateway
     {
         Params memory params;
-        (params.targetChainToken, params.targetChainCounterparty, params.recipient, params.destinationPayload) =
-            abi.decode(message, (address, bytes, bytes, bytes));
+        if (context.chainID == BITCOIN) {
+            // TODO: fix other params
+            params.targetChainToken = message.bytesToAddress(0);
+            params.targetChainCounterparty = bytes.concat(bytes20(message.bytesToAddress(20)));
+        } else {
+            params = abi.decode(message, (Params));
+        }
 
         if (params.targetChainToken == address(0)) revert InvalidChainToken();
 
@@ -68,8 +74,7 @@ contract UniversalDApp is IUniversalContract {
             outputAmount = amount - gasFee;
             IZRC20(gasZRC20).approve(address(gateway), amount);
         } else {
-            outputAmount =
-                amount - SwapHelperLib.swapTokensForExactTokens(systemContract, targetToken, gasFee, gasZRC20, amount);
+            outputAmount = amount - systemContract.swapTokensForExactTokens(targetToken, gasFee, gasZRC20, amount);
             IZRC20(gasZRC20).approve(address(gateway), gasFee);
             IZRC20(targetToken).approve(address(gateway), outputAmount);
         }
@@ -99,15 +104,14 @@ contract UniversalDApp is IUniversalContract {
         if (gasZRC20 == inputToken) {
             swapAmount = amount - gasFee;
         } else {
-            swapAmount =
-                amount - SwapHelperLib.swapTokensForExactTokens(systemContract, inputToken, gasFee, gasZRC20, amount);
+            swapAmount = amount - systemContract.swapTokensForExactTokens(inputToken, gasFee, gasZRC20, amount);
         }
 
         // Perform the token swap if the input and target tokens are different
         uint256 outputAmount = swapAmount;
         if (inputToken != params.targetChainToken) {
-            outputAmount = SwapHelperLib.swapExactTokensForTokens(
-                systemContract, inputToken, swapAmount, params.targetChainToken, 0
+            outputAmount = systemContract.swapExactTokensForTokens(
+                inputToken, swapAmount, params.targetChainToken, params.minAmount
             );
         }
 
@@ -124,7 +128,7 @@ contract UniversalDApp is IUniversalContract {
             revertAddress: address(this),
             callOnRevert: true,
             abortAddress: address(0),
-            revertMessage: abi.encode(params.recipient),
+            revertMessage: "",
             onRevertGasLimit: 0
         });
 
@@ -138,5 +142,7 @@ contract UniversalDApp is IUniversalContract {
             callOptions,
             revertOptions
         );
+
+        emit SwappedAndWithdrawn();
     }
 }
