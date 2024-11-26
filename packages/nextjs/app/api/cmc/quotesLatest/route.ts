@@ -20,7 +20,6 @@ export const GET = async (request: Request) => {
   } catch (ex) {
     response = null;
     // error
-    console.log("BLEGHHHHHHHH");
     console.log(ex);
     return NextResponse.json({ error: (ex as Error).message }, { status: 500 });
   }
