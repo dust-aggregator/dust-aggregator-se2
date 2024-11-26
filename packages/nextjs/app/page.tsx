@@ -1,48 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
 
-async function getPrice() {
-  const result = await fetch("/api/cmc/test/");
-  const resultJson = await result.json();
-  console.log(resultJson);
-  // console.log("Getting price");
-
-  // const url = new URL("https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest");
-
-  // const params = {
-  //   start: "1",
-  //   limit: "5000",
-  //   convert: "USD",
-  // };
-
-  // Object.keys(params).forEach(key => url.searchParams.append(key, params[key as keyof typeof params]));
-
-  // const headers = new Headers();
-  // headers.append("Content-Type", "application/json");
-  // headers.append("X-CMC_PRO_API_KEY", "95ac92c8-a96f-4c62-aec4-1dcc0d313134");
-  // headers.append
-  // const result = await fetch("https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/listings/latest", {
-  //   method: "GET",
-  //   headers,
-  // });
-
-  // console.log(result);
-
-  // console.log("price received");
-}
-
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
 
-  useEffect(() => {
-    getPrice();
-  }, []);
   return (
     <>
       <div className="flex items-center flex-col flex-grow pt-10">
