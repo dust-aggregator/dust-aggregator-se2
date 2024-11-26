@@ -11,9 +11,10 @@
     "account": "yarn workspace @se-2/foundry account",
     "account:generate": "yarn workspace @se-2/foundry account:generate",
     "account:import": "yarn workspace @se-2/foundry account:import",
-    "chain": "yarn workspace @se-2/foundry chain",
+    "chain": "yarn workspace @se-2/foundry localnet:arbitrum",
     "compile": "yarn workspace @se-2/foundry compile",
     "deploy": "yarn workspace @se-2/foundry deploy",
+    "fund": "yarn workspace @se-2/foundry fund",
     "deploy:verify": "yarn workspace @se-2/foundry deploy:verify",
     "flatten": "yarn workspace @se-2/foundry flatten",
     "fork": "yarn workspace @se-2/foundry fork",
@@ -42,5 +43,12 @@
   "packageManager": "yarn@3.2.3",
   "engines": {
     "node": ">=18.18.0"
+  },
+  "dependencies": {
+    "@uniswap/permit2-sdk": "^1.3.0",
+    "@zetachain/universalkit": "^2.0.0",
+    "lucide-react": "^0.460.0",
+    "react-archer": "^4.4.0",
+    "sonner": "^1.7.0"
   }
 }

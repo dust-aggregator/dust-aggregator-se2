@@ -9,6 +9,7 @@
     "chain": "make chain",
     "compile": "make compile",
     "deploy": "make build-and-deploy RPC_URL=${1:-localhost}",
+    "fund": "make fund",
     "deploy:verify": "make deploy-verify RPC_URL=${1:-localhost}",
     "flatten": "make flatten",
     "fork": "make fork FORK_URL=${1:-mainnet}",
@@ -19,7 +20,7 @@
     "verify": "make build-and-verify RPC_URL=${1:-localhost}",
     "verify-keystore": "make verify-keystore",
     "localnet": "npx hardhat localnet --network localhost",
-    "localnet:arbitrum": "npx hardhat localnet --anvil '--fork-url=https://arb1.arbitrum.io/rpc --chain-id=31337' --network localhost"
+    "localnet:arbitrum": "hardhat localnet --anvil '--fork-url=https://arb1.arbitrum.io/rpc --chain-id=31337' --network localhost"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
