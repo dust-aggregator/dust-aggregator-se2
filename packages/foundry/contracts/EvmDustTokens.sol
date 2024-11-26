@@ -33,6 +33,8 @@ struct SwapOutput {
  * @title EVMDustTokens
  */
 contract EvmDustTokens is Ownable2Step {
+    using TransferHelper for *;
+
     uint24 public constant swapFee = 3000;
     // 100 == 1%
     uint256 public constant protocolFee = 100;
@@ -103,7 +105,6 @@ contract EvmDustTokens is Ownable2Step {
         uint256 deadline,
         bytes calldata signature
     ) external {
-        uint256 totalTokensReceived;
         uint256 swapsAmount = swaps.length;
 
         if (swapsAmount == 0) revert NoSwaps();
@@ -114,13 +115,14 @@ contract EvmDustTokens is Ownable2Step {
         // Array to store performed swaps
         SwapOutput[] memory performedSwaps = new SwapOutput[](swapsAmount);
         SwapInput memory swap;
+        uint256 totalTokensReceived;
         // Loop through each ERC-20 token address provided
         for (uint256 i; i < swapsAmount; ++i) {
             swap = swaps[i];
             address token = swap.token;
             uint256 amount = swap.amount;
             // Approve the swap router to spend the token
-            TransferHelper.safeApprove(token, address(swapRouter), amount);
+            token.safeApprove(address(swapRouter), amount);
 
             // Build Uniswap Swap to convert the token to WETH
             ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
@@ -163,7 +165,7 @@ contract EvmDustTokens is Ownable2Step {
         emit SwappedAndDeposited(msg.sender, performedSwaps, totalTokensReceived);
     }
 
-    function ReceiveTokens(address outputToken, address receiver) external payable {
+    function ReceiveTokens(address outputToken, address receiver, uint256 minAmount) external payable {
         if (msg.value == 0) revert InvalidMsgValue();
         // Check if the output token is whitelisted
         if (outputToken != address(0) && !isWhitelisted[outputToken]) revert TokenIsNotWhitelisted(outputToken);
@@ -179,7 +181,7 @@ contract EvmDustTokens is Ownable2Step {
             IWTOKEN(wNativeToken).deposit{value: msg.value}();
 
             // Step 2: Approve swap router to spend WETH
-            TransferHelper.safeApprove(wNativeToken, address(swapRouter), msg.value);
+            wNativeToken.safeApprove(address(swapRouter), msg.value);
 
             // Step 3: Build Uniswap Swap to convert WETH to outputToken
             ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
@@ -189,7 +191,7 @@ contract EvmDustTokens is Ownable2Step {
                 recipient: receiver,
                 deadline: block.timestamp,
                 amountIn: msg.value,
-                amountOutMinimum: 1, // TODO: Adjust for slippage tolerance
+                amountOutMinimum: minAmount,
                 sqrtPriceLimitX96: 0
             });
 
