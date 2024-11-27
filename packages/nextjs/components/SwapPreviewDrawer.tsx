@@ -46,7 +46,7 @@ export function SwapPreviewDrawer({
   })
 
   const { address } = useAccount();
-  const { data: hash, isPending, writeContract } = useWriteContract();
+  const { data: hash, isPending, writeContract, ...rest } = useWriteContract();
 
   useEffect(() => {
     const initializeProvider = async () => {
@@ -133,21 +133,16 @@ export function SwapPreviewDrawer({
   };
 
   const signPermit = async (swaps: TokenSwap[]) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
     if (client) {
       const { domain, types, values, deadline, nonce } = await preparePermitData(
         client,
         swaps,
         readLocalnetAddresses("ethereum", "EvmDustTokens")
       );
-      console.log({
-        domain, types, values
-      })
-      // const signature = await signer._signTypedData(domain, types, values);
-      const signature = await signTypedData(wagmiConfig, {
-        domain,
-        types,
-        values
-      });
+      const signature = await signer._signTypedData(domain, types, values);
 
       return { deadline, nonce, signature };
     }
@@ -178,12 +173,7 @@ export function SwapPreviewDrawer({
       );
 
       // Step 2: Create Permit2 Batch transfer signature
-      let permit;
-      try {
-        permit = await signPermit(tokenSwaps);
-      } catch(err) {
-        console.log("Error signing permit", err);
-      }
+      const permit = await signPermit(tokenSwaps);
 
       // Step 3: Perform swap and bridge transaction
       writeContract({
@@ -195,7 +185,6 @@ export function SwapPreviewDrawer({
         functionName: "SwapAndBridgeTokens",
         args: [
           tokenSwaps,
-          readLocalnetAddresses("zetachain", "Swap"),
           encodedParameters,
           permit.nonce,
           permit.deadline,
