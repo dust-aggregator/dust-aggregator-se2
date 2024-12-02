@@ -7,7 +7,8 @@ import IUniswapV3FactoryABI from "@uniswap/v3-core/artifacts/contracts/interface
 import IUniswapV3PoolABI from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
 import { FeeAmount, Pool } from "@uniswap/v3-sdk";
 import type { NextPage } from "next";
-import { http } from "viem";
+import { Chain, http } from "viem";
+import * as chains from "viem/chains";
 import { createConfig, useAccount } from "wagmi";
 import { readContract } from "wagmi/actions";
 import { mainnet } from "wagmi/chains";
@@ -15,23 +16,24 @@ import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
 
 async function getPrice(
-  chainId: number,
+  chain: Chain,
   token0Address: string,
   token0Decimals: number,
   token1Address: string,
   token1Decimals: number,
 ) {
-  const token0 = new Token(chainId, token0Address, token0Decimals, "", "");
-  const token1 = new Token(chainId, token1Address, token1Decimals, "", "");
+  const token0 = new Token(chain.id, token0Address, token0Decimals, "", "");
+  const token1 = new Token(chain.id, token1Address, token1Decimals, "", "");
 
   const factoryAddress = "0x1F98431c8aD98523631AE4a59f267346ea31F984"; // Uniswap V3 factory address
 
   const config = createConfig({
-    chains: [mainnet],
+    chains: [chain],
     transports: {
-      [mainnet.id]: http(),
+      [chain.id]: http(),
     },
   });
+
   const result = await readContract(config, {
     abi: IUniswapV3FactoryABI.abi,
     address: factoryAddress,
@@ -67,7 +69,13 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     // getTokenPrice();
-    getPrice(1, "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", 6, "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", 18);
+    getPrice(
+      mainnet,
+      "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      6,
+      "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      18,
+    );
   }, []);
   return (
     <>
