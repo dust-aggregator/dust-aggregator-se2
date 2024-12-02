@@ -15,6 +15,14 @@ import { mainnet } from "wagmi/chains";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
 
+const findChainById = (id: number) => {
+  // Convert the imported chains into an array of values to search through
+  const chainsArray = Object.values(chains);
+
+  // Find the chain with the specified id
+  return chainsArray.find(chain => chain.id === id);
+};
+
 async function getPrice(
   chain: Chain,
   token0Address: string,
@@ -70,7 +78,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     // getTokenPrice();
     getPrice(
-      mainnet,
+      findChainById(1) || mainnet,
       "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       6,
       "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
