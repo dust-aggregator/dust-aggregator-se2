@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {ISwapRouter} from "./interfaces/ISwapRouter.sol";
-import "./uniswap/TransferHelper.sol";
+import {TransferHelper} from "./uniswap/TransferHelper.sol";
 import {RevertContext, RevertOptions} from "./zetachain/Revert.sol";
 import {IGatewayEVM} from "./interfaces/IGatewayEVM.sol";
 import "./interfaces/IPermit2.sol";
@@ -85,8 +85,12 @@ contract EvmDustTokens is Ownable2Step {
         gateway = _gateway;
         swapRouter = _swapRouter;
         universalDApp = _universalDApp;
-        wNativeToken = _nativeToken;
         permit2 = _permit2;
+        wNativeToken = _nativeToken;
+        isWhitelisted[_nativeToken] = true;
+        tokenList.push(_nativeToken);
+        emit TokenAdded(_nativeToken);
+
         uint256 tokenCount = _tokenList.length;
         address token;
         for (uint256 i; i < tokenCount; ++i) {
@@ -172,12 +176,17 @@ contract EvmDustTokens is Ownable2Step {
 
         // If outputToken is 0x, send msg.value to the receiver
         if (outputToken == address(0)) {
-            // Handle native token transfer
             (bool s,) = receiver.call{value: msg.value}("");
             if (!s) revert TransferFailed();
+
             emit SwappedAndWithdrawn(receiver, outputToken, msg.value);
+        } else if (outputToken == wNativeToken) {
+            IWTOKEN(wNativeToken).deposit{value: msg.value}();
+            wNativeToken.safeTransfer(receiver, msg.value);
+
+            emit SwappedAndWithdrawn(receiver, wNativeToken, msg.value);
         } else {
-            // Step 1: Swap msg.value to Wrapped Token (i.e: WETH or WMATIC)
+            // Step 1: Swap msg.value to Wrapped Token (i.e: WETH or WPOL)
             IWTOKEN(wNativeToken).deposit{value: msg.value}();
 
             // Step 2: Approve swap router to spend WETH
@@ -241,12 +250,11 @@ contract EvmDustTokens is Ownable2Step {
 
         // Transfer the reverted tokens back to the original sender
         if (revertContext.asset == address(0)) {
-            // Transfer Ether
             (bool s,) = originalSender.call{value: revertContext.amount}("");
-            require(s, "Ether transfer failed");
+            if (!s) revert TransferFailed();
         } else {
             // Transfer ERC20 tokens
-            IERC20(revertContext.asset).transfer(originalSender, revertContext.amount);
+            revertContext.asset.safeTransfer(originalSender, revertContext.amount);
         }
 
         emit Reverted(originalSender, revertContext.asset, revertContext.amount);
