@@ -1,0 +1,321 @@
+    <div className="mt-16">
+      <ArcherContainer strokeColor="white">
+        <div className="flex justify-between items-center height-full width-full">
+          {/* Source chain settings */}
+          <div className="flex flex-col flex-1 items-center justify-center">
+            {selectedTokens.map((token, i) => (
+              <ArcherElement
+                key={`element${i}`}
+                id={`element${i}`}
+                relations={[
+                  {
+                    targetId: "root",
+                    targetAnchor: "left",
+                    sourceAnchor: "right",
+                  },
+                ]}
+              >
+                <Card className="rounded-2xl mb-4 items-start w-64">
+                  <CardHeader>
+                    <div className="flex justify-between items-center w-full">
+                      <CardTitle>{token.name}</CardTitle>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveToken(token.symbol)}
+                        disabled={loading || transactionStatus !== "notStarted"}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center w-full">
+                      <Input
+                        type="number"
+                        value={token.amount}
+                        disabled={transactionStatus !== "notStarted"}
+                        onChange={(e) =>
+                          handleAmountChange(token.symbol, e.target.value)
+                        }
+                        className="w-full mr-2"
+                        placeholder="Amount"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleMaxAmount(token.symbol)}
+                        disabled={loading || transactionStatus !== "notStarted"}
+                        className={cn(
+                          token.isMax && "bg-primary text-primary-foreground"
+                        )}
+                      >
+                        Max
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </ArcherElement>
+            ))}
+            <ArcherElement
+              key={"select"}
+              id={"select"}
+              relations={[
+                {
+                  targetId: "root",
+                  targetAnchor: "left",
+                  sourceAnchor: "right",
+                  style: { strokeDasharray: "5,5" },
+                },
+              ]}
+            >
+              <div className="w-64">
+                <Card className="rounded-2xl items-start w-64">
+                  <CardContent>
+                    <div className="items-center w-full pt-6 space-y-2">
+                      <Popover open={openToken} onOpenChange={setOpenToken}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openToken}
+                            className="w-full justify-between"
+                            disabled={
+                              balancesPending ||
+                              loading ||
+                              transactionStatus !== "notStarted"
+                            }
+                          >
+                            {balancesPending ? "Loading..." : "Select token"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0">
+                          <Command>
+                            <CommandInput placeholder="Search tokens..." />
+                            <CommandList>
+                              <CommandEmpty>No token found.</CommandEmpty>
+                              <CommandGroup>
+                                {sortedTokens.map((token) => (
+                                  <CommandItem
+                                    key={token.symbol}
+                                    onSelect={() => handleSelectToken(token)}
+                                    className={cn(
+                                      token.balance === 0 && "opacity-50"
+                                    )}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedTokens.some(
+                                          (t) => t.symbol === token.symbol
+                                        )
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    <span className="flex-1">{token.name}</span>
+                                    <CommandShortcut>
+                                      {token.balance.toFixed(2)}
+                                    </CommandShortcut>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <p className="text-center">or</p>
+                      <Button
+                        variant="secondary"
+                        size="full"
+                        onClick={autoSelectTokens}
+                        disabled={loading || transactionStatus !== "notStarted"}
+                      >
+                        Auto-select
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </ArcherElement>
+          </div>
+
+          {/* Zetachain Logo */}
+          <div className="flex flex-col flex-1 items-center justify-center">
+            <ArcherElement
+              id="root"
+              relations={[
+                {
+                  targetId: "center-element",
+                  targetAnchor: "left",
+                  sourceAnchor: "right",
+                },
+              ]}
+            >
+              <div>
+                <span className="relative flex h-32	w-32">
+                  <span
+                    className={`${
+                      !["notStarted", "completed"].includes(transactionStatus)
+                        ? "animate-ping"
+                        : ""
+                    } absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75`}
+                  ></span>
+                  <Image
+                    src="/zetachain-icon.svg"
+                    alt="Zetachain Logo"
+                    width={120}
+                    height={120}
+                    className="relative inline-flex rounded-full h-32 w-32"
+                  />
+                </span>
+              </div>
+            </ArcherElement>
+            {transactionStatus !== "notStarted" ? (
+              <TransactionStatus state={transactionStatus} />
+            ) : (
+              <div className="flex items-center justify-center mt-4">
+                <SwapPreviewDrawer
+                  selectedTokens={selectedTokens}
+                  selectedNetwork={selectedNetwork}
+                  selectedOutputToken={selectedOutputToken}
+                  disabled={loading || transactionStatus !== "notStarted"}
+                />
+              </div>
+            )}
+            {transactionStatus === "completed" && (
+              <Button size="sm" onClick={handleReset}>
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Reset
+              </Button>
+            )}
+          </div>
+
+          {/* Destination chain settings */}
+          <div className="flex flex-col flex-1 items-center justify-center">
+            <ArcherElement
+              id="center-element"
+              relations={[
+                {
+                  targetId: "select-output-token",
+                  targetAnchor: "top",
+                  sourceAnchor: "bottom",
+                },
+              ]}
+            >
+              <Card className="rounded-2xl items-start w-64">
+                <CardHeader>
+                  <CardTitle>{"Output"}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="items-center w-full space-y-2">
+                    <Popover open={openNetwork} onOpenChange={setOpenNetwork}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openNetwork}
+                          className="w-full justify-between"
+                          disabled={
+                            loading || transactionStatus !== "notStarted"
+                          }
+                        >
+                          {selectedNetwork?.label || "Select Network"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput placeholder="Search networks..." />
+                          <CommandList>
+                            <CommandEmpty>No network found.</CommandEmpty>
+                            <CommandGroup>
+                              {networks.map((network) => (
+                                <CommandItem
+                                  key={network.value}
+                                  disabled={!network.enabled}
+                                  onSelect={() => handleSelectNetwork(network)}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedNetwork?.value === network.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {network.label}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <p className="text-center">and</p>
+                    <Popover
+                      open={openOutputToken}
+                      onOpenChange={setOpenOutputToken}
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openNetwork}
+                          className="w-full justify-between"
+                          disabled={
+                            loading ||
+                            !selectedNetwork ||
+                            transactionStatus !== "notStarted" ||
+                            balancesPendingDestination
+                          }
+                        >
+                          {selectedOutputToken?.name ||
+                            (!selectedNetwork
+                              ? "Select Network"
+                              : balancesPendingDestination
+                              ? "Loading..."
+                              : "Select Output Token")}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput placeholder="Search tokens..." />
+                          <CommandList>
+                            <CommandEmpty>No token found.</CommandEmpty>
+                            <CommandGroup>
+                              {outputBalances.map((token) => (
+                                <CommandItem
+                                  key={token.name}
+                                  // disabled={!network.enabled}
+                                  onSelect={() =>
+                                    handleSelectOutputToken(token)
+                                  }
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedOutputToken === token
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {token.name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </CardContent>
+              </Card>
+            </ArcherElement>
+          </div>
+        </div>
+      </ArcherContainer>
+    </div>
+  );
