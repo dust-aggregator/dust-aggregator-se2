@@ -83,6 +83,12 @@ module.exports = {
       animation: {
         "pulse-fast": "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+      },
     },
+    textColor: {
+      DEFAULT: "#9D9D9D"
+    }
   },
 };
