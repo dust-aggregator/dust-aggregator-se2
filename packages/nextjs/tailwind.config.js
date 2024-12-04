@@ -78,6 +78,8 @@ module.exports = {
   theme: {
     colors: {
       text: "#FFFFFF",
+      black: "#000000",
+      btn1: "#37312b"
     },
     extend: {
       boxShadow: {
