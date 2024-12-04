@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import CategorySelect from "./CategorySelect";
 import CategorySelectInputBox from "./CategorySelectInputBox";
-import UserActionBoxContainer from "./UserActionBoxContainer";
+import UserActionBoxContainer2 from "./UserActionBoxContainer2";
 import { AllTokensBalances } from "./token-balances/AllTokensBalances";
 import { AllTokensPrices } from "./token-prices/AllTokensPrices";
 import { Network } from "alchemy-sdk";
@@ -18,8 +18,8 @@ const networkOptions = [
   {
     section: "Ethereum",
     options: [
-      { value: "base", label: "Base" },
-      { value: "bnb", label: "BNB" },
+      { value: "base", label: "Base", selected: true },
+      { value: "bnb", label: "BNB", selected: false },
     ],
   },
   { section: "Solana", options: [{ value: "mainnet", label: "Solana Mainnet" }] },
@@ -41,10 +41,6 @@ const InputBox = () => {
 
   // Update disabled property function
   const updateSpecificOption = (sectionKey: string, optionValue: string, selected: boolean) => {
-    console.log(sectionKey);
-    console.log(optionValue);
-    console.log(selected);
-
     setNetworkOptions2(prevOptions =>
       prevOptions.map(section =>
         section.section === sectionKey
@@ -58,6 +54,38 @@ const InputBox = () => {
       ),
     );
   };
+
+  const filteredNetworkOptions = networkOptions2
+    .map(network => ({
+      ...network,
+      options: network.options.filter((option: any) => option.selected),
+    }))
+    .filter(network => network.options.length > 0);
+
+  console.log(filteredNetworkOptions);
+
+  const comps = filteredNetworkOptions.map((e: any, index: number) => {
+    return (
+      <div key={"sjf" + index}>
+        <p className="m-0 text-xl text-bold">{e.section}</p>
+        {e.options.map((option: any, index: number) => {
+          return (
+            <div className="flex bg-base-100 rounded p-1 m-1 justify-between" key={"sndn" + index}>
+              <p className="m-0">{option.label}</p>
+              <button
+                className="m-0"
+                onClick={() => {
+                  updateSpecificOption(e.section, option.value, !option.selected);
+                }}
+              >
+                {"(X)"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    );
+  });
 
   useEffect(() => {
     const networkOptions2: any[] = [];
@@ -80,14 +108,12 @@ const InputBox = () => {
     setNetworkOptions2(networkOptions2);
   }, [allTokensFromAlchemy.length]);
 
-  console.log(networkOptions2);
-
   return (
-    <UserActionBoxContainer>
-      <p className="font-bold">DUST Threshold</p>
+    <UserActionBoxContainer2>
+      <p className="font-bold m-0">DUST Threshold</p>
       <div className="flex gap-2">
         <input
-          className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2"
+          className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8"
           placeholder={""}
           name={"dustThreshold"}
           type="number"
@@ -102,7 +128,7 @@ const InputBox = () => {
           <p className="pb-2 m-0">Save</p>
         </button>
       </div>
-      <p className="font-bold">Input</p>
+      <p className="font-bold m-0">Input</p>
 
       <div className="flex gap-2">
         <CategorySelectInputBox
@@ -123,15 +149,16 @@ const InputBox = () => {
           // ref={inputReft}
           // onFocus={onFocus}
         /> */}
-        <button className="px-6 hover:brightness-50 min-w-30 bg-[url('/button2.png')] bg-no-repeat bg-center bg-cover">
+        <button className="px-6 hover:brightness-50 min-w-30 bg-[url('/button2.png')] bg-no-repeat bg-center bg-cover h-10">
           {"Auto-select"}
         </button>
       </div>
-      <div className="overflow-scroll h-32 p-4">
+      <div className="overflow-scroll h-40 p-1">
+        {comps}
         {/* <AllTokensPrices /> */}
         {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
       </div>
-    </UserActionBoxContainer>
+    </UserActionBoxContainer2>
   );
 };
 

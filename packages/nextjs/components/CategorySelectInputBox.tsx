@@ -35,7 +35,7 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
   };
   return (
     <details className="dropdown">
-      <summary className="btn m-1 text-xs p-2">Select tokens</summary>
+      <summary className="btn m-0 text-xs p-0">Select tokens</summary>
       <ul className="menu dropdown-content flex flex-col flex-nowrap h-64 overflow-y-scroll bg-base-100 rounded-box p-2 w-52">
         {options?.map(({ section, options }) => {
           return (
