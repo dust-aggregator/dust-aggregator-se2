@@ -39,6 +39,26 @@ const InputBox = () => {
 
   const [networkOptions2, setNetworkOptions2] = useState<any[]>([]);
 
+  // Update disabled property function
+  const updateSpecificOption = (sectionKey: string, optionValue: string, selected: boolean) => {
+    console.log(sectionKey);
+    console.log(optionValue);
+    console.log(selected);
+
+    setNetworkOptions2(prevOptions =>
+      prevOptions.map(section =>
+        section.section === sectionKey
+          ? {
+              ...section,
+              options: section.options.map((option: any) =>
+                option.value === optionValue ? { ...option, selected } : option,
+              ),
+            }
+          : section,
+      ),
+    );
+  };
+
   useEffect(() => {
     const networkOptions2: any[] = [];
     for (let i = 0; i < allTokensFromAlchemy.length; i++) {
@@ -51,18 +71,17 @@ const InputBox = () => {
             disabled: false,
             tokenBalance: e.tokenBalance,
             decimals: e.decimals,
+            selected: false,
           };
         }),
       });
     }
 
     setNetworkOptions2(networkOptions2);
-    console.log(networkOptions2);
   }, [allTokensFromAlchemy.length]);
 
-  console.log(allTokensFromAlchemy);
-
   console.log(networkOptions2);
+
   return (
     <UserActionBoxContainer>
       <p className="font-bold">DUST Threshold</p>
@@ -89,6 +108,8 @@ const InputBox = () => {
         <CategorySelectInputBox
           title="Select tokens"
           options={networkOptions2}
+          onSelect={updateSpecificOption}
+
           // onChange={setSelectedNetwork}
           // selectedOption={selectedNetwork}
         />
