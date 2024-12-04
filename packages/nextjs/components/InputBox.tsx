@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CategorySelect from "./CategorySelect";
 import CategorySelectInputBox from "./CategorySelectInputBox";
 import UserActionBoxContainer from "./UserActionBoxContainer";
@@ -37,16 +37,28 @@ const InputBox = () => {
     networks.map(({ alchemyEnum }) => alchemyEnum),
   );
 
-  const networkOptions2: any[] = [];
+  const [networkOptions2, setNetworkOptions2] = useState<any[]>([]);
 
-  for (let i = 0; i < allTokensFromAlchemy.length; i++) {
-    networkOptions2.push({
-      section: networks.find(network => network.alchemyEnum === allTokensFromAlchemy[i].name)?.key,
-      options: allTokensFromAlchemy[i].tokenBalancesWithMetadata.map((e: any, index: number) => {
-        return { value: "inputToken-" + index, label: e.name };
-      }),
-    });
-  }
+  useEffect(() => {
+    const networkOptions2: any[] = [];
+    for (let i = 0; i < allTokensFromAlchemy.length; i++) {
+      networkOptions2.push({
+        section: networks.find(network => network.alchemyEnum === allTokensFromAlchemy[i].name)?.key,
+        options: allTokensFromAlchemy[i].tokenBalancesWithMetadata.map((e: any, index: number) => {
+          return {
+            value: "inputToken-" + index,
+            label: e.name,
+            disabled: false,
+            tokenBalance: e.tokenBalance,
+            decimals: e.decimals,
+          };
+        }),
+      });
+    }
+
+    setNetworkOptions2(networkOptions2);
+    console.log(networkOptions2);
+  }, [allTokensFromAlchemy.length]);
 
   console.log(allTokensFromAlchemy);
 
@@ -56,7 +68,7 @@ const InputBox = () => {
       <p className="font-bold">DUST Threshold</p>
       <div className="flex gap-2">
         <input
-          className="input rounded-lg p-1 bg-btn1 shadow-inner-xl"
+          className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2"
           placeholder={""}
           name={"dustThreshold"}
           type="number"

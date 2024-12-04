@@ -1,6 +1,11 @@
+import { formatEther } from "viem";
+
 interface OptionInfo {
   value: string;
   label: string;
+  disabled: boolean;
+  tokenBalance: bigint;
+  decimals: number;
 }
 
 interface Option {
@@ -20,7 +25,7 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
   const handleClick = (option: OptionInfo) => {
     // const elem = document.activeElement;
     // if (elem) {
-    //   elem?.blur();
+    //   (elem as any)?.blur();
     // }
 
     if (onChange) onChange(option);
@@ -28,21 +33,33 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
   return (
     <details className="dropdown">
       <summary className="btn m-1">open or close</summary>
-      <ul className="menu dropdown-content flex flex-col flex-nowrap h-32 overflow-y-scroll bg-base-100 rounded-box p-2">
-        {options?.map(({ section, options }) => (
-          <div key={section}>
-            <p className="text-sm font-bold my-1 px-2">{section}</p>
-            <div>
-              {options.map(({ value, label }) => (
-                <li key={value}>
-                  <a onClick={() => handleClick({ label, value })} className="text-xs text-[#9D9D9D] px-2 py-1">
-                    {label}
-                  </a>
-                </li>
-              ))}
+      <ul className="menu dropdown-content flex flex-col flex-nowrap h-64 overflow-y-scroll bg-base-100 rounded-box p-2 w-52">
+        {options?.map(({ section, options }) => {
+          return (
+            <div key={section}>
+              <p className="text-sm font-bold my-1 px-2">{section}</p>
+              <div>
+                {options.map(({ value, label, disabled, tokenBalance, decimals }) => {
+                  const formattedBalance = Number(tokenBalance) / Math.pow(10, decimals);
+                  return (
+                    <li key={value} className={disabled ? "disabled" : ""}>
+                      <a
+                        onClick={() => {
+                          handleClick({ label, value, disabled, tokenBalance, decimals });
+                          disabled = !disabled;
+                        }}
+                        className="text-xs text-[#9D9D9D] px-2 py-1 justify-between"
+                      >
+                        <p>{label}</p>
+                        <p>{formattedBalance.toFixed(2)}</p>
+                      </a>
+                    </li>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </ul>
 
       {/* <summary className="btn m-1">open or close</summary>
