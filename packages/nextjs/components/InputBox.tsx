@@ -16,7 +16,7 @@ const InputBox = () => {
         <p className="font-bold">DUST Threshold</p>
         <div className="flex gap-2">
           <input
-            className="input rounded-lg p-1 bg-btn1"
+            className="input rounded-lg p-1 bg-btn1 shadow-inner-xl"
             placeholder={""}
             name={"dustThreshold"}
             type="number"
@@ -27,14 +27,16 @@ const InputBox = () => {
             // ref={inputReft}
             // onFocus={onFocus}
           />
-          <button className="px-6 bg-btn1 rounded-lg hover:brightness-50">Save</button>
+          <button className="px-4 hover:brightness-50 bg-[url('/button1.png')] bg-no-repeat bg-center bg-cover">
+            <p className="pb-2 m-0">Save</p>
+          </button>
         </div>
       </div>
       <div className="m-4">
         <p className="font-bold">Input</p>
         <div className="flex gap-2">
           <input
-            className="input rounded-lg p-1 bg-btn1 w-[125px]"
+            className="input rounded-lg p-1 bg-btn1 shadow-inner-xl w-[125px]"
             placeholder={""}
             name={"dustThreshold"}
             // disabled={disabled}
@@ -42,7 +44,9 @@ const InputBox = () => {
             // ref={inputReft}
             // onFocus={onFocus}
           />
-          <button className="px-6 bg-btn1 rounded-lg hover:brightness-50 min-w-30">{"Auto-select"}</button>
+          <button className="px-6 hover:brightness-50 min-w-30 bg-[url('/button2.png')] bg-no-repeat bg-center bg-cover">
+            {"Auto-select"}
+          </button>
         </div>
       </div>
       <div className="overflow-scroll h-32 p-4">
