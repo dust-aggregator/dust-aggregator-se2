@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Alchemy, Network } from "alchemy-sdk";
 import { useAccount } from "wagmi";
+import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
 
 const networks = [
   Network.ETH_MAINNET,
@@ -13,43 +14,45 @@ const networks = [
 export const AllTokensBalances = ({ address }: any) => {
   // const { address: connectedAddress } = useAccount();
 
-  const [allObjects, setAllObjects] = useState<any[]>([]);
-  useEffect(() => {
-    async function fn() {
-      if (address === undefined) return;
+  console.log(address);
+  const { allObjects } = useTokenBalancesWithMetadataByNetwork(address);
+  // const [allObjects, setAllObjects] = useState<any[]>([]);
+  // useEffect(() => {
+  //   async function fn() {
+  //     if (address === undefined) return;
 
-      const objs = [];
+  //     const objs = [];
 
-      for (let i = 0; i < networks.length; i++) {
-        const obj: any = { name: networks[i].toString(), tokenBalances: [], tokenBalancesWithMetadata: [] };
+  //     for (let i = 0; i < networks.length; i++) {
+  //       const obj: any = { name: networks[i].toString(), tokenBalances: [], tokenBalancesWithMetadata: [] };
 
-        const config = {
-          apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
-          network: networks[i],
-        };
-        const alchemy = new Alchemy(config);
+  //       const config = {
+  //         apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
+  //         network: networks[i],
+  //       };
+  //       const alchemy = new Alchemy(config);
 
-        const balances = await alchemy.core.getTokenBalances(address);
+  //       const balances = await alchemy.core.getTokenBalances(address);
 
-        for (const token of balances.tokenBalances) {
-          const metadata = await alchemy.core.getTokenMetadata(token.contractAddress);
-          console.log(metadata);
-          obj.tokenBalancesWithMetadata.push({ ...token, ...metadata });
-        }
+  //       for (const token of balances.tokenBalances) {
+  //         const metadata = await alchemy.core.getTokenMetadata(token.contractAddress);
+  //         console.log(metadata);
+  //         obj.tokenBalancesWithMetadata.push({ ...token, ...metadata });
+  //       }
 
-        obj.tokenBalances = balances.tokenBalances;
+  //       obj.tokenBalances = balances.tokenBalances;
 
-        objs.push(obj);
-      }
+  //       objs.push(obj);
+  //     }
 
-      setAllObjects(objs);
-    }
-    fn();
-  }, [address]);
+  //     setAllObjects(objs);
+  //   }
+  //   fn();
+  // }, [address]);
 
-  const [balancesWithMetadata, setBalancesWithMetadata] = useState<any[]>([]);
+  // const [balancesWithMetadata, setBalancesWithMetadata] = useState<any[]>([]);
 
-  console.log(balancesWithMetadata);
+  // console.log(balancesWithMetadata);
 
   const comps = allObjects.map((networkWithTokens: any, index: number) => {
     return (
@@ -61,9 +64,9 @@ export const AllTokensBalances = ({ address }: any) => {
           return (
             <div key={"p-" + index2} className="p-1 m-0 flex flex-wrap gap-1 justify-between">
               {/* <p className="m-0">{token.name}</p> */}
-              <p className="m-0 w-[100px] text-ellipsis overflow-hidden line-clamp-1">{token.symbol}</p>
+              <p className="m-0 w-[100px] text-ellipsis overflow-hidden line-clamp-1 text-sm">{token.symbol}</p>
 
-              <p className="m-0">{formattedBalance.toFixed(2)}</p>
+              <p className="m-0 text-sm">{formattedBalance.toFixed(2)}</p>
             </div>
           );
         })}
