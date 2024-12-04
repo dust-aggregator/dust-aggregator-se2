@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Alchemy, Network } from "alchemy-sdk";
 import { useAccount } from "wagmi";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
+import { useTokensFromAlchemy } from "~~/hooks/dust/useTokensFromAlchemy";
 
 const networks = [
   Network.ETH_MAINNET,
@@ -12,49 +13,17 @@ const networks = [
 ];
 
 export const AllTokensBalances = ({ address }: any) => {
-  // const { address: connectedAddress } = useAccount();
+  // useTokensFromAlchemy(address);
 
-  console.log(address);
-  const { allObjects } = useTokenBalancesWithMetadataByNetwork(address);
-  // const [allObjects, setAllObjects] = useState<any[]>([]);
-  // useEffect(() => {
-  //   async function fn() {
-  //     if (address === undefined) return;
+  const { allObjects, isLoading } = useTokenBalancesWithMetadataByNetwork(address);
 
-  //     const objs = [];
+  console.log(allObjects);
 
-  //     for (let i = 0; i < networks.length; i++) {
-  //       const obj: any = { name: networks[i].toString(), tokenBalances: [], tokenBalancesWithMetadata: [] };
+  const allObjectsFiltered = allObjects.filter((element: any) => {
+    return element.tokenBalancesWithMetadata.length > 0;
+  });
 
-  //       const config = {
-  //         apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
-  //         network: networks[i],
-  //       };
-  //       const alchemy = new Alchemy(config);
-
-  //       const balances = await alchemy.core.getTokenBalances(address);
-
-  //       for (const token of balances.tokenBalances) {
-  //         const metadata = await alchemy.core.getTokenMetadata(token.contractAddress);
-  //         console.log(metadata);
-  //         obj.tokenBalancesWithMetadata.push({ ...token, ...metadata });
-  //       }
-
-  //       obj.tokenBalances = balances.tokenBalances;
-
-  //       objs.push(obj);
-  //     }
-
-  //     setAllObjects(objs);
-  //   }
-  //   fn();
-  // }, [address]);
-
-  // const [balancesWithMetadata, setBalancesWithMetadata] = useState<any[]>([]);
-
-  // console.log(balancesWithMetadata);
-
-  const comps = allObjects.map((networkWithTokens: any, index: number) => {
+  const comps = allObjectsFiltered.map((networkWithTokens: any, index: number) => {
     return (
       <div key={index} className="flex flex-col">
         <p className="p-1 m-0 text-xl bg-base-300">{networkWithTokens.name}</p>
@@ -74,5 +43,12 @@ export const AllTokensBalances = ({ address }: any) => {
     );
   });
 
+  if (isLoading) {
+    return (
+      <>
+        <p className="text-2xl text-center">Loading...</p>
+      </>
+    );
+  }
   return <div>{comps}</div>;
 };

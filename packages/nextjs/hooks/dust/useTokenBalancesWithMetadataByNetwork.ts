@@ -11,18 +11,16 @@ const networks = [
 ];
 
 export const useTokenBalancesWithMetadataByNetwork = (address: any) => {
-  // const { address: connectedAddress } = useAccount();
-
-  console.log(address);
   const [allObjects, setAllObjects] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     async function fn() {
-      console.log("Entered");
       if (address === undefined) {
-        console.log("RETURNED");
         return;
       }
 
+      setIsLoading(true);
       const objs = [];
 
       for (let i = 0; i < networks.length; i++) {
@@ -38,7 +36,6 @@ export const useTokenBalancesWithMetadataByNetwork = (address: any) => {
 
         for (const token of balances.tokenBalances) {
           const metadata = await alchemy.core.getTokenMetadata(token.contractAddress);
-          console.log(metadata);
           obj.tokenBalancesWithMetadata.push({ ...token, ...metadata });
         }
 
@@ -48,12 +45,12 @@ export const useTokenBalancesWithMetadataByNetwork = (address: any) => {
       }
 
       setAllObjects(objs);
-      console.log("I RAN");
+      setIsLoading(false);
     }
     fn();
   }, [address]);
 
   // const [balancesWithMetadata, setBalancesWithMetadata] = useState<any[]>([]);
 
-  return { allObjects };
+  return { allObjects, isLoading };
 };
