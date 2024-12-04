@@ -1,20 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Alchemy, Network } from "alchemy-sdk";
-import { useAccount } from "wagmi";
+import React from "react";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
-import { useTokensFromAlchemy } from "~~/hooks/dust/useTokensFromAlchemy";
-
-const networks = [
-  Network.ETH_MAINNET,
-  Network.ZETACHAIN_MAINNET,
-  Network.MATIC_MAINNET,
-  Network.BNB_MAINNET,
-  Network.BASE_MAINNET,
-];
 
 export const AllTokensBalances = ({ address }: any) => {
-  // useTokensFromAlchemy(address);
-
   const { allObjects, isLoading } = useTokenBalancesWithMetadataByNetwork(address);
 
   console.log(allObjects);
