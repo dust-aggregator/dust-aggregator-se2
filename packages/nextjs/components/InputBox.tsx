@@ -1,5 +1,6 @@
 import { useState } from "react";
 import UserActionBoxContainer from "./UserActionBoxContainer";
+import { AllTokensBalances } from "./token-balances/AllTokensBalances";
 
 const InputBox = () => {
   const [dustThresholdValue, setDustThresholdValue] = useState<number>(0);
@@ -42,6 +43,9 @@ const InputBox = () => {
           />
           <button className="px-6 bg-btn1 rounded-lg hover:brightness-50 min-w-30">{"Auto-select"}</button>
         </div>
+      </div>
+      <div className="overflow-scroll h-32 p-4">
+        <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" />
       </div>
     </UserActionBoxContainer>
   );

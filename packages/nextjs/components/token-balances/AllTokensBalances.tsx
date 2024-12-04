@@ -10,13 +10,13 @@ const networks = [
   Network.BASE_MAINNET,
 ];
 
-export const AllTokensBalances = () => {
-  const { address: connectedAddress } = useAccount();
+export const AllTokensBalances = ({ address }: any) => {
+  // const { address: connectedAddress } = useAccount();
 
   const [allObjects, setAllObjects] = useState<any[]>([]);
   useEffect(() => {
     async function fn() {
-      if (connectedAddress === undefined) return;
+      if (address === undefined) return;
 
       const objs = [];
 
@@ -29,7 +29,7 @@ export const AllTokensBalances = () => {
         };
         const alchemy = new Alchemy(config);
 
-        const balances = await alchemy.core.getTokenBalances(connectedAddress);
+        const balances = await alchemy.core.getTokenBalances(address);
 
         for (const token of balances.tokenBalances) {
           const metadata = await alchemy.core.getTokenMetadata(token.contractAddress);
@@ -45,7 +45,7 @@ export const AllTokensBalances = () => {
       setAllObjects(objs);
     }
     fn();
-  }, [connectedAddress]);
+  }, [address]);
 
   const [balancesWithMetadata, setBalancesWithMetadata] = useState<any[]>([]);
 
@@ -54,16 +54,16 @@ export const AllTokensBalances = () => {
   const comps = allObjects.map((networkWithTokens: any, index: number) => {
     return (
       <div key={index} className="flex flex-col">
-        <p className="p-4 bg-base-300">{networkWithTokens.name}</p>
+        <p className="p-1 m-0 text-xl bg-base-300">{networkWithTokens.name}</p>
         {networkWithTokens.tokenBalancesWithMetadata.map((token: any, index2: number) => {
           const formattedBalance = token.tokenBalance / Math.pow(10, token.decimals);
 
           return (
-            <div key={"p-" + index2} className="flex flex-wrap gap-1">
-              <p>{token.name}</p>
-              <p>({token.symbol}): </p>
+            <div key={"p-" + index2} className="p-1 m-0 flex flex-wrap gap-1 justify-between">
+              {/* <p className="m-0">{token.name}</p> */}
+              <p className="m-0 w-[100px] text-ellipsis overflow-hidden line-clamp-1">{token.symbol}</p>
 
-              <p>{formattedBalance.toFixed(2)}</p>
+              <p className="m-0">{formattedBalance.toFixed(2)}</p>
             </div>
           );
         })}
