@@ -11,8 +11,6 @@ import { useAccount } from "wagmi";
 // ];
 
 export const useTokenBalancesWithMetadataByNetwork = (address: any, networks: any) => {
-  console.log(networks);
-
   const [allObjects, setAllObjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
