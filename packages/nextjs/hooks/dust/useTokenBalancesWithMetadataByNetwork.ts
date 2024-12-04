@@ -2,15 +2,17 @@ import React, { useEffect, useState } from "react";
 import { Alchemy, Network } from "alchemy-sdk";
 import { useAccount } from "wagmi";
 
-const networks = [
-  Network.ETH_MAINNET,
-  Network.ZETACHAIN_MAINNET,
-  Network.MATIC_MAINNET,
-  Network.BNB_MAINNET,
-  Network.BASE_MAINNET,
-];
+// const alchemyNetworks = [
+//   Network.ETH_MAINNET,
+//   Network.ZETACHAIN_MAINNET,
+//   Network.MATIC_MAINNET,
+//   Network.BNB_MAINNET,
+//   Network.BASE_MAINNET,
+// ];
 
-export const useTokenBalancesWithMetadataByNetwork = (address: any) => {
+export const useTokenBalancesWithMetadataByNetwork = (address: any, networks: any) => {
+  console.log(networks);
+
   const [allObjects, setAllObjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -48,7 +50,7 @@ export const useTokenBalancesWithMetadataByNetwork = (address: any) => {
       setIsLoading(false);
     }
     fn();
-  }, [address]);
+  }, [address, networks?.length]);
 
   // const [balancesWithMetadata, setBalancesWithMetadata] = useState<any[]>([]);
 

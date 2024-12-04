@@ -1,6 +1,7 @@
 import { useState } from "react";
 import UserActionBoxContainer from "./UserActionBoxContainer";
 import { AllTokensBalances } from "./token-balances/AllTokensBalances";
+import { AllTokensPrices } from "./token-prices/AllTokensPrices";
 
 const InputBox = () => {
   const [dustThresholdValue, setDustThresholdValue] = useState<number>(0);
@@ -45,6 +46,7 @@ const InputBox = () => {
         </div>
       </div>
       <div className="overflow-scroll h-32 p-4">
+        {/* <AllTokensPrices /> */}
         <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" />
       </div>
     </UserActionBoxContainer>

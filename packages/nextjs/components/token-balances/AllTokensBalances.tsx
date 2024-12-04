@@ -1,8 +1,19 @@
 import React from "react";
+import { Network } from "alchemy-sdk";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
 
+const networks = [
+  { key: "Ethereum", alchemyEnum: Network.ETH_MAINNET },
+  { key: "Matic", alchemyEnum: Network.MATIC_MAINNET },
+  { key: "Binance", alchemyEnum: Network.BNB_MAINNET },
+  { key: "Base", alchemyEnum: Network.BASE_MAINNET },
+];
+
 export const AllTokensBalances = ({ address }: any) => {
-  const { allObjects, isLoading } = useTokenBalancesWithMetadataByNetwork(address);
+  const { allObjects, isLoading } = useTokenBalancesWithMetadataByNetwork(
+    address,
+    networks.map(({ alchemyEnum }) => alchemyEnum),
+  );
 
   console.log(allObjects);
 
@@ -11,9 +22,12 @@ export const AllTokensBalances = ({ address }: any) => {
   });
 
   const comps = allObjectsFiltered.map((networkWithTokens: any, index: number) => {
+    const networkName = networks.find(network => network.alchemyEnum === networkWithTokens.name);
+
+    console.log(networkName);
     return (
       <div key={index} className="flex flex-col">
-        <p className="p-1 m-0 text-xl bg-base-300">{networkWithTokens.name}</p>
+        <p className="p-1 m-0 text-xl bg-base-300">{networkName?.key || ""}</p>
         {networkWithTokens.tokenBalancesWithMetadata.map((token: any, index2: number) => {
           const formattedBalance = token.tokenBalance / Math.pow(10, token.decimals);
 
