@@ -107,7 +107,7 @@ export default function Component() {
   const [openToken, setOpenToken] = useState(false);
   const [openNetwork, setOpenNetwork] = useState(false);
   const [openOutputToken, setOpenOutputToken] = useState(false);
-  const [selectedTokens, setSelectedTokens] = useState<SelectedToken[]>(MOCK_SELECTED_TOKENS);
+  const [selectedTokens, setSelectedTokens] = useState<any[]>(MOCK_SELECTED_TOKENS);
   const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
   const [transactionStatus, setTransactionStatus] = useState<TransactionState>("notStarted");
 
@@ -134,7 +134,7 @@ export default function Component() {
     enabled: !!address,
     onLogs(logs) {
       // Loop through logs and check if the executor is the recipient
-      logs.forEach(log => {
+      logs.forEach((log: any) => {
         const { executor, swaps, totalTokensReceived } = log.args;
         if (executor.toLowerCase() === address?.toLowerCase()) {
           setTransactionStatus("destinationPending");
@@ -173,11 +173,11 @@ export default function Component() {
     enabled: !!address && !!selectedNetwork,
     onLogs(logs) {
       // Loop through logs and check if the executor is the recipient
-      logs.forEach(log => {
+      logs.forEach((log: any) => {
         const { receiver, outputToken, totalTokensReceived } = log.args;
         // Filter based on signer
         if (receiver.toLowerCase() === address?.toLowerCase()) {
-          const formattedAmount = ethers.utils.formatUnits(totalTokensReceived, selectedOutputToken?.decimals);
+          const formattedAmount = ethers.formatUnits(totalTokensReceived, selectedOutputToken?.decimals);
 
           // Mark transaction as complete and show success
           setTransactionStatus("completed");
@@ -210,7 +210,7 @@ export default function Component() {
       name: names[index],
       symbol: symbols[index],
       decimals: decimals[index],
-      balance: Number(ethers.utils.formatUnits(tokenBalances[index], decimals[index])),
+      balance: Number(ethers.formatUnits(tokenBalances[index], decimals[index])),
     }));
   };
 
@@ -232,7 +232,7 @@ export default function Component() {
     setSelectedTokens(selectedTokens.filter(t => t.symbol !== tokenValue));
   };
 
-  const handleSelectNetwork = (network: { value: string; label: string }) => {
+  const handleSelectNetwork = (network: Network) => {
     setSelectedNetwork(network);
     setOpenNetwork(false);
   };
