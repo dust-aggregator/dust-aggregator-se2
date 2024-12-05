@@ -4,16 +4,16 @@ import { useEffect, useState } from "react";
 import type { NextPage } from "next";
 
 const TokenPrice: NextPage = () => {
-  async function getPrice() {
-    const result = await fetch(`/api/cmc/quotesLatest?ids=1,2,3,1027`);
-    const resultJson = await result.json();
+  // async function getPrice() {
+  //   const result = await fetch(`/api/cmc/quotesLatest?ids=1,2,3,1027`);
+  //   const resultJson = await result.json();
 
-    setTokens(Object.values(resultJson));
-  }
+  //   // setTokens(Object.values(resultJson));
+  // }
 
   async function getAllListings() {
     let startCount = 1;
-    let limit = 5000;
+    // let limit = 5000;
 
     const pagination = 5000;
 
@@ -40,29 +40,29 @@ const TokenPrice: NextPage = () => {
   }
 
   useEffect(() => {
-    getPrice();
+    // getPrice();
 
     getAllListings();
     // getListings();
   }, []);
 
-  const [tokens, setTokens] = useState([]);
+  // const [tokens, setTokens] = useState([]);
   const [tokens2, setTokens2] = useState<any[]>([]);
 
   console.log(tokens2);
 
-  const tokenComponents = tokens.map((token: any, index: number) => {
-    return (
-      <div className="flex gap-1">
-        <p>{`${token?.name}:`}</p>
-        <p>{`$${token?.quote?.USD?.price}`}</p>
-      </div>
-    );
-  });
+  // const tokenComponents = tokens.map((token: any, index: number) => {
+  //   return (
+  //     <div className="flex gap-1">
+  //       <p>{`${token?.name}:`}</p>
+  //       <p>{`$${token?.quote?.USD?.price}`}</p>
+  //     </div>
+  //   );
+  // });
 
   const tokenComponents2 = tokens2.map((token: any, index: number) => {
     return (
-      <div className="flex gap-1">
+      <div key={"jdnn-" + index} className="flex gap-1">
         <p>{`${token?.name}:`}</p>
         <p>{`$${token?.quote?.USD?.price}`}</p>
       </div>

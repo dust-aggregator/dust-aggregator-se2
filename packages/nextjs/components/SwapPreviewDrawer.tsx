@@ -1,29 +1,23 @@
 import React, { useEffect } from "react";
-import { Button } from "~~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "~~/components/ui/dialog";
+import SwapTokenLine from "./SwapTokenLine";
+import { signTypedData } from "@wagmi/core";
+import { BigNumberish, ZeroAddress, ethers, formatUnits, parseUnits } from "ethers";
 import { ArrowDown, Coins } from "lucide-react";
 import { toast } from "sonner";
-import { ethers } from "ethers";
-import { wagmiConfig } from '~~/services/web3/wagmiConfig';
+import { useAccount, usePublicClient, useWriteContract } from "wagmi";
+import { Button } from "~~/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~~/components/ui/dialog";
+import { Network, SelectedToken, Token, TokenSwap } from "~~/lib/types";
 import {
-  getUniswapV3EstimatedAmountOut,
-  readLocalnetAddresses,
+  EvmDustTokens,
   encodeDestinationPayload,
   encodeZetachainPayload,
-  EvmDustTokens,
+  getUniswapV3EstimatedAmountOut,
   preparePermitData,
+  readLocalnetAddresses,
 } from "~~/lib/zetachainUtils";
-import { Network, SelectedToken, Token, TokenSwap } from "~~/lib/types";
-import { useAccount, usePublicClient, useWriteContract } from "wagmi";
-import { signTypedData } from '@wagmi/core'
-import SwapTokenLine from "./SwapTokenLine";
+import { wagmiConfig } from "~~/services/web3/wagmiConfig";
+
 type ProfileFormDrawerProps = {
   selectedTokens: SelectedToken[];
   selectedNetwork: Network;
@@ -40,10 +34,9 @@ export function SwapPreviewDrawer({
   const [open, setOpen] = React.useState(false);
   const [amountOut, setAmountOut] = React.useState<string | null>(null);
 
-
   const client = usePublicClient({
     chainId: 31337,
-  })
+  });
 
   const { address } = useAccount();
   const { data: hash, isPending, writeContract, ...rest } = useWriteContract();
@@ -77,23 +70,20 @@ export function SwapPreviewDrawer({
 
     const slippageBPS = 50;
     try {
-      let transportTokenAmount = ethers.BigNumber.from(0);
+      let transportTokenAmount = BigInt(0);
 
       for (const token of selectedTokens) {
-        const parsedAmount = ethers.utils.parseUnits(
-          token.amount,
-          token.decimals
-        );
+        const parsedAmount = parseUnits(token.amount, token.decimals);
         const swapTokenAmount = await getUniswapV3EstimatedAmountOut(
           client,
           readLocalnetAddresses("ethereum", "uniswapQuoterV3"),
           token.address,
           readLocalnetAddresses("ethereum", "weth"),
           parsedAmount,
-          slippageBPS
+          slippageBPS,
         );
 
-        transportTokenAmount = transportTokenAmount.add(swapTokenAmount);
+        transportTokenAmount = transportTokenAmount + swapTokenAmount;
       }
 
       const outputTokenAmount = await getUniswapV3EstimatedAmountOut(
@@ -102,7 +92,7 @@ export function SwapPreviewDrawer({
         readLocalnetAddresses("ethereum", "weth"),
         selectedOutputToken.address,
         transportTokenAmount,
-        slippageBPS
+        slippageBPS,
       );
 
       // const zetachainExchangeRate = await getUniswapV2AmountOut(
@@ -115,16 +105,10 @@ export function SwapPreviewDrawer({
 
       // console.log("ZETA EXCHANGE RATE:", zetachainExchangeRate);
 
-      const parsedOutputTokenAmount = ethers.utils.formatUnits(
-        outputTokenAmount,
-        selectedOutputToken.decimals
-      );
+      const parsedOutputTokenAmount = formatUnits(outputTokenAmount, selectedOutputToken.decimals);
 
       // Truncate to 4 decimal places
-      const outputAmountWithFourDecimals = truncateToDecimals(
-        parsedOutputTokenAmount,
-        4
-      );
+      const outputAmountWithFourDecimals = truncateToDecimals(parsedOutputTokenAmount, 4);
 
       setAmountOut(outputAmountWithFourDecimals);
     } catch (error) {
@@ -133,16 +117,17 @@ export function SwapPreviewDrawer({
   };
 
   const signPermit = async (swaps: TokenSwap[]) => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = provider.getSigner();
 
     if (client) {
       const { domain, types, values, deadline, nonce } = await preparePermitData(
         client,
         swaps,
-        readLocalnetAddresses("ethereum", "EvmDustTokens")
+        readLocalnetAddresses("ethereum", "EvmDustTokens"),
       );
-      const signature = await signer._signTypedData(domain, types, values);
+
+      const signature = await (await signer).signTypedData(domain, types, values);
 
       return { deadline, nonce, signature };
     }
@@ -154,42 +139,30 @@ export function SwapPreviewDrawer({
 
       // Step 1: Prepare payloads
       const outputToken = selectedOutputToken.address;
-      const destinationPayload = encodeDestinationPayload(
-        recipient,
-        outputToken
-      );
+      const destinationPayload = encodeDestinationPayload(recipient, outputToken);
       const encodedParameters = encodeZetachainPayload(
         selectedNetwork.zrc20Address,
         selectedNetwork.contractAddress,
         recipient,
-        destinationPayload
+        destinationPayload,
       );
-      const tokenSwaps: TokenSwap[] = selectedTokens.map(
-        ({ amount, decimals, address }) => ({
-          amount: ethers.utils.parseUnits(amount, decimals),
-          token: address,
-          minAmountOut: ethers.constants.Zero, // TODO: Set a minimum amount out
-        })
-      );
+      const tokenSwaps: TokenSwap[] = selectedTokens.map(({ amount, decimals, address }) => ({
+        amount: parseUnits(amount, decimals),
+        token: address,
+        minAmountOut: ZeroAddress, // TODO: Set a minimum amount out
+      }));
 
       // Step 2: Create Permit2 Batch transfer signature
       const permit = await signPermit(tokenSwaps);
 
+      if (!permit) return;
+
       // Step 3: Perform swap and bridge transaction
       writeContract({
-        address: readLocalnetAddresses(
-          "ethereum",
-          "EvmDustTokens"
-        ) as `0x${string}`,
+        address: readLocalnetAddresses("ethereum", "EvmDustTokens") as `0x${string}`,
         abi: EvmDustTokens.abi,
         functionName: "SwapAndBridgeTokens",
-        args: [
-          tokenSwaps,
-          encodedParameters,
-          permit.nonce,
-          permit.deadline,
-          permit.signature,
-        ],
+        args: [tokenSwaps, encodedParameters, permit.nonce, permit.deadline, permit.signature],
       });
 
       setOpen(false);
@@ -223,11 +196,7 @@ export function SwapPreviewDrawer({
           <div className="font-semibold">Output Network & Token:</div>
           <div className="flex justify-between items-center">
             <span>{`${selectedOutputToken?.name} @ ${selectedNetwork?.label}`}</span>
-            <span>
-              {amountOut
-                ? `${amountOut} ${selectedOutputToken?.symbol}`
-                : "Calculating..."}
-            </span>
+            <span>{amountOut ? `${amountOut} ${selectedOutputToken?.symbol}` : "Calculating..."}</span>
           </div>
         </div>
         <DialogFooter className="flex flex-column mt-4">

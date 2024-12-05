@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { BigNumberish, ethers } from "ethers";
 
 export interface Token {
   name: string;
@@ -25,15 +25,10 @@ export type Network = {
   nativeToken: Token;
 };
 
-export type TransactionState =
-  | "notStarted"
-  | "sourcePending"
-  | "zetaPending"
-  | "destinationPending"
-  | "completed";
+export type TransactionState = "notStarted" | "sourcePending" | "zetaPending" | "destinationPending" | "completed";
 
 export type TokenSwap = {
-  amount: ethers.BigNumber;
+  amount: BigNumberish;
   token: string;
-  minAmountOut: ethers.BigNumber;
+  minAmountOut: BigNumberish;
 };

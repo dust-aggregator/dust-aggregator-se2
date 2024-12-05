@@ -11,7 +11,7 @@ interface Option {
 interface Props {
   title: string;
   options: Option[];
-  onChange: (option: OptionInfo) => void;
+  onChange: any; //(option: OptionInfo) => void;
   selectedOption?: string;
   className?: string;
 }
@@ -20,7 +20,7 @@ const CategorySelect = ({ className, title, options, selectedOption, onChange }:
   const handleClick = (option: OptionInfo) => {
     const elem = document.activeElement;
     if (elem) {
-      elem?.blur();
+      // elem?.blur();
     }
     onChange(option);
   };
@@ -33,7 +33,7 @@ const CategorySelect = ({ className, title, options, selectedOption, onChange }:
           selectedOption ? "text-[#E4E4E4]" : "text-[#9D9D9D]"
         }`}
       >
-        {selectedOption?.label || title}
+        {selectedOption || title}
       </div>
       <ul tabIndex={0} className="w-full dropdown-content menu rounded-box z-[1] p-2 shadow mt-1 bg-[#3C3731]">
         {options.map(({ ecosystem, options }) => (

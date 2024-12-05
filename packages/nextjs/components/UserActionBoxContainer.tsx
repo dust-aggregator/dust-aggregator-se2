@@ -1,4 +1,4 @@
-const UserActionBoxContainer = ({ children }) => {
+const UserActionBoxContainer = ({ children }: any) => {
   return (
     <div className="relative w-[313px] h-[354px]">
       <div className="w-full h-full absolute inset-0 bg-[#161D22] z-10 rounded-2xl" />
