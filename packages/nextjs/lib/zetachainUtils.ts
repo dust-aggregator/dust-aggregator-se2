@@ -118,7 +118,8 @@ const preparePermitData = async (client: PublicClient, swaps: TokenSwap[], spend
   // Generate the permit return data & sign it
   const { domain, types, values } = SignatureTransfer.getPermitData(permit, PERMIT2_ADDRESS, chainId);
 
-  return { domain, types, values, deadline, nonce };
+  const domainAny: any = domain;
+  return { domain: domainAny, types, values, deadline, nonce };
 };
 
 const calculateEndTime = (duration: number) => {
@@ -130,7 +131,7 @@ async function getUniswapV3EstimatedAmountOut(
   quoterAddress: string, // Uniswap V3 Quoter address
   tokenIn: string,
   tokenOut: string,
-  amountIn: BigInt,
+  amountIn: bigint,
   slippageBPS: number,
 ) {
   const quoterAbi = parseAbi([
