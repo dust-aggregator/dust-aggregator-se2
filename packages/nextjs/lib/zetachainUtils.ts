@@ -1,19 +1,12 @@
-import localnetData from "../../foundry/localnet.json";
-import EvmDustTokens from "../../foundry/out/EvmDustTokens.sol/EvmDustTokens.json";
 import { TokenSwap } from "./types";
 import { PERMIT2_ADDRESS, SignatureTransfer } from "@uniswap/permit2-sdk";
 import { AbiCoder, ethers } from "ethers";
 import { PublicClient, parseAbi } from "viem";
-import deployedContracts from "~~/contracts/deployedContracts";
 
 type AddressData = {
   chain: string;
   type: string;
   address: string;
-};
-type LocalnetData = {
-  pid: number;
-  addresses: AddressData[];
 };
 
 const CHAIN_NAME_TO_ID: { [key: string]: number } = {
@@ -37,19 +30,7 @@ const readLocalnetAddresses = (chain: string, type: string) => {
   //   }
   // }
 
-  if (!localnetData.pid) {
-    throw new Error("Localnet data not found");
-  }
-
-  const addressesData = localnetData;
-
-  const addressData = addressesData.addresses.find(address => address.chain === chain && address.type2 === type);
-
-  if (!addressData) {
-    throw new Error(`Address not found for chain ${chain} and type ${type}`);
-  }
-
-  return addressData.address2;
+  return "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1";
 };
 
 const encodeDestinationPayload = (recipient: string, outputToken: string): string => {
@@ -167,5 +148,4 @@ export {
   encodeZetachainPayload,
   preparePermitData,
   getUniswapV3EstimatedAmountOut,
-  EvmDustTokens,
 };
