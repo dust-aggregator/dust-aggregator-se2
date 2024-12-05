@@ -4,15 +4,8 @@ import CategorySelectInputBox from "./CategorySelectInputBox";
 import UserActionBoxContainer2 from "./UserActionBoxContainer2";
 import { AllTokensBalances } from "./token-balances/AllTokensBalances";
 import { AllTokensPrices } from "./token-prices/AllTokensPrices";
-import { Network } from "alchemy-sdk";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
-
-const networks = [
-  { key: "Ethereum", alchemyEnum: Network.ETH_MAINNET },
-  { key: "Matic", alchemyEnum: Network.MATIC_MAINNET },
-  { key: "Binance", alchemyEnum: Network.BNB_MAINNET },
-  { key: "Base", alchemyEnum: Network.BASE_MAINNET },
-];
+import { networks } from "~~/lib/constants";
 
 const networkOptions = [
   {
@@ -61,8 +54,6 @@ const InputBox = () => {
       options: network.options.filter((option: any) => option.selected),
     }))
     .filter(network => network.options.length > 0);
-
-  console.log(filteredNetworkOptions);
 
   const comps = filteredNetworkOptions.map((e: any, index: number) => {
     return (

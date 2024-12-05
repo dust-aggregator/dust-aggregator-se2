@@ -1,40 +1,52 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CategorySelect from "./CategorySelect";
+import Select from "./Select";
+import SwapPreview from "./SwapPreview";
 import UserActionBoxContainer from "./UserActionBoxContainer";
+import { useAccount, useReadContract, useToken, useWatchContractEvent } from "wagmi";
+import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
+import { SUPPORTED_OUTPUT_NETWORKS, networks } from "~~/lib/constants";
+import { Token } from "~~/lib/types";
+import { useGlobalState } from "~~/services/store/store";
 
-const networkOptions = [
-  {
-    ecosystem: "Ethereum",
-    options: [
-      { value: "base", label: "Base" },
-      { value: "bnb", label: "BNB" },
-    ],
-  },
-  { ecosystem: "Solana", options: [{ value: "mainnet", label: "Solana Mainnet" }] },
+const tokenOptions = [
+  { value: "dai", label: "DAI", decorator: "5 USD" },
+  { value: "uni", label: "UNI", decorator: "7 USD" },
+  { value: "wbtc", label: "WBTC", decorator: "5 USD" },
 ];
 
 const OutputBox = () => {
-  const [selectedNetwork, setSelectedNetwork] = useState();
-  const [selectedToken, setSelectedToken] = useState();
+  const { outputNetwork, setOutputNetwork, outputToken, setOutputToken } = useGlobalState();
+  const [outputBalances, setOutputBalances] = useState<Token[]>([]);
+
+  const { address } = useAccount();
+
+  const { allObjects, isLoading } = useTokenBalancesWithMetadataByNetwork(
+    address,
+    networks.map(({ alchemyEnum }) => alchemyEnum),
+  );
+
+  // useEffect(() => {
+  //   if (rawBalancesDestination) {
+  //     const formattedBalances = formatTokenBalances(rawBalancesDestination);
+  //     setOutputBalances(formattedBalances);
+  //   }
+  // }, [rawBalancesDestination]);
 
   return (
     <UserActionBoxContainer>
       <h3 className="font-bold">Output</h3>
       <CategorySelect
         title="Select Network"
-        options={networkOptions}
-        onChange={setSelectedNetwork}
-        selectedOption={selectedNetwork}
+        options={SUPPORTED_OUTPUT_NETWORKS}
+        onChange={setOutputNetwork}
+        selectedOption={outputNetwork}
       />
       <div className="flex justify-center">
-        <p className="text-[#9D9D9D] text-xs my-2">And</p>
+        <p className="text-[#9D9D9D] text-xs my-1">And</p>
       </div>
-      <CategorySelect
-        title="Select Token"
-        options={networkOptions}
-        onChange={setSelectedToken}
-        selectedOption={selectedToken}
-      />
+      <Select title="Select Token" options={tokenOptions} onChange={setOutputToken} selectedOption={outputToken} />
+      <SwapPreview />
     </UserActionBoxContainer>
   );
 };

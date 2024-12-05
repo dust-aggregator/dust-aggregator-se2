@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { Network, Token } from "~~/lib/types";
 import scaffoldConfig from "~~/scaffold.config";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 
@@ -20,6 +21,10 @@ type GlobalState = {
   setIsNativeCurrencyFetching: (newIsNativeCurrencyFetching: boolean) => void;
   targetNetwork: ChainWithAttributes;
   setTargetNetwork: (newTargetNetwork: ChainWithAttributes) => void;
+  outputNetwork?: Network;
+  setOutputNetwork: (newOutputNetwork: Network) => void;
+  outputToken?: Token;
+  setOutputToken: (newOutputToken: Token) => void;
 };
 
 export const useGlobalState = create<GlobalState>(set => ({
@@ -33,4 +38,8 @@ export const useGlobalState = create<GlobalState>(set => ({
     set(state => ({ nativeCurrency: { ...state.nativeCurrency, isFetching: newValue } })),
   targetNetwork: scaffoldConfig.targetNetworks[0],
   setTargetNetwork: (newTargetNetwork: ChainWithAttributes) => set(() => ({ targetNetwork: newTargetNetwork })),
+  outputNetwork: undefined,
+  setOutputNetwork: (newOutputNetwork: Network) => set(() => ({ outputNetwork: newOutputNetwork })),
+  outputToken: undefined,
+  setOutputToken: (newOutputToken: Token) => set(() => ({ outputToken: newOutputToken })),
 }));

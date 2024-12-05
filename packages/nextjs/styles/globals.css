@@ -45,8 +45,6 @@ p {
   @apply shadow-none;
 }
 
-select {
-  border-radius: 8px;
-  background-color: #3c3731 !important;
-  color: #9d9d9d;
+.modal::backdrop {
+  @apply backdrop-blur-md bg-black/20;
 }
