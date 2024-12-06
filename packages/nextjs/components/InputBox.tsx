@@ -11,7 +11,7 @@ import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
 import { networks } from "~~/lib/constants";
 
 const InputBox = () => {
-  const [dustThresholdValue, setDustThresholdValue] = useState<number>(0);
+  const [dustThresholdValue, setDustThresholdValue] = useState<number>(5);
 
   function handleChange(e: any) {
     setDustThresholdValue(e.target.value);
@@ -79,6 +79,13 @@ const InputBox = () => {
     }))
     .filter(network => network.options.length > 0);
 
+  function formatDecimal(input: string): string {
+    const numberValue = parseFloat(input); // Convert the string to a number
+    return numberValue % 1 === 0
+      ? numberValue.toString() // Return as an integer if no decimal values
+      : numberValue.toFixed(4).replace(/\.?0+$/, ""); // Format to 4 decimals, remove trailing zeros
+  }
+
   const comps = filteredNetworkOptions.map((e: any, index: number) => {
     return (
       <div key={"sjf" + index} className="flex flex-col gap-1">
@@ -99,6 +106,16 @@ const InputBox = () => {
                   <Image src={"/Vector.png"} alt="" width={"12"} height={"12"} className="h-4" />
                 </button>
                 <p className="m-0">{option.label}</p>
+              </div>
+
+              <div className="flex items-center justify-center gap-1">
+                <p>{formatDecimal(option.tokenBalance)}</p>
+                <Image src={"/particles.png"} alt="" width={"12"} height={"12"} className="h-4" />
+              </div>
+
+              <div className="flex items-center justify-center gap-1">
+                <p>$</p>
+                <p>{option.usdValue?.toFixed(2)}</p>
               </div>
             </div>
           );
@@ -203,6 +220,16 @@ const InputBox = () => {
     setNetworkOptions2(networkOptions2);
   }, [walletConnectBalances.length, dustThresholdValue]);
 
+  let totalDustInUsd = 0;
+  console.log(networkOptions2);
+  for (let i = 0; i < networkOptions2.length; i++) {
+    for (let j = 0; j < networkOptions2[i].options.length; j++) {
+      if (networkOptions2[i].options[j].selected) {
+        totalDustInUsd += networkOptions2[i].options[j].usdValue;
+      }
+    }
+  }
+
   return (
     <UserActionBoxContainer>
       <p className="font-bold m-0">DUST Threshold</p>
@@ -234,6 +261,12 @@ const InputBox = () => {
         {comps}
         {/* <AllTokensPrices /> */}
         {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
+      </div>
+
+      <div className="flex items-center justify-center gap-1">
+        <p>Total: </p>
+        <p>$</p>
+        <p>{totalDustInUsd?.toFixed(2)}</p>
       </div>
     </UserActionBoxContainer>
   );
