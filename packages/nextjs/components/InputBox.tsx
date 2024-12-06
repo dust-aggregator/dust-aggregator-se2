@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import CategorySelect from "./CategorySelect";
 import CategorySelectInputBox from "./CategorySelectInputBox";
+import UserActionBoxContainer from "./UserActionBoxContainer";
 import UserActionBoxContainer2 from "./UserActionBoxContainer2";
 import { AllTokensBalances } from "./token-balances/AllTokensBalances";
 import { AllTokensPrices } from "./token-prices/AllTokensPrices";
@@ -34,6 +35,11 @@ const InputBox = () => {
 
   // Update disabled property function
   const updateSpecificOption = (sectionKey: string, optionValue: string, selected: boolean) => {
+    console.log("Updating...");
+    console.log(sectionKey);
+    console.log(optionValue);
+    console.log(selected);
+
     setNetworkOptions2(prevOptions =>
       prevOptions.map(section =>
         section.section === sectionKey
@@ -100,7 +106,7 @@ const InputBox = () => {
   }, [allTokensFromAlchemy.length]);
 
   return (
-    <UserActionBoxContainer2>
+    <UserActionBoxContainer>
       <p className="font-bold m-0">DUST Threshold</p>
       <div className="flex gap-2">
         <input
@@ -110,10 +116,6 @@ const InputBox = () => {
           type="number"
           value={dustThresholdValue}
           onChange={handleChange}
-          // disabled={disabled}
-          // autoComplete="off"
-          // ref={inputReft}
-          // onFocus={onFocus}
         />
         <button className="px-4 hover:brightness-50 bg-[url('/button1.png')] bg-no-repeat bg-center bg-cover">
           <p className="pb-2 m-0">Save</p>
@@ -125,31 +127,16 @@ const InputBox = () => {
         <CategorySelectInputBox
           title="Select tokens"
           options={networkOptions2}
-          onSelect={updateSpecificOption}
-
-          // onChange={setSelectedNetwork}
-          // selectedOption={selectedNetwork}
+          // onSelect={updateSpecificOption}
+          onChange={updateSpecificOption}
         />
-
-        {/* <input
-          className="input rounded-lg p-1 bg-btn1 shadow-inner-xl w-[125px]"
-          placeholder={""}
-          name={"dustThreshold"}
-          // disabled={disabled}
-          // autoComplete="off"
-          // ref={inputReft}
-          // onFocus={onFocus}
-        /> */}
-        <button className="px-6 hover:brightness-50 min-w-30 bg-[url('/button2.png')] bg-no-repeat bg-center bg-cover h-10">
-          {"Auto-select"}
-        </button>
       </div>
       <div className="overflow-scroll h-40 p-1">
         {comps}
         {/* <AllTokensPrices /> */}
         {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
       </div>
-    </UserActionBoxContainer2>
+    </UserActionBoxContainer>
   );
 };
 
