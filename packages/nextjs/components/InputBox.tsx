@@ -7,18 +7,8 @@ import UserActionBoxContainer2 from "./UserActionBoxContainer2";
 import { AllTokensBalances } from "./token-balances/AllTokensBalances";
 import { AllTokensPrices } from "./token-prices/AllTokensPrices";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
+import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
 import { networks } from "~~/lib/constants";
-
-const networkOptions = [
-  {
-    section: "Ethereum",
-    options: [
-      { value: "base", label: "Base", selected: true },
-      { value: "bnb", label: "BNB", selected: false },
-    ],
-  },
-  { section: "Solana", options: [{ value: "mainnet", label: "Solana Mainnet" }] },
-];
 
 const InputBox = () => {
   const [dustThresholdValue, setDustThresholdValue] = useState<number>(0);
@@ -27,10 +17,37 @@ const InputBox = () => {
     setDustThresholdValue(e.target.value);
   }
 
-  const { allObjects: allTokensFromAlchemy, isLoading } = useTokenBalancesWithMetadataByNetwork(
-    "0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf",
-    networks.map(({ alchemyEnum }) => alchemyEnum),
-  );
+  // const { allObjects: allTokensFromAlchemy, isLoading } = useTokenBalancesWithMetadataByNetwork(
+  //   "0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf",
+  //   networks.map(({ alchemyEnum }) => alchemyEnum),
+  // );
+
+  const [walletConnectBalances, setWalletConnectBalances] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fn() {
+      const apiResponse = await fetch("/api/walletconnect/fetch-wallet-balance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          address: "0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf",
+        }),
+      });
+
+      if (apiResponse.ok) {
+        const apiResponseJson = await apiResponse.json();
+
+        setWalletConnectBalances(apiResponseJson.balances);
+        // console.log(apiResponseJson);
+      }
+      // console.log(apiResponse);
+    }
+    fn();
+  }, []);
+  // const { price } = useTokenPricesUniswap();
+  // console.log(price);
 
   const [networkOptions2, setNetworkOptions2] = useState<any[]>([]);
 
@@ -92,24 +109,99 @@ const InputBox = () => {
 
   useEffect(() => {
     const networkOptions2: any[] = [];
-    for (let i = 0; i < allTokensFromAlchemy.length; i++) {
-      networkOptions2.push({
-        section: networks.find(network => network.alchemyEnum === allTokensFromAlchemy[i].name)?.key,
-        options: allTokensFromAlchemy[i].tokenBalancesWithMetadata.map((e: any, index: number) => {
+
+    const filteredBalancesByUsdValue = walletConnectBalances.filter(token => token?.value <= dustThresholdValue);
+
+    for (let i = 0; i < networks.length; i++) {
+      // const networks = { chainId: 1};
+
+      console.log(walletConnectBalances);
+
+      // const filteredTokens: any[] = [];
+
+      // for (let j = 0; j < walletConnectBalances.length; j++) {
+      //   if (walletConnectBalances[j]?.chainId?.replace("eip155:", "") === networks[i].chainId.toString) {
+      //     filteredTokens.push(walletConnectBalances[j]);
+      //   }
+      // }
+      const filteredTokens = filteredBalancesByUsdValue.filter(
+        token => token?.chainId?.replace("eip155:", "") === networks[i].chainId.toString(),
+      );
+
+      console.log(filteredTokens);
+
+      if (filteredTokens.length > 0) {
+        const obj: any = {};
+        obj.section = networks[i].key;
+        obj.options = filteredTokens.map((e: any, index: number) => {
+          console.log(e.quantity.numeric.toString());
           return {
             value: "inputToken-" + index,
             label: e.name,
             disabled: false,
-            tokenBalance: e.tokenBalance,
-            decimals: e.decimals,
+            tokenBalance: e.quantity.numeric,
+            usdValue: e.value,
+            decimals: e.quantity.decimals,
             selected: false,
           };
-        }),
-      });
+        });
+
+        console.log(obj);
+        networkOptions2.push(obj);
+      }
     }
 
+    //   if (networks[i].chainId === walletConnectBalances[i].chainId.replace("eip155:", "")) {
+    //     const obj: any = {};
+    //     obj.section = networks[i].key;
+
+    //     const options:[] = [];
+
+    //     for (let j = 0; j < walletConnectBalances.length; j++) {
+    //       if (walletConnectBalances[j])
+    //     }
+    //     obj.options
+    //   }
+
+    // }
+
+    // for (let i = 0; i < walletConnectBalances.length; i++) {
+
+    //   const obj: any = {};
+    //   obj.section = networks.find(network => network.chainId === walletConnectBalances[i].chainId.replace("eip155:", ""))?.key,;
+    //   obj.options
+    //   networkOptions2.push({
+    //     section: networks.find(network => network.chainId === walletConnectBalances[i].chainId.replace("eip155:", ""))?.key,
+    //     options: walletConnectBalances.map((e: any, index: number) => {
+    //       return {
+    //         value: "inputToken-" + index,
+    //         label: e.name,
+    //         disabled: false,
+    //         tokenBalance: e.tokenBalance,
+    //         decimals: e.decimals,
+    //         selected: false,
+    //       };
+    //     }),
+    //   });
+    // }
+    // for (let i = 0; i < allTokensFromAlchemy.length; i++) {
+    //   networkOptions2.push({
+    //     section: networks.find(network => network.alchemyEnum === allTokensFromAlchemy[i].name)?.key,
+    //     options: allTokensFromAlchemy[i].tokenBalancesWithMetadata.map((e: any, index: number) => {
+    //       return {
+    //         value: "inputToken-" + index,
+    //         label: e.name,
+    //         disabled: false,
+    //         tokenBalance: e.tokenBalance,
+    //         decimals: e.decimals,
+    //         selected: false,
+    //       };
+    //     }),
+    //   });
+    // }
+
     setNetworkOptions2(networkOptions2);
-  }, [allTokensFromAlchemy.length]);
+  }, [walletConnectBalances.length, dustThresholdValue]);
 
   return (
     <UserActionBoxContainer>

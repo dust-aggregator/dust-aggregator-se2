@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Token } from "@uniswap/sdk-core";
+import { Token, V3_CORE_FACTORY_ADDRESSES } from "@uniswap/sdk-core";
 import IUniswapV3FactoryABI from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Factory.sol/IUniswapV3Factory.json";
 import IUniswapV3PoolABI from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
 import { FeeAmount, Pool } from "@uniswap/v3-sdk";
@@ -17,7 +17,7 @@ const findChainById = (id: number) => {
   return chainsArray.find(chain => chain.id === id);
 };
 
-export function useTokenPricesUniswap() {
+export function useTokenPricesUniswap(tokenAddress: string) {
   const [price, setPrice] = useState("0");
 
   async function getPrice(
@@ -30,8 +30,9 @@ export function useTokenPricesUniswap() {
     const token0 = new Token(chain.id, token0Address, token0Decimals, "", "");
     const token1 = new Token(chain.id, token1Address, token1Decimals, "", "");
 
-    const factoryAddress = "0x1F98431c8aD98523631AE4a59f267346ea31F984"; // Uniswap V3 factory address
+    // const factoryAddress = "0x1F98431c8aD98523631AE4a59f267346ea31F984"; // Uniswap V3 factory address
 
+    const factoryAddress = V3_CORE_FACTORY_ADDRESSES[chain.id];
     const config = createConfig({
       chains: [chain],
       transports: {
@@ -76,7 +77,7 @@ export function useTokenPricesUniswap() {
     console.log(tokenAPrice);
     console.log(tokenBPrice);
 
-    setPrice(tokenAPrice);
+    setPrice(tokenBPrice);
   }
 
   useEffect(() => {

@@ -3,10 +3,10 @@ import { Network as AlchemyNetwork } from "alchemy-sdk";
 import { Network } from "~~/lib/types";
 
 export const networks = [
-  { key: "Ethereum", alchemyEnum: AlchemyNetwork.ETH_MAINNET },
-  { key: "Matic", alchemyEnum: AlchemyNetwork.MATIC_MAINNET },
-  { key: "Binance", alchemyEnum: AlchemyNetwork.BNB_MAINNET },
-  { key: "Base", alchemyEnum: AlchemyNetwork.BASE_MAINNET },
+  { key: "Ethereum", alchemyEnum: AlchemyNetwork.ETH_MAINNET, chainId: 1 },
+  { key: "Matic", alchemyEnum: AlchemyNetwork.MATIC_MAINNET, chainId: 137 },
+  { key: "Binance", alchemyEnum: AlchemyNetwork.BNB_MAINNET, chainId: 56 },
+  { key: "Base", alchemyEnum: AlchemyNetwork.BASE_MAINNET, chainId: 8453 },
 ];
 
 export const SUPPORTED_OUTPUT_NETWORKS = [

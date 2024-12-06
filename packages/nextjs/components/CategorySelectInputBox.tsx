@@ -1,13 +1,14 @@
 import Image from "next/image";
-import { formatEther } from "viem";
+import { formatEther, parseUnits } from "viem";
 
 interface OptionInfo {
   value: string;
   label: string;
   disabled: boolean;
-  tokenBalance: bigint;
+  tokenBalance: string;
   decimals: number;
   selected: boolean;
+  usdValue: number;
 }
 
 interface Option {
@@ -43,6 +44,13 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
     onChange(section, option.value, option.selected);
   };
 
+  function formatDecimal(input: string): string {
+    const numberValue = parseFloat(input); // Convert the string to a number
+    return numberValue % 1 === 0
+      ? numberValue.toString() // Return as an integer if no decimal values
+      : numberValue.toFixed(4).replace(/\.?0+$/, ""); // Format to 4 decimals, remove trailing zeros
+  }
+
   return (
     <div className="dropdown w-full">
       <div
@@ -63,8 +71,8 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
             <div key={section}>
               <p className="text-sm font-bold my-1 px-2">{section}</p>
               <div>
-                {options.map(({ value, label, disabled, tokenBalance, decimals, selected }) => {
-                  const formattedBalance = Number(tokenBalance) / Math.pow(10, decimals);
+                {options.map(({ value, label, disabled, tokenBalance, usdValue, decimals, selected }) => {
+                  // const formattedBalance = tokenBalance; // parseUnits(tokenBalance, decimals); // Number(tokenBalance) / Math.pow(10, decimals);
 
                   if (selected) return <div key={value}></div>;
 
@@ -73,7 +81,15 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
                       <a
                         onClick={() => {
                           console.log("Handled");
-                          handleClick(section, { label, value, disabled, tokenBalance, decimals, selected: !selected });
+                          handleClick(section, {
+                            label,
+                            value,
+                            disabled,
+                            tokenBalance,
+                            usdValue,
+                            decimals,
+                            selected: !selected,
+                          });
                           // onSelect(section, value, !selected);
                           disabled = !disabled;
                         }}
@@ -81,8 +97,13 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
                       >
                         <p>{label}</p>
                         <div className="flex items-center justify-center gap-1">
-                          <p>{formattedBalance.toFixed(2)}</p>
+                          <p>{formatDecimal(tokenBalance)}</p>
                           <Image src={"/particles.png"} alt="" width={"12"} height={"12"} className="h-4" />
+                        </div>
+
+                        <div className="flex items-center justify-center gap-1">
+                          <p>$</p>
+                          <p>{usdValue?.toFixed(2)}</p>
                         </div>
                       </a>
                     </li>
