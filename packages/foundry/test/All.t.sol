@@ -2,8 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
-// import "../contracts/YourContract.sol";
-import {EvmDustTokens, SwapInput, IGatewayEVM} from "../contracts/EvmDustTokens.sol";
+import {EvmDustTokens, IGatewayEVM} from "../contracts/EvmDustTokens.sol";
 import {SimpleSwap} from "./SimpleSwap.sol";
 import {UniversalDApp} from "../contracts/UniversalDApp.sol";
 import {IQuoter} from "./IQuoter.sol";
@@ -172,7 +171,7 @@ contract YourContractTest is Test, ZetachainUtils {
             user2,
             destinationPayload
         );
-        SwapInput[] memory swaps = getTokenSwaps(
+        EvmDustTokens.SwapInput[] memory swaps = getTokenSwaps(
             DEFAULT_SWAPS,
             DEFAULT_AMOUNT,
             DEFAULT_SLIPPAGE
@@ -200,7 +199,7 @@ contract YourContractTest is Test, ZetachainUtils {
     }
 
     function signPermit(
-        SwapInput[] memory swaps
+        EvmDustTokens.SwapInput[] memory swaps
     ) public view returns (uint256, uint256, bytes memory) {
         (
             bytes32 domain,
@@ -244,12 +243,12 @@ contract YourContractTest is Test, ZetachainUtils {
     struct PreparedPermitData {
         uint256 deadline;
         uint256 nonce;
-        SwapInput[] permitted;
+        EvmDustTokens.SwapInput[] permitted;
         address spender;
     }
 
     function preparePermitData(
-        SwapInput[] memory swaps,
+        EvmDustTokens.SwapInput[] memory swaps,
         address spender
     )
         public
@@ -344,7 +343,7 @@ contract YourContractTest is Test, ZetachainUtils {
     }
 
     function validateTokenPermissions(
-        SwapInput memory permission
+        EvmDustTokens.SwapInput memory permission
     ) internal pure {
         // Implement validation logic for token permissions
         require(permission.token != address(0), "INVALID_TOKEN");
@@ -413,8 +412,8 @@ contract YourContractTest is Test, ZetachainUtils {
         address[] memory tokens,
         uint256 swapAmount,
         uint256 slippageBPS
-    ) public returns (SwapInput[] memory swaps) {
-        swaps = new SwapInput[](tokens.length);
+    ) public returns (EvmDustTokens.SwapInput[] memory swaps) {
+        swaps = new EvmDustTokens.SwapInput[](tokens.length);
 
         for (uint256 i = 0; i < tokens.length; i++) {
             IERC20Metadata token = IERC20Metadata(tokens[i]);
@@ -438,7 +437,7 @@ contract YourContractTest is Test, ZetachainUtils {
             uint256 minAmountOut = (estimatedAmountOut *
                 (10000 - slippageBPS)) / 10000;
 
-            swaps[i] = SwapInput({
+            swaps[i] = EvmDustTokens.SwapInput({
                 amount: amount,
                 minAmountOut: minAmountOut,
                 token: tokens[i]
