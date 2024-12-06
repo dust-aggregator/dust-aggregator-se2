@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const projectID = process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? "52c90e37353bd1f1acccf263e5e1eb34";
+    const projectID = process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? "";
 
     if (!projectID) throw new Error("API_KEY not found in env");
 
