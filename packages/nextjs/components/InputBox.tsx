@@ -6,6 +6,7 @@ import UserActionBoxContainer from "./UserActionBoxContainer";
 import UserActionBoxContainer2 from "./UserActionBoxContainer2";
 import { AllTokensBalances } from "./token-balances/AllTokensBalances";
 import { AllTokensPrices } from "./token-prices/AllTokensPrices";
+import { useAccount } from "wagmi";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
 import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
 import { networks } from "~~/lib/constants";
@@ -24,15 +25,22 @@ const InputBox = () => {
 
   const [walletConnectBalances, setWalletConnectBalances] = useState<any[]>([]);
 
+  const connectedAccount = useAccount();
+
+  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
+
   useEffect(() => {
     async function fn() {
+      if (connectedAccount?.address === undefined) return;
+
+      setIsLoadingTokens(true);
       const apiResponse = await fetch("/api/walletconnect/fetch-wallet-balance", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          address: "0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf",
+          address: connectedAccount.address,
         }),
       });
 
@@ -43,9 +51,11 @@ const InputBox = () => {
         // console.log(apiResponseJson);
       }
       // console.log(apiResponse);
+
+      setIsLoadingTokens(false);
     }
     fn();
-  }, []);
+  }, [connectedAccount?.address]);
   // const { price } = useTokenPricesUniswap();
   // console.log(price);
 
@@ -232,42 +242,53 @@ const InputBox = () => {
 
   return (
     <UserActionBoxContainer>
-      <p className="font-bold m-0">DUST Threshold</p>
-      <div className="flex gap-2">
-        <input
-          className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8"
-          placeholder={""}
-          name={"dustThreshold"}
-          type="number"
-          value={dustThresholdValue}
-          onChange={handleChange}
-        />
-        <button className="px-4 hover:brightness-50 bg-[url('/button1.png')] bg-no-repeat bg-center bg-cover">
-          <p className="pb-2 m-0">Save</p>
-        </button>
-      </div>
-      <p className="font-bold m-0">Input</p>
+      {connectedAccount?.address ? (
+        isLoadingTokens ? (
+          <p>{"Loading Tokens..."}</p>
+        ) : (
+          <>
+            <p className="font-bold m-0">DUST Threshold</p>
+            <div className="flex gap-2">
+              <input
+                className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8"
+                placeholder={""}
+                name={"dustThreshold"}
+                type="number"
+                value={dustThresholdValue}
+                onChange={handleChange}
+              />
+              <button className="px-4 hover:brightness-50 bg-[url('/button1.png')] bg-no-repeat bg-center bg-cover">
+                <p className="pb-2 m-0">Save</p>
+              </button>
+            </div>
+            <p className="font-bold m-0">Input</p>
 
-      <div className="flex gap-2">
-        <CategorySelectInputBox
-          title="Select tokens"
-          options={networkOptions2}
-          // onSelect={updateSpecificOption}
-          onChange={updateSpecificOption}
-        />
-      </div>
-      <div className="p-[0.4px] bg-[#FFFFFF] rounded my-3"></div>
-      <div className="overflow-scroll h-40">
-        {comps}
-        {/* <AllTokensPrices /> */}
-        {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
-      </div>
-
-      <div className="flex items-center justify-center gap-1">
-        <p>Total: </p>
-        <p>$</p>
-        <p>{totalDustInUsd?.toFixed(2)}</p>
-      </div>
+            <div className="flex gap-2">
+              <CategorySelectInputBox
+                title="Select tokens"
+                options={networkOptions2}
+                // onSelect={updateSpecificOption}
+                onChange={updateSpecificOption}
+              />
+            </div>
+            <div className="p-[0.4px] bg-[#FFFFFF] rounded my-3"></div>
+            <div className="overflow-scroll h-40">
+              {comps}
+              {/* <AllTokensPrices /> */}
+              {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
+            </div>
+            <div className="flex items-center justify-center gap-1">
+              <p>Total: </p>
+              <p>$</p>
+              <p>{totalDustInUsd?.toFixed(2)}</p>
+            </div>
+          </>
+        )
+      ) : (
+        <>
+          <p>Please connect your wallet</p>
+        </>
+      )}
     </UserActionBoxContainer>
   );
 };
