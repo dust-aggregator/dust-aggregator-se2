@@ -9,51 +9,53 @@ import {RevertContext, RevertOptions} from "./zetachain/Revert.sol";
 import {IGatewayEVM} from "./interfaces/IGatewayEVM.sol";
 import "./interfaces/IPermit2.sol";
 
-// Interface for a wrapped native token to allow withdrawals
+// Interface for a wrapped native token to allow deposits and withdrawals
 interface IWTOKEN is IERC20 {
     function deposit() external payable;
     function withdraw(uint256 amount) external;
     receive() external payable;
 }
 
-struct SwapInput {
-    address token;
-    uint256 amount;
-    uint256 minAmountOut;
-}
-
-struct SwapOutput {
-    address tokenIn;
-    address tokenOut;
-    uint256 amountIn;
-    uint256 amountOut;
-}
-
 /**
- * @title EVMDustTokens
+ * @title EvmDustTokens
+ * This contract helps users to convert all their ERC20 tokens
+ * from one supported chain to another.
  */
 contract EvmDustTokens is Ownable2Step {
     using TransferHelper for *;
 
-    uint24 public constant swapFee = 3000;
-    // 100 == 1%
-    uint256 public constant protocolFee = 100;
+    uint24 public constant swapFee = 3000; // Uniswap fee
+    uint256 public constant protocolFee = 100; // Our fee: 100 == 1%
     IGatewayEVM public immutable gateway;
-    ISwapRouter public immutable swapRouter;
+    ISwapRouter public immutable swapRouter; // Uniswap router
     IPermit2 public immutable permit2;
     address public immutable universalDApp;
     address payable public immutable wNativeToken;
+    uint256 public collectedFees;
 
+    // Allowed tokens to receive
     mapping(address => bool) public isWhitelisted;
     address[] tokenList;
-    uint256 public collectedFees;
+
+    struct SwapInput {
+        address token;
+        uint256 amount;
+        uint256 minAmountOut;
+    }
+
+    struct SwapOutput {
+        address tokenIn;
+        address tokenOut;
+        uint256 amountIn;
+        uint256 amountOut;
+    }
 
     event FeesWithdrawn(uint256 amount);
     event TokenAdded(address indexed token);
     event TokenRemoved(address indexed token);
     event SwappedAndDeposited(address indexed executor, SwapOutput[] swaps, uint256 totalTokensReceived);
-    event SwappedAndWithdrawn(address indexed receiver, address outputToken, uint256 totalTokensReceived);
-    event Reverted(address recipient, address asset, uint256 amount);
+    event Withdrawn(address indexed receiver, address outputToken, uint256 totalTokensReceived);
+    event Reverted(address indexed recipient, address asset, uint256 amount);
 
     error FeeWithdrawalFailed();
     error InvalidAddress();
@@ -74,10 +76,10 @@ contract EvmDustTokens is Ownable2Step {
         ISwapRouter _swapRouter,
         address _universalDApp,
         address payable _nativeToken,
-        address initialOwner,
+        address _initialOwner,
         IPermit2 _permit2,
         address[] memory _tokenList
-    ) payable Ownable(initialOwner) {
+    ) payable Ownable(_initialOwner) {
         if (
             address(_gateway) == address(0) || address(_swapRouter) == address(0) || _nativeToken == address(0)
                 || address(_permit2) == address(0)
@@ -102,6 +104,15 @@ contract EvmDustTokens is Ownable2Step {
         }
     }
 
+    /**
+     * Called by users to convert all their ERC20 tokens from one supported chain to another
+     * @param swaps - Swaps to perform
+     * @param message - Message to send to the Universal DApp
+     * @param nonce - Permit2 nonce
+     * @param deadline - Permit2 deadline
+     * @param signature - Permit2 signature
+     * @dev The message has to be abi.encode(UniversalDApp.Params)
+     */
     function SwapAndBridgeTokens(
         SwapInput[] calldata swaps,
         bytes calldata message,
@@ -128,7 +139,7 @@ contract EvmDustTokens is Ownable2Step {
             // Approve the swap router to spend the token
             token.safeApprove(address(swapRouter), amount);
 
-            // Build Uniswap Swap to convert the token to WETH
+            // Build Uniswap Swap to convert the token to the wrapped native token
             ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
                 tokenIn: token,
                 tokenOut: wNativeToken,
@@ -140,7 +151,7 @@ contract EvmDustTokens is Ownable2Step {
                 sqrtPriceLimitX96: 0
             });
 
-            // Perform the swap
+            // Try to perform the swap
             try swapRouter.exactInputSingle(params) returns (uint256 amountOut) {
                 totalTokensReceived += amountOut;
                 // Store performed swap details
@@ -151,6 +162,7 @@ contract EvmDustTokens is Ownable2Step {
             }
         }
 
+        // Unwrap the native token and subtract the protocol fee
         IWTOKEN(wNativeToken).withdraw(totalTokensReceived);
         uint256 feeAmount = totalTokensReceived * protocolFee / 10000;
         totalTokensReceived -= feeAmount;
@@ -169,9 +181,16 @@ contract EvmDustTokens is Ownable2Step {
         emit SwappedAndDeposited(msg.sender, performedSwaps, totalTokensReceived);
     }
 
+    /**
+     * Called by the Universal DApp to withdraw tokens on the destination chain
+     * @param outputToken - The address of the output token
+     * @param receiver - The address of the receiver
+     * @param minAmount - The minimum amount of tokens to receive from the swap
+     * @dev To receive native tokens, set outputToken to address(0)
+     */
     function ReceiveTokens(address outputToken, address receiver, uint256 minAmount) external payable {
         if (msg.value == 0) revert InvalidMsgValue();
-        // Check if the output token is whitelisted
+        // Check if the output token is native or whitelisted
         if (outputToken != address(0) && !isWhitelisted[outputToken]) revert TokenIsNotWhitelisted(outputToken);
 
         // If outputToken is 0x, send msg.value to the receiver
@@ -179,20 +198,18 @@ contract EvmDustTokens is Ownable2Step {
             (bool s,) = receiver.call{value: msg.value}("");
             if (!s) revert TransferFailed();
 
-            emit SwappedAndWithdrawn(receiver, outputToken, msg.value);
+            emit Withdrawn(receiver, outputToken, msg.value);
         } else if (outputToken == wNativeToken) {
+            // Wrap native token to the wrapped native token (i.e: WETH, WPOL, etc)
             IWTOKEN(wNativeToken).deposit{value: msg.value}();
             wNativeToken.safeTransfer(receiver, msg.value);
 
-            emit SwappedAndWithdrawn(receiver, wNativeToken, msg.value);
+            emit Withdrawn(receiver, wNativeToken, msg.value);
         } else {
-            // Step 1: Swap msg.value to Wrapped Token (i.e: WETH or WPOL)
+            // Swap wrapped native token to the output token
             IWTOKEN(wNativeToken).deposit{value: msg.value}();
-
-            // Step 2: Approve swap router to spend WETH
             wNativeToken.safeApprove(address(swapRouter), msg.value);
 
-            // Step 3: Build Uniswap Swap to convert WETH to outputToken
             ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
                 tokenIn: wNativeToken,
                 tokenOut: outputToken,
@@ -204,25 +221,31 @@ contract EvmDustTokens is Ownable2Step {
                 sqrtPriceLimitX96: 0
             });
 
-            // Step 4: Perform the swap
             uint256 amountOut = swapRouter.exactInputSingle(params);
 
-            emit SwappedAndWithdrawn(receiver, outputToken, amountOut);
+            emit Withdrawn(receiver, outputToken, amountOut);
         }
     }
 
-    // Add token to whitelist
+    /**
+     * Add token to whitelist
+     * @param token - The address of the ERC20 token
+     */
     function addToken(address token) external onlyOwner {
-        if (token == address(0)) revert InvalidToken(token);
+        if (token == address(0)) revert InvalidAddress();
         if (isWhitelisted[token]) revert TokenIsWhitelisted(token);
         isWhitelisted[token] = true;
         tokenList.push(token);
         emit TokenAdded(token);
     }
 
-    // Remove token from whitelist
+    /**
+     * Remove token from whitelist
+     * @param token - The address of the ERC20 token
+     * @param index - The index of the token in tokenList
+     */
     function removeToken(address token, uint256 index) external onlyOwner {
-        if (token == address(0)) revert InvalidToken(token);
+        if (token == address(0)) revert InvalidAddress();
         if (!isWhitelisted[token]) revert TokenIsNotWhitelisted(token);
         delete isWhitelisted[token];
 
@@ -235,6 +258,9 @@ contract EvmDustTokens is Ownable2Step {
         emit TokenRemoved(token);
     }
 
+    /**
+     * Withdraw all collected fees
+     */
     function withdrawFees() external onlyOwner {
         uint256 fees = collectedFees;
         delete collectedFees;
@@ -243,8 +269,15 @@ contract EvmDustTokens is Ownable2Step {
         emit FeesWithdrawn(fees);
     }
 
+    /**
+     * Called by the gateway if the transaction reverts.
+     * Returns the reverted tokens back to the original sender
+     * @param revertContext - Revert context to pass to onRevert
+     * @dev The gateway sends tokens to the contract and then calls onRevert
+     */
     function onRevert(RevertContext calldata revertContext) external payable {
         if (msg.sender != address(gateway)) revert NotGateway();
+
         // Decode the revert message to get the original sender's address
         address originalSender = abi.decode(revertContext.revertMessage, (address));
 
@@ -253,17 +286,28 @@ contract EvmDustTokens is Ownable2Step {
             (bool s,) = originalSender.call{value: revertContext.amount}("");
             if (!s) revert TransferFailed();
         } else {
-            // Transfer ERC20 tokens
             revertContext.asset.safeTransfer(originalSender, revertContext.amount);
         }
 
         emit Reverted(originalSender, revertContext.asset, revertContext.amount);
     }
 
+    /**
+     * Get the list of whitelisted tokens
+     */
     function getTokenList() external view returns (address[] memory) {
         return tokenList;
     }
 
+    /**
+     * Get the metadata of whitelisted tokens
+     * @param user - The address of the user
+     * @return addresses - The addresses of the whitelisted tokens
+     * @return names - The names of the whitelisted tokens
+     * @return symbols - The symbols of the whitelisted tokens
+     * @return decimals - The decimals of the whitelisted tokens
+     * @return balances - The balances of the whitelisted tokens
+     */
     function getTokensMetadata(address user)
         external
         view
@@ -293,7 +337,13 @@ contract EvmDustTokens is Ownable2Step {
         }
     }
 
-    // Batch SignatureTransfer
+    /**
+     * Batch SignatureTransfer to transfer tokens from msg.sender to this contract
+     * @param swaps - Swaps to perform
+     * @param nonce - Permit2 nonce
+     * @param deadline - Permit2 deadline
+     * @param signature - Permit2 signature
+     */
     function signatureBatchTransfer(
         SwapInput[] calldata swaps,
         uint256 nonce,
@@ -328,12 +378,7 @@ contract EvmDustTokens is Ownable2Step {
             ISignatureTransfer.PermitBatchTransferFrom({permitted: permitted, nonce: nonce, deadline: deadline});
 
         // Execute the batched permit transfer
-        permit2.permitTransferFrom(
-            permit,
-            transferDetails,
-            msg.sender, // The owner of the tokens
-            signature
-        );
+        permit2.permitTransferFrom(permit, transferDetails, msg.sender, signature);
     }
 
     receive() external payable {}

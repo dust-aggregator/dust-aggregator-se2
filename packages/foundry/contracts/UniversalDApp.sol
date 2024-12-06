@@ -4,16 +4,17 @@ pragma solidity ^0.8.19;
 import {SystemContract} from "./helpers/SystemContract.sol";
 import "./interfaces/IZRC20.sol";
 import {SwapHelperLib} from "./helpers/SwapHelperLib.sol";
-import {BytesHelperLib} from "./helpers/BytesHelperLib.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 import {RevertContext, RevertOptions} from "./zetachain/Revert.sol";
 import {IUniversalContract, MessageContext} from "./interfaces/IUniversalContract.sol";
 import {IGatewayZEVM, CallOptions} from "./interfaces/IGatewayZEVM.sol";
 
+/**
+ * @title UniversalDApp
+ * @notice This contract is a universal DApp that can be used to swap
+ * and send tokens between chains
+ */
 contract UniversalDApp is IUniversalContract {
     using SwapHelperLib for SystemContract;
-    using BytesHelperLib for bytes;
 
     SystemContract public immutable systemContract;
     IGatewayZEVM public immutable gateway;
@@ -40,23 +41,33 @@ contract UniversalDApp is IUniversalContract {
     }
 
     struct Params {
-        address targetChainToken;
+        address targetChainToken; // an address of zrc20 token on Zetachain of the target chain
         uint256 gasLimit;
         uint256 minAmount;
         address originalSender;
-        bytes targetChainCounterparty;
-        bytes destinationPayload;
+        bytes targetChainCounterparty; // an address of the EVMDustTokens contract on the target chain
+        bytes destinationPayload; // must be abi.encodeCall(EvmDustTokens.ReceiveTokens, (...))
     }
 
+    /**
+     * This function is called by the gateway to perform the swap and withdrawal
+     * @param context - The context of the cross-chain call
+     * @param zrc20 - The address of the ZRC20 token sent
+     * @param amount - The amount of tokens sent
+     * @param message - The message from the EVMDustTokens contract
+     */
     function onCall(MessageContext calldata context, address zrc20, uint256 amount, bytes calldata message)
         external
         onlyGateway
     {
+        // Revert any call from Bitcoin
         if (context.chainID == BITCOIN_CHAIN_ID) {
             revert NotSupportedChainID();
         }
 
         Params memory params = abi.decode(message, (Params));
+        // Revert if the target chain token is not valid
+        // Otherwise, swap and withdraw
         if (params.targetChainToken == address(0)) {
             revert InvalidChainToken();
         } else if (params.targetChainToken == BITCOIN) {
@@ -66,12 +77,19 @@ contract UniversalDApp is IUniversalContract {
         }
     }
 
+    /**
+     * Called by the gateway if the transaction reverts
+     * @param revertContext - Revert context to pass to onRevert
+     */
     function onRevert(RevertContext calldata revertContext) external onlyGateway {
         address targetToken = revertContext.asset;
         uint256 amount = revertContext.amount;
 
+        // Get the gas fee required for withdrawal
         (address gasZRC20, uint256 gasFee) = IZRC20(targetToken).withdrawGasFee();
 
+        // If the gas token is the target token, subtract the gas fee from the amount
+        // Otherwise, swap required amount of tokens for the gas fee
         uint256 outputAmount;
         if (gasZRC20 == targetToken) {
             outputAmount = amount - gasFee;
@@ -84,6 +102,7 @@ contract UniversalDApp is IUniversalContract {
 
         bytes memory recipient = revertContext.revertMessage;
 
+        // do not call onRevert again
         RevertOptions memory revertOptions = RevertOptions({
             revertAddress: address(this),
             callOnRevert: false,
@@ -98,10 +117,37 @@ contract UniversalDApp is IUniversalContract {
         emit Reverted(recipient, targetToken, outputAmount);
     }
 
+    /**
+     * Swap and withdraw to Bitcoin
+     * @param inputToken - The address of the input token
+     * @param amount - The amount of tokens
+     * @param params - The parameters for the withdrawal
+     */
+    function swapAndWithdrawBTC(address inputToken, uint256 amount, Params memory params) internal {
+        // Get the gas fee required for withdrawal
+        (address gasZRC20, uint256 gasFee) = IZRC20(params.targetChainToken).withdrawGasFee();
+
+        // Swap and approve the tokens
+        (uint256 outputAmount, RevertOptions memory revertOptions) =
+            swapAndApprove(gasZRC20, gasFee, inputToken, amount, params);
+
+        // Execute the withdrawal via the gateway
+        gateway.withdraw(params.targetChainCounterparty, outputAmount, params.targetChainToken, revertOptions);
+
+        emit SwappedAndWithdrawn(params.targetChainCounterparty, params.targetChainToken, outputAmount);
+    }
+
+    /**
+     * Swap and withdraw to an EVM chain
+     * @param inputToken - The address of the input token
+     * @param amount - The amount of tokens
+     * @param params - The parameters for the withdrawal
+     */
     function swapAndWithdrawEVM(address inputToken, uint256 amount, Params memory params) internal {
         // Get the gas fee required for withdrawal and call
         (address gasZRC20, uint256 gasFee) = IZRC20(params.targetChainToken).withdrawGasFeeWithGasLimit(params.gasLimit);
 
+        // Swap and approve the tokens
         (uint256 outputAmount, RevertOptions memory revertOptions) =
             swapAndApprove(gasZRC20, gasFee, inputToken, amount, params);
 
@@ -119,19 +165,16 @@ contract UniversalDApp is IUniversalContract {
         emit SwappedAndWithdrawn(params.targetChainCounterparty, params.targetChainToken, outputAmount);
     }
 
-    function swapAndWithdrawBTC(address inputToken, uint256 amount, Params memory params) internal {
-        // Get the gas fee required for withdrawal and call
-        (address gasZRC20, uint256 gasFee) = IZRC20(params.targetChainToken).withdrawGasFee();
-
-        (uint256 outputAmount, RevertOptions memory revertOptions) =
-            swapAndApprove(gasZRC20, gasFee, inputToken, amount, params);
-
-        // Execute the withdrawal via the gateway
-        gateway.withdraw(params.targetChainCounterparty, outputAmount, params.targetChainToken, revertOptions);
-
-        emit SwappedAndWithdrawn(params.targetChainCounterparty, params.targetChainToken, outputAmount);
-    }
-
+    /**
+     * Helper function to swap and approve the tokens
+     * @param gasZRC20 - The address of the gas token
+     * @param gasFee - The gas fee
+     * @param inputToken - The address of the input token
+     * @param amount - The amount of tokens
+     * @param params - The parameters for the withdrawal
+     * @return outputAmount - The output amount of tokens
+     * @return revertOptions - The revert options
+     */
     function swapAndApprove(address gasZRC20, uint256 gasFee, address inputToken, uint256 amount, Params memory params)
         internal
         returns (uint256 outputAmount, RevertOptions memory revertOptions)
