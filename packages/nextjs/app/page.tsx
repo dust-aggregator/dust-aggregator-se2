@@ -100,6 +100,7 @@ import gearHubSVG from "~~/public/assets/gear_hub.svg";
 // ];
 
 export default function Component() {
+  // ignore this comment <----
   // const [balances, setBalances] = useState<Token[]>([]);
   // const [outputBalances, setOutputBalances] = useState<Token[]>([]);
   // const [selectedOutputToken, setSelectedOutputToken] = useState<Token | null>(MOCK_SELECTED_TOKENS[0]);
