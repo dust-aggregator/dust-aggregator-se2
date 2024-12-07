@@ -1,6 +1,17 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { ethers } from "ethers";
+import { parseUnits } from "viem";
+import { baseSepolia } from "viem/chains";
+import { http, usePublicClient } from "wagmi";
+import { useEthersProvider } from "~~/hooks/dust/useEthersProvider";
+import { truncateToDecimals } from "~~/lib/utils";
+import { getUniswapV3EstimatedAmountOut } from "~~/lib/zetachainUtils";
 import { useGlobalState } from "~~/services/store/store";
+import { wagmiConfig } from "~~/services/web3/wagmiConfig";
+
+const quoterAddressBaseSep = "0xC5290058841028F1614F3A6F0F5816cAd0df5E27";
+const wethBaseSep = "0x4200000000000000000000000000000000000006";
 
 const mockSelectedTokens = [
   {
@@ -26,17 +37,23 @@ const mockSelectedTokens = [
   },
 ];
 
-const amountOut = 21.2;
-
 const SwapPreview = () => {
-  const { outputNetwork, outputToken } = useGlobalState();
+  const { outputNetwork, outputToken, inputTokens } = useGlobalState();
+  const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
+  const provider = useEthersProvider();
+
+  const client = usePublicClient({ config: wagmiConfig });
+
+  useEffect(() => {
+    calculateOutputTokenAmount();
+  }, [outputToken, outputNetwork, inputTokens, client, provider]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (readyForPreview) {
         setQuoteTime(quoteTime => {
           if (quoteTime === 1) {
-            alert("Fetching new quote");
             return 30;
           }
           return quoteTime - 1;
@@ -45,23 +62,25 @@ const SwapPreview = () => {
     }, 1000);
     return () => clearInterval(interval);
   });
+
   const calculateOutputTokenAmount = async () => {
-    if (!selectedOutputToken || !selectedNetwork || !client) {
+    if (!outputToken || !outputNetwork || !inputTokens.length || !client || !provider) {
       return;
     }
     setAmountOut(null);
 
     const slippageBPS = 50;
     try {
-      let transportTokenAmount = ethers.BigNumber.from(0);
+      let transportTokenAmount = BigInt(0);
 
-      for (const token of selectedTokens) {
-        const parsedAmount = ethers.utils.parseUnits(token.amount, token.decimals);
+      for (const token of inputTokens) {
+        const parsedAmount = parseUnits(token.amount, token.decimals);
         const swapTokenAmount = await getUniswapV3EstimatedAmountOut(
-          client,
-          readLocalnetAddresses("ethereum", "uniswapQuoterV3"),
+          // wagmiConfig,
+          provider,
+          quoterAddressBaseSep,
           token.address,
-          readLocalnetAddresses("ethereum", "weth"),
+          wethBaseSep,
           parsedAmount,
           slippageBPS,
         );
@@ -71,33 +90,25 @@ const SwapPreview = () => {
 
       const outputTokenAmount = await getUniswapV3EstimatedAmountOut(
         client,
-        readLocalnetAddresses("ethereum", "uniswapQuoterV3"),
-        readLocalnetAddresses("ethereum", "weth"),
-        selectedOutputToken.address,
+        quoterAddressBaseSep,
+        wethBaseSep,
+        outputToken.address,
         transportTokenAmount,
         slippageBPS,
       );
 
-      // const zetachainExchangeRate = await getUniswapV2AmountOut(
-      //   "0x2ca7d64A7EFE2D62A725E2B35Cf7230D6677FfEe",
-      //   "0x65a45c57636f9BcCeD4fe193A602008578BcA90b",
-      //   transportTokenAmount
-      // );
-
-      // console.log("ZETA EXCHANGE RATE:", zetachainExchangeRate);
-
-      // console.log("ZETA EXCHANGE RATE:", zetachainExchangeRate);
-
-      const parsedOutputTokenAmount = ethers.utils.formatUnits(outputTokenAmount, selectedOutputToken.decimals);
+      const parsedOutputTokenAmount = ethers.utils.formatUnits(outputTokenAmount, outputToken.decimals);
 
       // Truncate to 4 decimal places
       const outputAmountWithFourDecimals = truncateToDecimals(parsedOutputTokenAmount, 4);
 
+      console.log({ outputAmountWithFourDecimals });
       setAmountOut(outputAmountWithFourDecimals);
     } catch (error) {
       console.error("Error calculating output token amount:", error);
     }
   };
+
   const readyForPreview = !!outputNetwork && !!outputToken;
 
   return (

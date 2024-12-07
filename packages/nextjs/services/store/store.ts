@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Network, Token } from "~~/lib/types";
+import { Network, SelectedToken, Token } from "~~/lib/types";
 import scaffoldConfig from "~~/scaffold.config";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 
@@ -11,6 +11,29 @@ import { ChainWithAttributes } from "~~/utils/scaffold-eth";
  *
  * Think about it as a global useState.
  */
+
+const mockInputTokens: SelectedToken[] = [
+  {
+    name: "USDC Token",
+    symbol: "USDC",
+    decimals: 6,
+    balance: 3000000,
+    address: "0x5dEaC602762362FE5f135FA5904351916053cF70",
+    amount: "3000000000000000000",
+    isMax: true,
+    hasPermit2Allowance: false,
+  },
+  {
+    name: "Dai Token",
+    symbol: "DAI",
+    decimals: 18,
+    balance: 2000000,
+    address: "0x5dEaC602762362FE5f135FA5904351916053cF70",
+    amount: "200000000000000000",
+    isMax: true,
+    hasPermit2Allowance: false,
+  },
+];
 
 type GlobalState = {
   nativeCurrency: {
@@ -25,6 +48,8 @@ type GlobalState = {
   setOutputNetwork: (newOutputNetwork: Network) => void;
   outputToken?: Token;
   setOutputToken: (newOutputToken: Token) => void;
+  inputTokens: SelectedToken[];
+  setInputTokens: (newInputTokens: SelectedToken[]) => void;
 };
 
 export const useGlobalState = create<GlobalState>(set => ({
@@ -42,4 +67,6 @@ export const useGlobalState = create<GlobalState>(set => ({
   setOutputNetwork: (newOutputNetwork: Network) => set(() => ({ outputNetwork: newOutputNetwork })),
   outputToken: undefined,
   setOutputToken: (newOutputToken: Token) => set(() => ({ outputToken: newOutputToken })),
+  inputTokens: mockInputTokens,
+  setInputTokens: (newInputTokens: SelectedToken[]) => set(() => ({ inputTokens: newInputTokens })),
 }));

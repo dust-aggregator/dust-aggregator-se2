@@ -74,8 +74,8 @@ export function useTokenPricesUniswap(tokenAddress: string) {
     const tokenAPrice = pool.token0Price.toSignificant(6);
     const tokenBPrice = pool.token1Price.toSignificant(6);
 
-    console.log(tokenAPrice);
-    console.log(tokenBPrice);
+    // console.log(tokenAPrice);
+    // console.log(tokenBPrice);
 
     setPrice(tokenBPrice);
   }
