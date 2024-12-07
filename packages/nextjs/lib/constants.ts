@@ -9,6 +9,8 @@ export const networks = [
   { key: "Base", alchemyEnum: AlchemyNetwork.BASE_MAINNET, chainId: 8453 },
 ];
 
+export const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+
 export const SUPPORTED_OUTPUT_NETWORKS = [
   {
     ecosystem: "Ethereum",

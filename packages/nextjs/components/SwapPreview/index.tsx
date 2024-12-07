@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import InputToken from "./InputToken";
 import { ethers } from "ethers";
 import { parseUnits } from "viem";
-import { baseSepolia } from "viem/chains";
-import { http, usePublicClient } from "wagmi";
-import { useEthersProvider } from "~~/hooks/dust/useEthersProvider";
+import { usePublicClient } from "wagmi";
+import { useEthersProvider } from "~~/hooks/dust";
 import { truncateToDecimals } from "~~/lib/utils";
 import { getUniswapV3EstimatedAmountOut } from "~~/lib/zetachainUtils";
 import { useGlobalState } from "~~/services/store/store";
@@ -12,30 +11,6 @@ import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
 const quoterAddressBaseSep = "0xC5290058841028F1614F3A6F0F5816cAd0df5E27";
 const wethBaseSep = "0x4200000000000000000000000000000000000006";
-
-const mockSelectedTokens = [
-  {
-    address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-    ticker: "DAI",
-    name: "Dai",
-    amount: "8.4",
-    decimals: 18,
-  },
-  {
-    address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-    ticker: "UNI",
-    name: "Uni",
-    amount: "3",
-    decimals: 18,
-  },
-  {
-    address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-    ticker: "LINK",
-    name: "Link",
-    amount: "14.1",
-    decimals: 18,
-  },
-];
 
 const SwapPreview = () => {
   const { outputNetwork, outputToken, inputTokens } = useGlobalState();
@@ -45,9 +20,9 @@ const SwapPreview = () => {
 
   const client = usePublicClient({ config: wagmiConfig });
 
-  useEffect(() => {
-    calculateOutputTokenAmount();
-  }, [outputToken, outputNetwork, inputTokens, client, provider]);
+  // useEffect(() => {
+  //   calculateOutputTokenAmount();
+  // }, [outputToken, outputNetwork, inputTokens, client, provider]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -127,31 +102,22 @@ const SwapPreview = () => {
           <div className="text-[#9D9D9D]">
             <span>Optimism</span>
             <ul>
-              {mockSelectedTokens.map(token => (
-                <li key={token.ticker} className="flex justify-between">
-                  <div>
-                    <span className="px-2">•</span>
-                    <span>
-                      {token.name} ({token.ticker})
-                    </span>
-                  </div>
-                  <span className="text-[#2DC7FF] flex">
-                    {token.amount} {token.ticker}
-                    <Image className="ml-1" src="/assets/particles.svg" alt="dust_particles" width={15} height={15} />
-                  </span>
+              {inputTokens.map(token => (
+                <li key={token.symbol} className="flex justify-between">
+                  <InputToken token={token} />
                 </li>
               ))}
             </ul>
           </div>
           <h3 className="font-bold text-xl mt-2">Output Token</h3>
           <span className="text-[#9D9D9D]">{outputNetwork?.label}</span>
-          <div key={outputToken?.label} className="flex justify-between mb-24">
+          <div key={outputToken?.name} className="flex justify-between mb-24">
             <div>
               <span className="px-2">•</span>
-              <span>{outputToken?.label}</span>
+              <span>{outputToken?.name}</span>
             </div>
             <span className="text-[#F0BF26] flex font-bold">
-              {amountOut} {outputToken?.label}
+              {amountOut} {outputToken?.name}
             </span>
           </div>
           <div className="text-[#9D9D9D]">
