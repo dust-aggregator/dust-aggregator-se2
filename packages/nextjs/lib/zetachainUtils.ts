@@ -83,7 +83,7 @@ const encodeZetachainPayload = (
   return encodedParameters;
 };
 
-const preparePermitData = async (client: PublicClient, swaps: TokenSwap[], spender: string) => {
+const preparePermitData = async (chainId: number, swaps: TokenSwap[], spender: string) => {
   const nonce = Math.floor(Math.random() * 1e15); // 1 quadrillion potential nonces
   const deadline = calculateEndTime(30 * 60 * 1000); // 30 minute sig deadline
 
@@ -96,9 +96,6 @@ const preparePermitData = async (client: PublicClient, swaps: TokenSwap[], spend
     }),
     spender: spender,
   };
-
-  // Get the chainId (Sepolia = 11155111)
-  const chainId = await client.getChainId();
 
   // Generate the permit return data & sign it
   const { domain, types, values } = SignatureTransfer.getPermitData(permit, PERMIT2_ADDRESS, chainId);

@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { erc20Abi } from "viem";
+import { erc20Abi, parseUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
+import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
 
-const PERMIT2_BASE_SEPOLIA = "0x000000000022D473030F116dDEE9F6B43aC78BA3";
-
-export const useTokenHasPermit2Approval = (tokenAddress: string, amount: string) => {
+export const useTokenHasPermit2Approval = (tokenAddress: string, amount: bigint) => {
   const [hasApproval, setHasApproval] = useState<boolean>(false);
   const [needsRefresh, setNeedsRefresh] = useState<boolean>(false);
   const { address } = useAccount();
@@ -26,6 +25,7 @@ export const useTokenHasPermit2Approval = (tokenAddress: string, amount: string)
   useEffect(() => {
     if (approvedAmount !== undefined && !isError) {
       if (approvedAmount >= BigInt(amount)) {
+        console.log({ approvedAmount, amount, tokenAddress });
         setHasApproval(true);
       }
       setNeedsRefresh(false);

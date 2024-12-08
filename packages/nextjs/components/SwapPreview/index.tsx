@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import ConfirmButton from "./ConfirmButton";
 import InputToken from "./InputToken";
 import { ethers } from "ethers";
 import { parseUnits } from "viem";
 import { usePublicClient } from "wagmi";
-import { useEthersProvider } from "~~/hooks/dust";
+// import { useEthersProvider } from "~~/hooks/dust";
 import { truncateToDecimals } from "~~/lib/utils";
 import { getUniswapV3EstimatedAmountOut } from "~~/lib/zetachainUtils";
 import { useGlobalState } from "~~/services/store/store";
@@ -16,13 +17,13 @@ const SwapPreview = () => {
   const { outputNetwork, outputToken, inputTokens } = useGlobalState();
   const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
-  const provider = useEthersProvider();
+  // const provider = useEthersProvider();
 
   const client = usePublicClient({ config: wagmiConfig });
 
   // useEffect(() => {
   //   calculateOutputTokenAmount();
-  // }, [outputToken, outputNetwork, inputTokens, client, provider]);
+  // },   const handleConfirm = async () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -77,7 +78,6 @@ const SwapPreview = () => {
       // Truncate to 4 decimal places
       const outputAmountWithFourDecimals = truncateToDecimals(parsedOutputTokenAmount, 4);
 
-      console.log({ outputAmountWithFourDecimals });
       setAmountOut(outputAmountWithFourDecimals);
     } catch (error) {
       console.error("Error calculating output token amount:", error);
@@ -135,9 +135,7 @@ const SwapPreview = () => {
             <div className="text=[#FFFFF]"></div>
           </div>
           <form method="dialog" className="w-full flex justify-center mt-6">
-            <button className="flex-1 px-6 hover:brightness-50 bg-[url('/button2.png')] bg-no-repeat bg-center bg-cover h-10">
-              Approve
-            </button>
+            <ConfirmButton />
             <button
               style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
               className="flex-1 text-[#FFFFFF] my-0 text-sm bg-center btn  min-h-0 h-10 rounded-lg"
