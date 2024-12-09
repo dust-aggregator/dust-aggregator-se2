@@ -51,8 +51,10 @@ contract EvmDustTokens is Ownable2Step {
     }
 
     event FeesWithdrawn(uint256 amount);
+    event TokenFeesWithdrawn(address token, uint256 amount);
     event TokenAdded(address indexed token);
     event TokenRemoved(address indexed token);
+    event Swapped(address indexed executor, SwapOutput[] swaps, uint256 totalTokensReceived);
     event SwappedAndDeposited(address indexed executor, SwapOutput[] swaps, uint256 totalTokensReceived);
     event Withdrawn(address indexed receiver, address outputToken, uint256 totalTokensReceived);
     event Reverted(address indexed recipient, address asset, uint256 amount);
@@ -65,7 +67,7 @@ contract EvmDustTokens is Ownable2Step {
     error InvalidToken(address token);
     error NotGateway();
     error NoSwaps();
-    error SwapFailed(address token);
+    error SwapFailed(address token, bytes revertData);
     error TransferFailed();
     error TokenIsNotWhitelisted(address token);
     error TokenIsWhitelisted(address token);
@@ -75,23 +77,23 @@ contract EvmDustTokens is Ownable2Step {
         IGatewayEVM _gateway,
         ISwapRouter _swapRouter,
         address _universalDApp,
-        address payable _nativeToken,
+        address payable _wNativeToken,
         address _initialOwner,
         IPermit2 _permit2,
         address[] memory _tokenList
     ) payable Ownable(_initialOwner) {
         if (
-            address(_gateway) == address(0) || address(_swapRouter) == address(0) || _nativeToken == address(0)
+            address(_gateway) == address(0) || address(_swapRouter) == address(0) || _wNativeToken == address(0)
                 || address(_permit2) == address(0)
         ) revert InvalidAddress();
         gateway = _gateway;
         swapRouter = _swapRouter;
         universalDApp = _universalDApp;
         permit2 = _permit2;
-        wNativeToken = _nativeToken;
-        isWhitelisted[_nativeToken] = true;
-        tokenList.push(_nativeToken);
-        emit TokenAdded(_nativeToken);
+        wNativeToken = _wNativeToken;
+        isWhitelisted[_wNativeToken] = true;
+        tokenList.push(_wNativeToken);
+        emit TokenAdded(_wNativeToken);
 
         uint256 tokenCount = _tokenList.length;
         address token;
@@ -120,47 +122,13 @@ contract EvmDustTokens is Ownable2Step {
         uint256 deadline,
         bytes calldata signature
     ) external {
-        uint256 swapsAmount = swaps.length;
-
-        if (swapsAmount == 0) revert NoSwaps();
+        if (swaps.length == 0) revert NoSwaps();
 
         // Batch transfer all input tokens using Permit2
-        signatureBatchTransfer(swaps, nonce, deadline, signature);
+        _signatureBatchTransfer(swaps, nonce, deadline, signature);
 
-        // Array to store performed swaps
-        SwapOutput[] memory performedSwaps = new SwapOutput[](swapsAmount);
-        SwapInput memory swap;
-        uint256 totalTokensReceived;
-        // Loop through each ERC-20 token address provided
-        for (uint256 i; i < swapsAmount; ++i) {
-            swap = swaps[i];
-            address token = swap.token;
-            uint256 amount = swap.amount;
-            // Approve the swap router to spend the token
-            token.safeApprove(address(swapRouter), amount);
-
-            // Build Uniswap Swap to convert the token to the wrapped native token
-            ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
-                tokenIn: token,
-                tokenOut: wNativeToken,
-                fee: swapFee,
-                recipient: address(this),
-                deadline: block.timestamp,
-                amountIn: amount,
-                amountOutMinimum: swap.minAmountOut,
-                sqrtPriceLimitX96: 0
-            });
-
-            // Try to perform the swap
-            try swapRouter.exactInputSingle(params) returns (uint256 amountOut) {
-                totalTokensReceived += amountOut;
-                // Store performed swap details
-                performedSwaps[i] =
-                    SwapOutput({tokenIn: token, tokenOut: wNativeToken, amountIn: amount, amountOut: amountOut});
-            } catch {
-                revert SwapFailed(token);
-            }
-        }
+        // Perform the swaps
+        (SwapOutput[] memory performedSwaps, uint256 totalTokensReceived) = _performSwaps(swaps, wNativeToken);
 
         // Unwrap the native token and subtract the protocol fee
         IWTOKEN(wNativeToken).withdraw(totalTokensReceived);
@@ -179,6 +147,37 @@ contract EvmDustTokens is Ownable2Step {
         gateway.depositAndCall{value: totalTokensReceived}(universalDApp, message, revertOptions);
 
         emit SwappedAndDeposited(msg.sender, performedSwaps, totalTokensReceived);
+    }
+
+    /**
+     * Called by users to convert all their ERC20 tokens on the same chain
+     * @param swaps - Swaps to perform
+     * @param outputToken - The address of the output token
+     * @param nonce - Permit2 nonce
+     * @param deadline - Permit2 deadline
+     * @param signature - Permit2 signature
+     */
+    function SwapTokens(
+        SwapInput[] calldata swaps,
+        address outputToken,
+        uint256 nonce,
+        uint256 deadline,
+        bytes calldata signature
+    ) external {
+        if (swaps.length == 0) revert NoSwaps();
+
+        // Batch transfer all input tokens using Permit2
+        _signatureBatchTransfer(swaps, nonce, deadline, signature);
+
+        // Perform the swaps
+        (SwapOutput[] memory performedSwaps, uint256 totalTokensReceived) = _performSwaps(swaps, outputToken);
+
+        // Subtract the protocol fee and send the tokens to the msg.sender
+        uint256 feeAmount = totalTokensReceived * protocolFee / 10000;
+        totalTokensReceived -= feeAmount;
+        outputToken.safeTransfer(msg.sender, totalTokensReceived);
+
+        emit Swapped(msg.sender, performedSwaps, totalTokensReceived);
     }
 
     /**
@@ -215,7 +214,6 @@ contract EvmDustTokens is Ownable2Step {
                 tokenOut: outputToken,
                 fee: swapFee,
                 recipient: receiver,
-                deadline: block.timestamp,
                 amountIn: msg.value,
                 amountOutMinimum: minAmount,
                 sqrtPriceLimitX96: 0
@@ -228,15 +226,20 @@ contract EvmDustTokens is Ownable2Step {
     }
 
     /**
-     * Add token to whitelist
-     * @param token - The address of the ERC20 token
+     * Add tokens to whitelist
+     * @param tokens - The addresses of the ERC20 tokens
      */
-    function addToken(address token) external onlyOwner {
-        if (token == address(0)) revert InvalidAddress();
-        if (isWhitelisted[token]) revert TokenIsWhitelisted(token);
-        isWhitelisted[token] = true;
-        tokenList.push(token);
-        emit TokenAdded(token);
+    function addTokens(address[] calldata tokens) external onlyOwner {
+        uint256 tokenCount = tokens.length;
+        address token;
+        for (uint256 i; i < tokenCount; ++i) {
+            token = tokens[i];
+            if (token == address(0)) revert InvalidAddress();
+            if (isWhitelisted[token]) revert TokenIsWhitelisted(token);
+            isWhitelisted[token] = true;
+            tokenList.push(token);
+            emit TokenAdded(token);
+        }
     }
 
     /**
@@ -267,6 +270,22 @@ contract EvmDustTokens is Ownable2Step {
         (bool s,) = msg.sender.call{value: fees}("");
         if (!s) revert FeeWithdrawalFailed();
         emit FeesWithdrawn(fees);
+    }
+
+    /**
+     * Withdraw token fees
+     * @param tokens - The addresses of the ERC20 tokens
+     */
+    function withdrawTokenFees(address[] calldata tokens) external onlyOwner {
+        uint256 len = tokens.length;
+        uint256 amount;
+        address token;
+        for (uint256 i; i < len; ++i) {
+            token = tokens[i];
+            amount = IERC20(token).balanceOf(address(this));
+            token.safeTransfer(msg.sender, amount);
+            emit TokenFeesWithdrawn(token, amount);
+        }
     }
 
     /**
@@ -344,21 +363,21 @@ contract EvmDustTokens is Ownable2Step {
      * @param deadline - Permit2 deadline
      * @param signature - Permit2 signature
      */
-    function signatureBatchTransfer(
+    function _signatureBatchTransfer(
         SwapInput[] calldata swaps,
         uint256 nonce,
         uint256 deadline,
         bytes calldata signature
     ) internal {
-        uint256 len = swaps.length;
+        uint256 swapsAmount = swaps.length;
 
         // Create arrays for TokenPermissions and SignatureTransferDetails
-        ISignatureTransfer.TokenPermissions[] memory permitted = new ISignatureTransfer.TokenPermissions[](len);
+        ISignatureTransfer.TokenPermissions[] memory permitted = new ISignatureTransfer.TokenPermissions[](swapsAmount);
         ISignatureTransfer.SignatureTransferDetails[] memory transferDetails =
-            new ISignatureTransfer.SignatureTransferDetails[](len);
+            new ISignatureTransfer.SignatureTransferDetails[](swapsAmount);
         address token;
         uint256 amount;
-        for (uint256 i; i < len; ++i) {
+        for (uint256 i; i < swapsAmount; ++i) {
             SwapInput calldata swap = swaps[i];
             token = swap.token;
             amount = swap.amount;
@@ -379,6 +398,51 @@ contract EvmDustTokens is Ownable2Step {
 
         // Execute the batched permit transfer
         permit2.permitTransferFrom(permit, transferDetails, msg.sender, signature);
+    }
+
+    /**
+     * Perform the swaps via Uniswap
+     * @param swaps - Swaps to perform
+     * @param outputToken - The address of the output token
+     * @return performedSwaps - The performed swaps
+     * @return totalTokensReceived - The total amount of the output token received
+     */
+    function _performSwaps(SwapInput[] calldata swaps, address outputToken)
+        internal
+        returns (SwapOutput[] memory performedSwaps, uint256 totalTokensReceived)
+    {
+        uint256 swapsAmount = swaps.length;
+        performedSwaps = new SwapOutput[](swapsAmount);
+        totalTokensReceived;
+        // Loop through each ERC-20 token address provided
+        for (uint256 i; i < swapsAmount; ++i) {
+            SwapInput calldata swap = swaps[i];
+            address token = swap.token;
+            uint256 amount = swap.amount;
+            // Approve the swap router to spend the token
+            token.safeApprove(address(swapRouter), amount);
+
+            // Build Uniswap Swap to convert the token to the output token
+            ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
+                tokenIn: token,
+                tokenOut: outputToken,
+                fee: swapFee,
+                recipient: address(this),
+                amountIn: amount,
+                amountOutMinimum: swap.minAmountOut,
+                sqrtPriceLimitX96: 0
+            });
+
+            // Try to perform the swap
+            try swapRouter.exactInputSingle(params) returns (uint256 amountOut) {
+                totalTokensReceived += amountOut;
+                // Store performed swap details
+                performedSwaps[i] =
+                    SwapOutput({tokenIn: token, tokenOut: outputToken, amountIn: amount, amountOut: amountOut});
+            } catch (bytes memory revertData) {
+                revert SwapFailed(token, revertData);
+            }
+        }
     }
 
     receive() external payable {}

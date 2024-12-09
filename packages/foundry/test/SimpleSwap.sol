@@ -81,7 +81,6 @@ contract SimpleSwap {
                     tokenOut: token,
                     fee: 3000,
                     recipient: msg.sender, // Swap to this contract
-                    deadline: block.timestamp,
                     amountIn: amountIn,
                     amountOutMinimum: 1, // Adjust for slippage tolerance
                     sqrtPriceLimitX96: 0
