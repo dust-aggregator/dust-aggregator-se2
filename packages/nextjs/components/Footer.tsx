@@ -17,11 +17,11 @@ export const Footer = () => {
 
       <div className="w-full flex justify-center">
         <div className="w-[80%] flex justify-between">
-          
+
           <div className="w-[65%] flex flex-col gap-3">
             <Image src={dfLogo} alt="logo" className="w-[100px]" />
             <span className="font-montserrat opacity-50">
-              Dust.fun is a Web3 application designed to help users streamline their wallet management by consolidating “dust” tokens—small, fragmented balances often left unused across multiple chains. By connecting wallets.Dust.fun is a Web3 application designed to help users streamline their wallet management by consolidating “dust” tokens—small, fragmented balances often left unused across multiple chains. By connecting wallets.
+              Dust.fun is a Web3 application that simplifies wallet management by consolidating “dust” tokens—small, unused balances across multiple chains—into a single, valuable asset. Powered by ZetaChain’s cross-chain technology, Dust.fun makes cleaning your wallet effortless and efficient.
             </span>
           </div>
 
