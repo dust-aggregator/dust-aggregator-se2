@@ -1,42 +1,35 @@
-import { use, useEffect, useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
+import ConfirmButton from "./ConfirmButton";
+import InputToken from "./InputToken";
+import { ethers } from "ethers";
+import { parseUnits } from "viem";
+import { usePublicClient } from "wagmi";
+// import { useEthersProvider } from "~~/hooks/dust";
+import { truncateToDecimals } from "~~/lib/utils";
+import { getUniswapV3EstimatedAmountOut } from "~~/lib/zetachainUtils";
 import { useGlobalState } from "~~/services/store/store";
+import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
-const mockSelectedTokens = [
-  {
-    address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-    ticker: "DAI",
-    name: "Dai",
-    amount: "8.4",
-    decimals: 18,
-  },
-  {
-    address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-    ticker: "UNI",
-    name: "Uni",
-    amount: "3",
-    decimals: 18,
-  },
-  {
-    address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-    ticker: "LINK",
-    name: "Link",
-    amount: "14.1",
-    decimals: 18,
-  },
-];
-
-const amountOut = 21.2;
+const quoterAddressBaseSep = "0xC5290058841028F1614F3A6F0F5816cAd0df5E27";
+const wethBaseSep = "0x4200000000000000000000000000000000000006";
 
 const SwapPreview = () => {
-  const { outputNetwork, outputToken } = useGlobalState();
+  const { outputNetwork, outputToken, inputTokens } = useGlobalState();
+  const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
+  // const provider = useEthersProvider();
+
+  const client = usePublicClient({ config: wagmiConfig });
+
+  // useEffect(() => {
+  //   calculateOutputTokenAmount();
+  // },   const handleConfirm = async () => {
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (readyForPreview) {
         setQuoteTime(quoteTime => {
           if (quoteTime === 1) {
-            alert("Fetching new quote");
             return 30;
           }
           return quoteTime - 1;
@@ -45,23 +38,25 @@ const SwapPreview = () => {
     }, 1000);
     return () => clearInterval(interval);
   });
+
   const calculateOutputTokenAmount = async () => {
-    if (!selectedOutputToken || !selectedNetwork || !client) {
+    if (!outputToken || !outputNetwork || !inputTokens.length || !client || !provider) {
       return;
     }
     setAmountOut(null);
 
     const slippageBPS = 50;
     try {
-      let transportTokenAmount = ethers.BigNumber.from(0);
+      let transportTokenAmount = BigInt(0);
 
-      for (const token of selectedTokens) {
-        const parsedAmount = ethers.utils.parseUnits(token.amount, token.decimals);
+      for (const token of inputTokens) {
+        const parsedAmount = parseUnits(token.amount, token.decimals);
         const swapTokenAmount = await getUniswapV3EstimatedAmountOut(
-          client,
-          readLocalnetAddresses("ethereum", "uniswapQuoterV3"),
+          // wagmiConfig,
+          provider,
+          quoterAddressBaseSep,
           token.address,
-          readLocalnetAddresses("ethereum", "weth"),
+          wethBaseSep,
           parsedAmount,
           slippageBPS,
         );
@@ -71,24 +66,14 @@ const SwapPreview = () => {
 
       const outputTokenAmount = await getUniswapV3EstimatedAmountOut(
         client,
-        readLocalnetAddresses("ethereum", "uniswapQuoterV3"),
-        readLocalnetAddresses("ethereum", "weth"),
-        selectedOutputToken.address,
+        quoterAddressBaseSep,
+        wethBaseSep,
+        outputToken.address,
         transportTokenAmount,
         slippageBPS,
       );
 
-      // const zetachainExchangeRate = await getUniswapV2AmountOut(
-      //   "0x2ca7d64A7EFE2D62A725E2B35Cf7230D6677FfEe",
-      //   "0x65a45c57636f9BcCeD4fe193A602008578BcA90b",
-      //   transportTokenAmount
-      // );
-
-      // console.log("ZETA EXCHANGE RATE:", zetachainExchangeRate);
-
-      // console.log("ZETA EXCHANGE RATE:", zetachainExchangeRate);
-
-      const parsedOutputTokenAmount = ethers.utils.formatUnits(outputTokenAmount, selectedOutputToken.decimals);
+      const parsedOutputTokenAmount = ethers.utils.formatUnits(outputTokenAmount, outputToken.decimals);
 
       // Truncate to 4 decimal places
       const outputAmountWithFourDecimals = truncateToDecimals(parsedOutputTokenAmount, 4);
@@ -98,6 +83,7 @@ const SwapPreview = () => {
       console.error("Error calculating output token amount:", error);
     }
   };
+
   const readyForPreview = !!outputNetwork && !!outputToken;
 
   return (
@@ -116,31 +102,22 @@ const SwapPreview = () => {
           <div className="text-[#9D9D9D]">
             <span>Optimism</span>
             <ul>
-              {mockSelectedTokens.map(token => (
-                <li key={token.ticker} className="flex justify-between">
-                  <div>
-                    <span className="px-2">•</span>
-                    <span>
-                      {token.name} ({token.ticker})
-                    </span>
-                  </div>
-                  <span className="text-[#2DC7FF] flex">
-                    {token.amount} {token.ticker}
-                    <Image className="ml-1" src="/assets/particles.svg" alt="dust_particles" width={15} height={15} />
-                  </span>
+              {inputTokens.map(token => (
+                <li key={token.symbol} className="flex justify-between">
+                  <InputToken token={token} />
                 </li>
               ))}
             </ul>
           </div>
           <h3 className="font-bold text-xl mt-2">Output Token</h3>
           <span className="text-[#9D9D9D]">{outputNetwork?.label}</span>
-          <div key={outputToken?.label} className="flex justify-between mb-24">
+          <div key={outputToken?.name} className="flex justify-between mb-24">
             <div>
               <span className="px-2">•</span>
-              <span>{outputToken?.label}</span>
+              <span>{outputToken?.name}</span>
             </div>
             <span className="text-[#F0BF26] flex font-bold">
-              {amountOut} {outputToken?.label}
+              {amountOut} {outputToken?.name}
             </span>
           </div>
           <div className="text-[#9D9D9D]">
@@ -158,9 +135,7 @@ const SwapPreview = () => {
             <div className="text=[#FFFFF]"></div>
           </div>
           <form method="dialog" className="w-full flex justify-center mt-6">
-            <button className="flex-1 px-6 hover:brightness-50 bg-[url('/button2.png')] bg-no-repeat bg-center bg-cover h-10">
-              Approve
-            </button>
+            <ConfirmButton />
             <button
               style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
               className="flex-1 text-[#FFFFFF] my-0 text-sm bg-center btn  min-h-0 h-10 rounded-lg"

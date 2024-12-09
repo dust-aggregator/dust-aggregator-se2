@@ -29,7 +29,7 @@ const Select = ({ className, title, options, selectedOption, onChange }: Props) 
           !!selectedOption ? "text-[#E4E4E4]" : "text-[#9D9D9D]"
         }`}
       >
-        {selectedOption?.label || title}
+        {selectedOption?.name || title}
       </div>
       <ul tabIndex={0} className="w-full dropdown-content menu rounded-box z-[1] p-2 shadow-inner-xl mt-1 bg-[#3C3731]">
         {options.map(({ value, label, decorator }) => (

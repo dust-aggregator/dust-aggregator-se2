@@ -6,20 +6,24 @@ import polygon from "~~/public/assets/polygon.svg"
 
 const frequentlyAskedQuestions = [
   {
-    question: "GLorem ipsum dolor sit amet, consectetur adipiscing elit ?",
-    answer: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam molestie ultricies malesuada. Cras euismod nunc id risus interdum mollis. Vivamus eleifend libero id orci sollicitudin posuere. Mauris placerat quam risus, a dapibus ante molestie quis. Sed et eleifend tortor, quis semper arcu. Sed eu orci rhoncus, venenatis mi eget, lacinia sem. Sed purus magna, malesuada eget justo eget, tempor auctor purus. Nullam dignissim, enim quis fringilla rutrum, diam urna faucibus est, sit amet faucibus diam massa a nunc. Suspendisse potenti. Nulla facilisi. Aenean auctor mi diam, venenatis gravida turpis consequat eget. Duis sagittis sapien eu quam blandit, nec malesuada magna feugiat."
+    question: "What is Dust.fun?",
+    answer: "Dust.fun is a wallet maintenance tool that allows you to clean your wallet of low-value tokens (“dust”) across various chains. It consolidates these tiny, bothersome token balances into a single token of your choice, all in one seamless transaction."
   },
   {
-    question: "GLorem ipsum dolor sit amet, consectetur adipiscing elit ?",
-    answer: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam molestie ultricies malesuada. Cras euismod nunc id risus interdum mollis. Vivamus eleifend libero id orci sollicitudin posuere. Mauris placerat quam risus, a dapibus ante molestie quis. Sed et eleifend tortor, quis semper arcu. Sed eu orci rhoncus, venenatis mi eget, lacinia sem. Sed purus magna, malesuada eget justo eget, tempor auctor purus. Nullam dignissim, enim quis fringilla rutrum, diam urna faucibus est, sit amet faucibus diam massa a nunc. Suspendisse potenti. Nulla facilisi. Aenean auctor mi diam, venenatis gravida turpis consequat eget. Duis sagittis sapien eu quam blandit, nec malesuada magna feugiat."
+    question: "How does Dust.fun define “dust”?",
+    answer: "“Dust” refers to tokens in your wallet with balances below a specific threshold, which you can define during the process. For example, you might set a limit of $5, and any tokens that have a combined value less than $5 will be categorized as dust and be available for you to swap."
   },
   {
-    question: "GLorem ipsum dolor sit amet, consectetur adipiscing elit ?",
-    answer: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam molestie ultricies malesuada. Cras euismod nunc id risus interdum mollis. Vivamus eleifend libero id orci sollicitudin posuere. Mauris placerat quam risus, a dapibus ante molestie quis. Sed et eleifend tortor, quis semper arcu. Sed eu orci rhoncus, venenatis mi eget, lacinia sem. Sed purus magna, malesuada eget justo eget, tempor auctor purus. Nullam dignissim, enim quis fringilla rutrum, diam urna faucibus est, sit amet faucibus diam massa a nunc. Suspendisse potenti. Nulla facilisi. Aenean auctor mi diam, venenatis gravida turpis consequat eget. Duis sagittis sapien eu quam blandit, nec malesuada magna feugiat."
+    question: "How does it work?",
+    answer: "Dust.fun works by leveraging ZetaChain’s universal cross-chain contracts, enabling seamless aggregation and swapping of low-value tokens (dust) across multiple chains in a single transaction. This is powered by ZetaChain’s depositAndCall and withdrawAndCall functionalities, which allow assets and contract interactions to flow effortlessly between connected blockchains."
   },
   {
-    question: "GLorem ipsum dolor sit amet, consectetur adipiscing elit ?",
-    answer: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam molestie ultricies malesuada. Cras euismod nunc id risus interdum mollis. Vivamus eleifend libero id orci sollicitudin posuere. Mauris placerat quam risus, a dapibus ante molestie quis. Sed et eleifend tortor, quis semper arcu. Sed eu orci rhoncus, venenatis mi eget, lacinia sem. Sed purus magna, malesuada eget justo eget, tempor auctor purus. Nullam dignissim, enim quis fringilla rutrum, diam urna faucibus est, sit amet faucibus diam massa a nunc. Suspendisse potenti. Nulla facilisi. Aenean auctor mi diam, venenatis gravida turpis consequat eget. Duis sagittis sapien eu quam blandit, nec malesuada magna feugiat."
+    question: "Is this safe?",
+    answer: "We are audited by the hacken team, you can read the report here."
+  },
+  {
+    question: "Are there any fees associated with using Dust.fun?",
+    answer: "Yes, Dust.fun charges a small service fee for aggregating and swapping dust tokens in addition to the gas fee you have to pay. The exact fee will depend on the chain and the transaction but will always be transparently displayed before you approve the transaction."
   },
 ]
 
@@ -86,7 +90,7 @@ const FAQ = () => {
                 w-[96%] flex z-0`
             }>
               {openIndexes[index] &&
-                <div className="px-6 pb-[2%] pt-[4%] bg-gradient-radial border rounded-lg -mt-[3%]">
+                <div className="w-full px-6 pb-[2%] pt-[4%] bg-gradient-radial border rounded-lg -mt-[3%]">
                   <span className="text-[#9D9D9D] font-montserrat text-md">
                     {faqElem.answer}
                   </span>

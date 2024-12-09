@@ -63,10 +63,10 @@ const InputBox = () => {
 
   // Update disabled property function
   const updateSpecificOption = (sectionKey: string, optionValue: string, selected: boolean) => {
-    console.log("Updating...");
-    console.log(sectionKey);
-    console.log(optionValue);
-    console.log(selected);
+    // console.log("Updating...");
+    // console.log(sectionKey);
+    // console.log(optionValue);
+    // console.log(selected);
 
     setNetworkOptions2(prevOptions =>
       prevOptions.map(section =>
@@ -142,7 +142,7 @@ const InputBox = () => {
     for (let i = 0; i < networks.length; i++) {
       // const networks = { chainId: 1};
 
-      console.log(walletConnectBalances);
+      // console.log(walletConnectBalances);
 
       // const filteredTokens: any[] = [];
 
@@ -155,13 +155,13 @@ const InputBox = () => {
         token => token?.chainId?.replace("eip155:", "") === networks[i].chainId.toString(),
       );
 
-      console.log(filteredTokens);
+      // console.log(filteredTokens);
 
       if (filteredTokens.length > 0) {
         const obj: any = {};
         obj.section = networks[i].key;
         obj.options = filteredTokens.map((e: any, index: number) => {
-          console.log(e.quantity.numeric.toString());
+          // console.log(e.quantity.numeric.toString());
           return {
             value: "inputToken-" + index,
             label: e.name,
@@ -173,7 +173,7 @@ const InputBox = () => {
           };
         });
 
-        console.log(obj);
+        // console.log(obj);
         networkOptions2.push(obj);
       }
     }
@@ -231,7 +231,7 @@ const InputBox = () => {
   }, [walletConnectBalances.length, dustThresholdValue]);
 
   let totalDustInUsd = 0;
-  console.log(networkOptions2);
+  // console.log(networkOptions2);
   for (let i = 0; i < networkOptions2.length; i++) {
     for (let j = 0; j < networkOptions2[i].options.length; j++) {
       if (networkOptions2[i].options[j].selected) {

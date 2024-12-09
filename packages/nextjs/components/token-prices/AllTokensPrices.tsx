@@ -36,7 +36,7 @@ export const AllTokensPrices = () => {
 
   const [tokens, setTokens] = useState<any[]>([]);
 
-  console.log(tokens);
+  // console.log(tokens);
 
   const tokenComponents2 = tokens.map((token: any, index: number) => {
     return (

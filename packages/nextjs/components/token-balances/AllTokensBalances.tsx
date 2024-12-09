@@ -15,7 +15,7 @@ export const AllTokensBalances = ({ address }: any) => {
     networks.map(({ alchemyEnum }) => alchemyEnum),
   );
 
-  console.log(allObjects);
+  // console.log(allObjects);
 
   const allObjectsFiltered = allObjects.filter((element: any) => {
     return element.tokenBalancesWithMetadata.length > 0;
@@ -24,7 +24,7 @@ export const AllTokensBalances = ({ address }: any) => {
   const comps = allObjectsFiltered.map((networkWithTokens: any, index: number) => {
     const networkName = networks.find(network => network.alchemyEnum === networkWithTokens.name);
 
-    console.log(networkName);
+    // console.log(networkName);
     return (
       <div key={index} className="flex flex-col">
         <p className="p-1 m-0 text-xl bg-base-300">{networkName?.key || ""}</p>
