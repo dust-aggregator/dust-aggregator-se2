@@ -3,7 +3,10 @@ import { ScaffoldEthAppWithProviders } from "~~/components/ScaffoldEthAppWithPro
 import "~~/styles/globals.css";
 import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
 
-export const metadata = getMetadata({ title: "Scaffold-ETH 2 App", description: "Built with 🏗 Scaffold-ETH 2" });
+export const metadata = getMetadata({
+  title: "Dust.fun",
+  description: "CONVERT ALL DUST TOKENS FROM YOUR WALLET IN ONE TRANSACTION",
+});
 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   return (
