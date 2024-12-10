@@ -10,6 +10,7 @@ import { useAccount } from "wagmi";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
 import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
 import { networks } from "~~/lib/constants";
+import { useGlobalState } from "~~/services/store/store";
 
 const InputBox = () => {
   const [dustThresholdValue, setDustThresholdValue] = useState<number>(5);
@@ -61,24 +62,24 @@ const InputBox = () => {
 
   const [networkOptions2, setNetworkOptions2] = useState<any[]>([]);
 
+  const setOutputTokensByNetwork = useGlobalState(({ setOutputTokensByNetwork }) => setOutputTokensByNetwork);
+
   // Update disabled property function
   const updateSpecificOption = (sectionKey: string, optionValue: string, selected: boolean, amountToDust: number) => {
-    console.log(amountToDust);
-
-    console.log(selected);
-
-    setNetworkOptions2(prevOptions =>
-      prevOptions.map(section =>
-        section.section === sectionKey
-          ? {
-              ...section,
-              options: section.options.map((option: any) =>
-                option.value === optionValue ? { ...option, selected, amountToDust } : option,
-              ),
-            }
-          : section,
-      ),
+    const updatedOptions: any[] = networkOptions2.map((section: any) =>
+      section.section === sectionKey
+        ? {
+            ...section,
+            options: section.options.map((option: any) =>
+              option.value === optionValue ? { ...option, selected, amountToDust } : option,
+            ),
+          }
+        : section,
     );
+
+    setOutputTokensByNetwork(updatedOptions);
+
+    setNetworkOptions2(updatedOptions);
   };
 
   const filteredNetworkOptions = networkOptions2
