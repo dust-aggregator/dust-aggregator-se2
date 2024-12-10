@@ -56,7 +56,7 @@ contract EvmDustTokens is Ownable2Step {
     event TokenRemoved(address indexed token);
     event Swapped(address indexed executor, SwapOutput[] swaps, uint256 totalTokensReceived);
     event SwappedAndDeposited(address indexed executor, SwapOutput[] swaps, uint256 totalTokensReceived);
-    event Withdrawn(address indexed receiver, address outputToken, uint256 totalTokensReceived);
+    event Withdrawn(address indexed recipient, address outputToken, uint256 totalTokensReceived);
     event Reverted(address indexed recipient, address asset, uint256 amount);
 
     error FeeWithdrawalFailed();
@@ -172,10 +172,20 @@ contract EvmDustTokens is Ownable2Step {
         // Perform the swaps
         (SwapOutput[] memory performedSwaps, uint256 totalTokensReceived) = _performSwaps(swaps, outputToken);
 
-        // Subtract the protocol fee and send the tokens to the msg.sender
         uint256 feeAmount = totalTokensReceived * protocolFee / 10000;
-        totalTokensReceived -= feeAmount;
-        outputToken.safeTransfer(msg.sender, totalTokensReceived);
+        if (outputToken == address(0)) {
+            // Unwrap the native token, subtract the protocol fee, and send the tokens to the msg.sender
+            IWTOKEN(wNativeToken).withdraw(totalTokensReceived);
+            totalTokensReceived -= feeAmount;
+            collectedFees = collectedFees + feeAmount;
+
+            (bool s,) = msg.sender.call{value: totalTokensReceived}("");
+            if (!s) revert TransferFailed();
+        } else {
+            // Subtract the protocol fee and send the tokens to the msg.sender
+            totalTokensReceived -= feeAmount;
+            outputToken.safeTransfer(msg.sender, totalTokensReceived);
+        }
 
         emit Swapped(msg.sender, performedSwaps, totalTokensReceived);
     }
@@ -183,27 +193,27 @@ contract EvmDustTokens is Ownable2Step {
     /**
      * Called by the Universal DApp to withdraw tokens on the destination chain
      * @param outputToken - The address of the output token
-     * @param receiver - The address of the receiver
+     * @param recipient - The address of the recipient
      * @param minAmount - The minimum amount of tokens to receive from the swap
      * @dev To receive native tokens, set outputToken to address(0)
      */
-    function ReceiveTokens(address outputToken, address receiver, uint256 minAmount) external payable {
+    function ReceiveTokens(address outputToken, address recipient, uint256 minAmount) external payable {
         if (msg.value == 0) revert InvalidMsgValue();
         // Check if the output token is native or whitelisted
         if (outputToken != address(0) && !isWhitelisted[outputToken]) revert TokenIsNotWhitelisted(outputToken);
 
-        // If outputToken is 0x, send msg.value to the receiver
+        // If outputToken is 0x, send msg.value to the recipient
         if (outputToken == address(0)) {
-            (bool s,) = receiver.call{value: msg.value}("");
+            (bool s,) = recipient.call{value: msg.value}("");
             if (!s) revert TransferFailed();
 
-            emit Withdrawn(receiver, outputToken, msg.value);
+            emit Withdrawn(recipient, outputToken, msg.value);
         } else if (outputToken == wNativeToken) {
             // Wrap native token to the wrapped native token (i.e: WETH, WPOL, etc)
             IWTOKEN(wNativeToken).deposit{value: msg.value}();
-            wNativeToken.safeTransfer(receiver, msg.value);
+            wNativeToken.safeTransfer(recipient, msg.value);
 
-            emit Withdrawn(receiver, wNativeToken, msg.value);
+            emit Withdrawn(recipient, wNativeToken, msg.value);
         } else {
             // Swap wrapped native token to the output token
             IWTOKEN(wNativeToken).deposit{value: msg.value}();
@@ -213,7 +223,7 @@ contract EvmDustTokens is Ownable2Step {
                 tokenIn: wNativeToken,
                 tokenOut: outputToken,
                 fee: swapFee,
-                recipient: receiver,
+                recipient: recipient,
                 amountIn: msg.value,
                 amountOutMinimum: minAmount,
                 sqrtPriceLimitX96: 0
@@ -221,7 +231,7 @@ contract EvmDustTokens is Ownable2Step {
 
             uint256 amountOut = swapRouter.exactInputSingle(params);
 
-            emit Withdrawn(receiver, outputToken, amountOut);
+            emit Withdrawn(recipient, outputToken, amountOut);
         }
     }
 
@@ -411,36 +421,76 @@ contract EvmDustTokens is Ownable2Step {
         internal
         returns (SwapOutput[] memory performedSwaps, uint256 totalTokensReceived)
     {
+        if (outputToken != address(0) && !isWhitelisted[outputToken]) revert TokenIsNotWhitelisted(outputToken);
+
         uint256 swapsAmount = swaps.length;
         performedSwaps = new SwapOutput[](swapsAmount);
         totalTokensReceived;
-        // Loop through each ERC-20 token address provided
-        for (uint256 i; i < swapsAmount; ++i) {
-            SwapInput calldata swap = swaps[i];
-            address token = swap.token;
-            uint256 amount = swap.amount;
-            // Approve the swap router to spend the token
-            token.safeApprove(address(swapRouter), amount);
+        if (outputToken == wNativeToken || outputToken == address(0)) {
+            // Loop through each ERC-20 token address provided
+            for (uint256 i; i < swapsAmount; ++i) {
+                SwapInput calldata swap = swaps[i];
+                address token = swap.token;
+                if (token == wNativeToken) revert InvalidToken(wNativeToken);
+                uint256 amount = swap.amount;
+                // Approve the swap router to spend the token
+                token.safeApprove(address(swapRouter), amount);
 
-            // Build Uniswap Swap to convert the token to the output token
-            ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
-                tokenIn: token,
-                tokenOut: outputToken,
-                fee: swapFee,
-                recipient: address(this),
-                amountIn: amount,
-                amountOutMinimum: swap.minAmountOut,
-                sqrtPriceLimitX96: 0
-            });
+                // Build Uniswap Swap to convert the token to the wrapped native token
+                ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
+                    tokenIn: token,
+                    tokenOut: wNativeToken,
+                    fee: swapFee,
+                    recipient: address(this),
+                    amountIn: amount,
+                    amountOutMinimum: swap.minAmountOut,
+                    sqrtPriceLimitX96: 0
+                });
 
-            // Try to perform the swap
-            try swapRouter.exactInputSingle(params) returns (uint256 amountOut) {
-                totalTokensReceived += amountOut;
-                // Store performed swap details
-                performedSwaps[i] =
-                    SwapOutput({tokenIn: token, tokenOut: outputToken, amountIn: amount, amountOut: amountOut});
-            } catch (bytes memory revertData) {
-                revert SwapFailed(token, revertData);
+                // Try to perform the swap
+                try swapRouter.exactInputSingle(params) returns (uint256 amountOut) {
+                    totalTokensReceived += amountOut;
+                    // Store performed swap details
+                    performedSwaps[i] =
+                        SwapOutput({tokenIn: token, tokenOut: outputToken, amountIn: amount, amountOut: amountOut});
+                } catch (bytes memory revertData) {
+                    revert SwapFailed(token, revertData);
+                }
+            }
+        } else {
+            bytes memory path;
+            for (uint256 i; i < swapsAmount; ++i) {
+                SwapInput calldata swap = swaps[i];
+                address token = swap.token;
+                if (token == wNativeToken) revert InvalidToken(wNativeToken);
+                uint256 amount = swap.amount;
+                // Approve the swap router to spend the token
+                token.safeApprove(address(swapRouter), amount);
+
+                // Build multihop Uniswap Swap to convert the token to the output token
+                path = bytes.concat(
+                    bytes20(token),
+                    bytes3(swapFee),
+                    bytes20(address(wNativeToken)),
+                    bytes3(swapFee),
+                    bytes20(outputToken)
+                );
+                ISwapRouter.ExactInputParams memory params = ISwapRouter.ExactInputParams({
+                    path: path,
+                    recipient: address(this),
+                    amountIn: amount,
+                    amountOutMinimum: swap.minAmountOut
+                });
+
+                // Try to perform the swap
+                try swapRouter.exactInput(params) returns (uint256 amountOut) {
+                    totalTokensReceived += amountOut;
+                    // Store performed swap details
+                    performedSwaps[i] =
+                        SwapOutput({tokenIn: token, tokenOut: outputToken, amountIn: amount, amountOut: amountOut});
+                } catch (bytes memory revertData) {
+                    revert SwapFailed(token, revertData);
+                }
             }
         }
     }
