@@ -22,7 +22,6 @@ export const mockInputTokens: SelectedToken[] = [
     balance: 3000000,
     address: "0x4200000000000000000000000000000000000006",
     amount: "0.001",
-    isMax: false,
     hasPermit2Allowance: false,
   },
   // {

@@ -10,7 +10,6 @@ export interface Token {
 
 export type SelectedToken = Token & {
   amount: string;
-  isMax: boolean;
   hasPermit2Allowance: boolean;
 };
 
