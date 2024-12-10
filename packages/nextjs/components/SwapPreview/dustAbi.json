@@ -5,7 +5,7 @@
       { "name": "_gateway", "type": "address", "internalType": "contract IGatewayEVM" },
       { "name": "_swapRouter", "type": "address", "internalType": "contract ISwapRouter" },
       { "name": "_universalDApp", "type": "address", "internalType": "address" },
-      { "name": "_nativeToken", "type": "address", "internalType": "address payable" },
+      { "name": "_wNativeToken", "type": "address", "internalType": "address payable" },
       { "name": "_initialOwner", "type": "address", "internalType": "address" },
       { "name": "_permit2", "type": "address", "internalType": "contract IPermit2" },
       { "name": "_tokenList", "type": "address[]", "internalType": "address[]" }
@@ -46,11 +46,33 @@
     "outputs": [],
     "stateMutability": "nonpayable"
   },
+  {
+    "type": "function",
+    "name": "SwapTokens",
+    "inputs": [
+      {
+        "name": "swaps",
+        "type": "tuple[]",
+        "internalType": "struct EvmDustTokens.SwapInput[]",
+        "components": [
+          { "name": "token", "type": "address", "internalType": "address" },
+          { "name": "amount", "type": "uint256", "internalType": "uint256" },
+          { "name": "minAmountOut", "type": "uint256", "internalType": "uint256" }
+        ]
+      },
+      { "name": "outputToken", "type": "address", "internalType": "address" },
+      { "name": "nonce", "type": "uint256", "internalType": "uint256" },
+      { "name": "deadline", "type": "uint256", "internalType": "uint256" },
+      { "name": "signature", "type": "bytes", "internalType": "bytes" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
   { "type": "function", "name": "acceptOwnership", "inputs": [], "outputs": [], "stateMutability": "nonpayable" },
   {
     "type": "function",
-    "name": "addToken",
-    "inputs": [{ "name": "token", "type": "address", "internalType": "address" }],
+    "name": "addTokens",
+    "inputs": [{ "name": "tokens", "type": "address[]", "internalType": "address[]" }],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -190,6 +212,13 @@
   },
   { "type": "function", "name": "withdrawFees", "inputs": [], "outputs": [], "stateMutability": "nonpayable" },
   {
+    "type": "function",
+    "name": "withdrawTokenFees",
+    "inputs": [{ "name": "tokens", "type": "address[]", "internalType": "address[]" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
     "type": "event",
     "name": "FeesWithdrawn",
     "inputs": [{ "name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256" }],
@@ -225,6 +254,27 @@
   },
   {
     "type": "event",
+    "name": "Swapped",
+    "inputs": [
+      { "name": "executor", "type": "address", "indexed": true, "internalType": "address" },
+      {
+        "name": "swaps",
+        "type": "tuple[]",
+        "indexed": false,
+        "internalType": "struct EvmDustTokens.SwapOutput[]",
+        "components": [
+          { "name": "tokenIn", "type": "address", "internalType": "address" },
+          { "name": "tokenOut", "type": "address", "internalType": "address" },
+          { "name": "amountIn", "type": "uint256", "internalType": "uint256" },
+          { "name": "amountOut", "type": "uint256", "internalType": "uint256" }
+        ]
+      },
+      { "name": "totalTokensReceived", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "SwappedAndDeposited",
     "inputs": [
       { "name": "executor", "type": "address", "indexed": true, "internalType": "address" },
@@ -248,6 +298,15 @@
     "type": "event",
     "name": "TokenAdded",
     "inputs": [{ "name": "token", "type": "address", "indexed": true, "internalType": "address" }],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TokenFeesWithdrawn",
+    "inputs": [
+      { "name": "token", "type": "address", "indexed": false, "internalType": "address" },
+      { "name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
     "anonymous": false
   },
   {
@@ -299,7 +358,10 @@
   {
     "type": "error",
     "name": "SwapFailed",
-    "inputs": [{ "name": "token", "type": "address", "internalType": "address" }]
+    "inputs": [
+      { "name": "token", "type": "address", "internalType": "address" },
+      { "name": "revertData", "type": "bytes", "internalType": "bytes" }
+    ]
   },
   {
     "type": "error",

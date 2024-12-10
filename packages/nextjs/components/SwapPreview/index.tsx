@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import ConfirmButton from "./ConfirmButton";
 import InputToken from "./InputToken";
+import { keccak256, toUtf8Bytes } from "ethers";
 import { ethers } from "ethers";
 import { parseUnits } from "viem";
 import { usePublicClient } from "wagmi";
@@ -13,11 +14,27 @@ import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 const quoterAddressBaseSep = "0xC5290058841028F1614F3A6F0F5816cAd0df5E27";
 const wethBaseSep = "0x4200000000000000000000000000000000000006";
 
+const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
+  if (ref.current) {
+    if (ref.current.open) {
+      ref.current.close();
+    } else {
+      ref.current.showModal();
+    }
+  }
+};
+
 const SwapPreview = () => {
   const { outputNetwork, outputToken, inputTokens } = useGlobalState();
   const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
-  // const provider = useEthersProvider();
+  const previewModalRef = useRef<HTMLDialogElement>(null);
+
+  const errorSignature = "SwapFailed(address,bytes)";
+  const errorHash = keccak256(toUtf8Bytes(errorSignature));
+  const errorSelector = errorHash.substring(0, 10); // First 4 bytes as selector
+  console.log(`Error hash: ${errorHash}`);
+  console.log(`Selector: ${errorSelector}`);
 
   const client = usePublicClient({ config: wagmiConfig });
 
@@ -86,17 +103,24 @@ const SwapPreview = () => {
 
   const readyForPreview = !!outputNetwork && !!outputToken;
 
+  const togglePreviewModal = getToggleModal(previewModalRef);
+  const closePreviewModal = () => {
+    if (previewModalRef.current) {
+      previewModalRef.current.close();
+    }
+  };
+
   return (
     <div>
       <button
         disabled={!readyForPreview}
         style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
         className="text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4"
-        onClick={() => document.getElementById("preview_modal").showModal()}
+        onClick={togglePreviewModal}
       >
         Preview Swap
       </button>
-      <dialog id="preview_modal" className="modal">
+      <dialog ref={previewModalRef} className="modal">
         <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded">
           <h3 className="font-bold text-xl">Input Tokens</h3>
           <div className="text-[#9D9D9D]">
@@ -135,11 +159,11 @@ const SwapPreview = () => {
             <div className="text=[#FFFFF]"></div>
           </div>
           <form method="dialog" className="w-full flex justify-center mt-6">
-            <ConfirmButton />
+            <ConfirmButton togglePreviewModal={togglePreviewModal} />
             <button
               style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
               className="flex-1 text-[#FFFFFF] my-0 text-sm bg-center btn  min-h-0 h-10 rounded-lg"
-              onClick={() => document.getElementById("my_modal_1").showModal()}
+              onClick={togglePreviewModal}
             >
               Cancel
             </button>

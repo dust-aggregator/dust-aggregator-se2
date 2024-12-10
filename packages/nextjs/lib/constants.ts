@@ -9,7 +9,7 @@ export const networks = [
   { key: "Base", alchemyEnum: AlchemyNetwork.BASE_MAINNET, chainId: 8453 },
 ];
 
-export const PERMIT2_BASE_SEPOLIA = "0x3F07E723Cc4CCD8F6B5D7fB84893E2d20F52DB7C";
+export const PERMIT2_BASE_SEPOLIA = "0x000000000022D473030F116dDEE9F6B43aC78BA3";
 
 export const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
