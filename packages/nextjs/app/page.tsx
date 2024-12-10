@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { useAccount } from "wagmi";
 // import { ethers } from "ethers";
 // import { Check, ChevronsUpDown, RotateCcw, X } from "lucide-react";
 // import { ArcherContainer, ArcherElement } from "react-archer";
@@ -284,6 +285,8 @@ export default function Component() {
 
   // const sortedTokens = [...balances].sort((a, b) => b.balance - a.balance);
 
+  const account = useAccount();
+
   return (
     <div className="flex-col items-center justify-center h-500 mt-20 px-24">
       <div className="flex justify-center">
@@ -297,10 +300,15 @@ export default function Component() {
           into your favorite asset.
         </p>
       </div>
+      {account?.address === undefined ? (
+        <p className="text-center text-6xl font-bold">Please connect your wallet!</p>
+      ) : (
+        <></>
+      )}
       <div className="flex justify-center mb-12">
-        <InputBox />
+        {account?.address ? <InputBox /> : <></>}
         <Image className="w-[500px] mx-[-15px]" src={gearHubSVG} alt="gears" />
-        <OutputBox />
+        {account?.address ? <OutputBox /> : <></>}
       </div>
       <div className="flex justify-center items-center">
         <hr className="w-1/6 bg-[#9D9D9D]" />
