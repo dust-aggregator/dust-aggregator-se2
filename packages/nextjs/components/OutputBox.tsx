@@ -36,21 +36,28 @@ const OutputBox = () => {
   //     setOutputBalances(formattedBalances);
   //   }
   // }, [rawBalancesDestination]);
+  const connectedAccount = useAccount();
 
   return (
     <UserActionBoxContainer>
-      <h3 className="font-bold">Output</h3>
-      <CategorySelect
-        title="Select Network"
-        options={SUPPORTED_OUTPUT_NETWORKS}
-        onChange={setOutputNetwork}
-        selectedOption={outputNetwork}
-      />
-      <div className="flex justify-center">
-        <p className="text-[#9D9D9D] text-xs my-1">And</p>
-      </div>
-      <Select title="Select Token" options={tokenOptions} onChange={setOutputToken} selectedOption={outputToken} />
-      <SwapPreview />
+      {connectedAccount?.address ? (
+        <>
+          <h3 className="font-bold">Output</h3>
+          <CategorySelect
+            title="Select Network"
+            options={SUPPORTED_OUTPUT_NETWORKS}
+            onChange={setOutputNetwork}
+            selectedOption={outputNetwork}
+          />
+          <div className="flex justify-center">
+            <p className="text-[#9D9D9D] text-xs my-1">And</p>
+          </div>
+          <Select title="Select Token" options={tokenOptions} onChange={setOutputToken} selectedOption={outputToken} />
+          <SwapPreview />
+        </>
+      ) : (
+        <></>
+      )}
     </UserActionBoxContainer>
   );
 };

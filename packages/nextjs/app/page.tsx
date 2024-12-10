@@ -306,9 +306,9 @@ export default function Component() {
         <></>
       )}
       <div className="flex justify-center mb-12">
-        {account?.address ? <InputBox /> : <></>}
+        <InputBox />
         <Image className="w-[500px] mx-[-15px]" src={gearHubSVG} alt="gears" />
-        {account?.address ? <OutputBox /> : <></>}
+        <OutputBox />
       </div>
       <div className="flex justify-center items-center">
         <hr className="w-1/6 bg-[#9D9D9D]" />

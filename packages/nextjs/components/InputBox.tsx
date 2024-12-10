@@ -4,6 +4,7 @@ import CategorySelect from "./CategorySelect";
 import CategorySelectInputBox from "./CategorySelectInputBox";
 import UserActionBoxContainer from "./UserActionBoxContainer";
 import UserActionBoxContainer2 from "./UserActionBoxContainer2";
+import { RainbowKitCustomConnectButton } from "./scaffold-eth/RainbowKitCustomConnectButton";
 import { AllTokensBalances } from "./token-balances/AllTokensBalances";
 import { AllTokensPrices } from "./token-prices/AllTokensPrices";
 import { useAccount } from "wagmi";
@@ -305,9 +306,9 @@ const InputBox = () => {
           </>
         )
       ) : (
-        <>
-          <p>Please connect your wallet</p>
-        </>
+        <div className="flex flex-col justify-center items-center">
+          <RainbowKitCustomConnectButton />
+        </div>
       )}
     </UserActionBoxContainer>
   );
