@@ -62,11 +62,10 @@ const InputBox = () => {
   const [networkOptions2, setNetworkOptions2] = useState<any[]>([]);
 
   // Update disabled property function
-  const updateSpecificOption = (sectionKey: string, optionValue: string, selected: boolean) => {
-    // console.log("Updating...");
-    // console.log(sectionKey);
-    // console.log(optionValue);
-    // console.log(selected);
+  const updateSpecificOption = (sectionKey: string, optionValue: string, selected: boolean, amountToDust: number) => {
+    console.log(amountToDust);
+
+    console.log(selected);
 
     setNetworkOptions2(prevOptions =>
       prevOptions.map(section =>
@@ -74,7 +73,7 @@ const InputBox = () => {
           ? {
               ...section,
               options: section.options.map((option: any) =>
-                option.value === optionValue ? { ...option, selected } : option,
+                option.value === optionValue ? { ...option, selected, amountToDust } : option,
               ),
             }
           : section,
@@ -110,20 +109,28 @@ const InputBox = () => {
                 <button
                   className="m-0"
                   onClick={() => {
-                    updateSpecificOption(e.section, option.value, !option.selected);
+                    updateSpecificOption(e.section, option.value, !option.selected, option.amountToDust);
                   }}
                 >
                   <Image src={"/Vector.png"} alt="" width={"12"} height={"12"} className="h-4" />
                 </button>
-                <p className="m-0">{option.label}</p>
+                <p className="m-0 text-xs">{option.label}</p>
               </div>
 
+              <input
+                type="number"
+                value={Number(option.amountToDust).toFixed(6)}
+                onChange={(a: any) => {
+                  updateSpecificOption(e.section, option.value, option.selected, a.target.value);
+                }}
+                className="w-10"
+              />
               <div className="flex items-center justify-center gap-1">
-                <p>{formatDecimal(option.tokenBalance)}</p>
+                <p className="text-xs">{formatDecimal(option.tokenBalance)}</p>
                 <Image src={"/particles.png"} alt="" width={"12"} height={"12"} className="h-4" />
               </div>
 
-              <div className="flex items-center justify-center gap-1">
+              <div className="flex items-center justify-center gap-1 text-xs">
                 <p>$</p>
                 <p>{option.usdValue?.toFixed(2)}</p>
               </div>
@@ -170,6 +177,7 @@ const InputBox = () => {
             usdValue: e.value,
             decimals: e.quantity.decimals,
             selected: false,
+            amountToDust: e.quantity.numeric,
           };
         });
 

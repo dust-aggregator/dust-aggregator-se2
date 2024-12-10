@@ -9,6 +9,7 @@ interface OptionInfo {
   decimals: number;
   selected: boolean;
   usdValue: number;
+  amountToDust: string;
 }
 
 interface Option {
@@ -41,7 +42,7 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
     if (elem) {
       elem?.blur();
     }
-    onChange(section, option.value, option.selected);
+    onChange(section, option.value, option.selected, option.amountToDust);
   };
 
   function formatDecimal(input: string): string {
@@ -71,7 +72,7 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
             <div key={section}>
               <p className="text-sm font-bold my-1 px-2">{section}</p>
               <div>
-                {options.map(({ value, label, disabled, tokenBalance, usdValue, decimals, selected }) => {
+                {options.map(({ value, label, disabled, tokenBalance, usdValue, decimals, selected, amountToDust }) => {
                   // const formattedBalance = tokenBalance; // parseUnits(tokenBalance, decimals); // Number(tokenBalance) / Math.pow(10, decimals);
 
                   if (selected) return <div key={value}></div>;
@@ -89,6 +90,7 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
                             usdValue,
                             decimals,
                             selected: !selected,
+                            amountToDust: amountToDust,
                           });
                           // onSelect(section, value, !selected);
                           disabled = !disabled;
