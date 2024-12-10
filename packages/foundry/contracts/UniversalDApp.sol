@@ -46,7 +46,7 @@ contract UniversalDApp is IUniversalContract {
         uint256 minAmount;
         address originalSender;
         bytes targetChainCounterparty; // an address of the EVMDustTokens contract on the target chain
-        bytes destinationPayload; // must be abi.encodeCall(EvmDustTokens.ReceiveTokens, (...))
+        bytes destinationPayload; // e.g. abi.encodeCall(EvmDustTokens.ReceiveTokens, (...))
     }
 
     /**
