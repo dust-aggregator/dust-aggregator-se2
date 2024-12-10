@@ -10,6 +10,7 @@ import { useAccount } from "wagmi";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
 import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
 import { networks } from "~~/lib/constants";
+import { SelectedToken } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
 
 const InputBox = () => {
@@ -49,16 +50,13 @@ const InputBox = () => {
         const apiResponseJson = await apiResponse.json();
 
         setWalletConnectBalances(apiResponseJson.balances);
-        // console.log(apiResponseJson);
       }
-      // console.log(apiResponse);
 
       setIsLoadingTokens(false);
     }
     fn();
   }, [connectedAccount?.address]);
   // const { price } = useTokenPricesUniswap();
-  // console.log(price);
 
   const [networkOptions2, setNetworkOptions2] = useState<any[]>([]);
 
@@ -77,7 +75,25 @@ const InputBox = () => {
         : section,
     );
 
-    setOutputTokensByNetwork(updatedOptions);
+    const filteredTokens = updatedOptions
+      .flatMap((section: any) => section.options)
+      .filter((option: any) => {
+        return option.selected === true;
+      });
+
+    const outputTokens = filteredTokens.map((token: any, index: number) => {
+      return {
+        name: token.label,
+        decimals: token.decimals,
+        balance: token.tokenBalance,
+        amount: token.amountToDust,
+        address: token.address,
+        symbol: token.symbol,
+        hasPermit2Allowance: false,
+      };
+    });
+
+    setOutputTokensByNetwork(outputTokens);
 
     setNetworkOptions2(updatedOptions);
   };
@@ -150,8 +166,6 @@ const InputBox = () => {
     for (let i = 0; i < networks.length; i++) {
       // const networks = { chainId: 1};
 
-      // console.log(walletConnectBalances);
-
       // const filteredTokens: any[] = [];
 
       // for (let j = 0; j < walletConnectBalances.length; j++) {
@@ -163,13 +177,10 @@ const InputBox = () => {
         token => token?.chainId?.replace("eip155:", "") === networks[i].chainId.toString(),
       );
 
-      // console.log(filteredTokens);
-
       if (filteredTokens.length > 0) {
         const obj: any = {};
         obj.section = networks[i].key;
         obj.options = filteredTokens.map((e: any, index: number) => {
-          // console.log(e.quantity.numeric.toString());
           return {
             value: "inputToken-" + index,
             label: e.name,
@@ -179,10 +190,11 @@ const InputBox = () => {
             decimals: e.quantity.decimals,
             selected: false,
             amountToDust: e.quantity.numeric,
+            symbol: e.symbol,
+            address: e.address?.split(":").pop(),
           };
         });
 
-        // console.log(obj);
         networkOptions2.push(obj);
       }
     }
@@ -240,7 +252,6 @@ const InputBox = () => {
   }, [walletConnectBalances.length, dustThresholdValue]);
 
   let totalDustInUsd = 0;
-  // console.log(networkOptions2);
   for (let i = 0; i < networkOptions2.length; i++) {
     for (let j = 0; j < networkOptions2[i].options.length; j++) {
       if (networkOptions2[i].options[j].selected) {

@@ -78,8 +78,8 @@ type GlobalState = {
   setOutputToken: (newOutputToken: Token) => void;
   inputTokens: SelectedToken[];
   setInputTokens: (newInputTokens: SelectedToken[]) => void;
-  outputTokensByNetwork?: any;
-  setOutputTokensByNetwork: (newOutputTokensByNetwork: any[]) => void;
+  outputTokensByNetwork?: SelectedToken[];
+  setOutputTokensByNetwork: (newOutputTokensByNetwork: SelectedToken[]) => void;
 };
 
 export const useGlobalState = create<GlobalState>(set => ({
@@ -99,7 +99,7 @@ export const useGlobalState = create<GlobalState>(set => ({
   setOutputToken: (newOutputToken: Token) => set(() => ({ outputToken: newOutputToken })),
   inputTokens: mockInputTokens,
   setInputTokens: (newInputTokens: SelectedToken[]) => set(() => ({ inputTokens: newInputTokens })),
-  outputTokensByNetwork: mockOutputTokensByNetwork,
-  setOutputTokensByNetwork: (newOutputTokensByNetwork: any[]) =>
+  outputTokensByNetwork: [],
+  setOutputTokensByNetwork: (newOutputTokensByNetwork: SelectedToken[]) =>
     set(() => ({ outputTokensByNetwork: newOutputTokensByNetwork })),
 }));
