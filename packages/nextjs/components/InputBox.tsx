@@ -61,7 +61,7 @@ const InputBox = () => {
 
   const [networkOptions2, setNetworkOptions2] = useState<any[]>([]);
 
-  const setOutputTokensByNetwork = useGlobalState(({ setOutputTokensByNetwork }) => setOutputTokensByNetwork);
+  const setInputTokens = useGlobalState(({ setInputTokens }) => setInputTokens);
 
   // Update disabled property function
   const updateSpecificOption = (sectionKey: string, optionValue: string, selected: boolean, amountToDust: number) => {
@@ -94,7 +94,7 @@ const InputBox = () => {
       };
     });
 
-    setOutputTokensByNetwork(outputTokens);
+    setInputTokens(outputTokens);
 
     setNetworkOptions2(updatedOptions);
   };
