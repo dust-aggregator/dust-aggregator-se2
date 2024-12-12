@@ -4,7 +4,8 @@ import InputToken from "./InputToken";
 import { keccak256, toUtf8Bytes } from "ethers";
 import { ethers } from "ethers";
 import { parseUnits } from "viem";
-import { usePublicClient } from "wagmi";
+import chains from "viem/chains";
+import { useAccount, usePublicClient } from "wagmi";
 // import { useEthersProvider } from "~~/hooks/dust";
 import { truncateToDecimals } from "~~/lib/utils";
 import { getUniswapV3EstimatedAmountOut } from "~~/lib/zetachainUtils";
@@ -29,6 +30,7 @@ const SwapPreview = () => {
   const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
   const previewModalRef = useRef<HTMLDialogElement>(null);
+  const { chain } = useAccount(wagmiConfig);
 
   const client = usePublicClient({ config: wagmiConfig });
 
@@ -95,7 +97,7 @@ const SwapPreview = () => {
     }
   };
 
-  const readyForPreview = !!outputNetwork && !!outputToken;
+  const readyForPreview = !!outputNetwork && !!outputToken && inputTokens.length > 0;
 
   const togglePreviewModal = getToggleModal(previewModalRef);
   const closePreviewModal = () => {
@@ -118,7 +120,7 @@ const SwapPreview = () => {
         <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded">
           <h3 className="font-bold text-xl">Input Tokens</h3>
           <div className="text-[#9D9D9D]">
-            <span>Optimism</span>
+            <span>{chain?.name}</span>
             <ul>
               {inputTokens.map(token => (
                 <li key={token.symbol} className="flex justify-between">
@@ -128,7 +130,7 @@ const SwapPreview = () => {
             </ul>
           </div>
           <h3 className="font-bold text-xl mt-2">Output Token</h3>
-          <span className="text-[#9D9D9D]">{outputNetwork?.label}</span>
+          <span className="text-[#9D9D9D]">{outputNetwork?.name}</span>
           <div key={outputToken?.name} className="flex justify-between mb-24">
             <div>
               <span className="px-2">•</span>

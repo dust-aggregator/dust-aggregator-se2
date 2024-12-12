@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import CategorySelect from "./CategorySelect";
 import CategorySelectInputBox from "./CategorySelectInputBox";
@@ -16,6 +16,7 @@ import { useGlobalState } from "~~/services/store/store";
 
 const InputBox = () => {
   const [dustThresholdValue, setDustThresholdValue] = useState<number>(5);
+  const { inputTokens } = useGlobalState();
 
   function handleChange(e: any) {
     setDustThresholdValue(e.target.value);
@@ -82,7 +83,7 @@ const InputBox = () => {
         return option.selected === true;
       });
 
-    const outputTokens = filteredTokens.map((token: any, index: number) => {
+    const selectedInputTokens = filteredTokens.map((token: any, index: number) => {
       return {
         name: token.label,
         decimals: token.decimals,
@@ -94,7 +95,7 @@ const InputBox = () => {
       };
     });
 
-    setInputTokens(outputTokens);
+    setInputTokens(selectedInputTokens);
 
     setNetworkOptions2(updatedOptions);
   };

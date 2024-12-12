@@ -4,51 +4,51 @@ import Select from "./Select";
 import SwapPreview from "./SwapPreview";
 import UserActionBoxContainer from "./UserActionBoxContainer";
 import { useAccount, useReadContract, useToken, useWatchContractEvent } from "wagmi";
+import { useTokenWhitelist } from "~~/hooks/dust";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
-import { SUPPORTED_OUTPUT_NETWORKS, networks } from "~~/lib/constants";
+import { SUPPORTED_NETWORKS, networks } from "~~/lib/constants";
 import { Token } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
 
-const tokenOptions = [
-  { value: "dai", label: "DAI", decorator: "5 USD" },
-  { value: "uni", label: "UNI", decorator: "7 USD" },
-  { value: "wbtc", label: "WBTC", decorator: "5 USD" },
-];
+const evmNetworkOptions = SUPPORTED_NETWORKS.map(({ id, name }) => ({ label: name, value: id }));
+
+const networkOptions = [{ ecosystem: "Ethereum", options: evmNetworkOptions }];
 
 const OutputBox = () => {
-  const { outputNetwork, setOutputNetwork, outputToken, setOutputToken } = useGlobalState();
-  const [outputBalances, setOutputBalances] = useState<Token[]>([]);
-
   const { address } = useAccount();
+  const { outputNetwork, setOutputNetwork, outputToken, setOutputToken } = useGlobalState();
+  const { tokens: whitelistedTokens } = useTokenWhitelist();
 
-  const { allObjects, isLoading } = useTokenBalancesWithMetadataByNetwork(
-    address,
-    networks.map(({ alchemyEnum }) => alchemyEnum),
-  );
+  const handleSelectNetwork = network => {
+    const newSelectedNetwork = SUPPORTED_NETWORKS.find(({ id }) => id === network.value);
+    setOutputNetwork(newSelectedNetwork);
+  };
 
-  // useEffect(() => {
-  //   if (rawBalancesDestination) {
-  //     const formattedBalances = formatTokenBalances(rawBalancesDestination);
-  //     setOutputBalances(formattedBalances);
-  //   }
-  // }, [rawBalancesDestination]);
-  const connectedAccount = useAccount();
+  const formattedSelectedNetwork = {
+    label: outputNetwork?.name || "Select Network",
+    value: outputNetwork?.id || "",
+  };
 
   return (
     <UserActionBoxContainer>
-      {connectedAccount?.address ? (
+      {address ? (
         <>
           <h3 className="font-bold">Output</h3>
           <CategorySelect
             title="Select Network"
-            options={SUPPORTED_OUTPUT_NETWORKS}
-            onChange={setOutputNetwork}
-            selectedOption={outputNetwork}
+            options={networkOptions}
+            onChange={handleSelectNetwork}
+            selectedOption={formattedSelectedNetwork}
           />
           <div className="flex justify-center">
             <p className="text-[#9D9D9D] text-xs my-1">And</p>
           </div>
-          <Select title="Select Token" options={tokenOptions} onChange={setOutputToken} selectedOption={outputToken} />
+          <Select
+            title="Select Token"
+            options={whitelistedTokens}
+            onChange={setOutputToken}
+            selectedOption={outputToken}
+          />
           <SwapPreview />
         </>
       ) : (
