@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import SwapResultModal from "../SwapResultModal";
 import dustAbi from "./dustAbi.json";
 import { ethers } from "ethers";
+import { encode } from "punycode";
 import { parseUnits } from "viem";
 import { useAccount, useSignTypedData, useWriteContract } from "wagmi";
 import { getAccount } from "wagmi/actions";
@@ -15,7 +16,7 @@ import {
 import { useGlobalState } from "~~/services/store/store";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
-const dustTokensContractBaseSep = "0x300abcE823C6C015c8dD31e35cA7B0602d9f2a10";
+const dustTokensContractPolygon = "0xC4b1221701ED9EeCbA01d5f52D60Cb95a9d492a2";
 
 interface Props {
   togglePreviewModal: () => void;
@@ -39,7 +40,7 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
       const { domain, types, values, deadline, nonce } = await preparePermitData(
         chainId,
         swaps,
-        dustTokensContractBaseSep,
+        dustTokensContractPolygon,
       );
       const signature = await signer.signTypedData(domain, types, values);
 
@@ -47,29 +48,25 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
     };
 
     try {
-      const recipient = address as string;
-
-      // Step 1: Prepare payloads
-      const outputTokenAddress = outputToken.address;
-      const destinationPayload = encodeDestinationPayload(recipient, outputTokenAddress);
       const encodedParameters = encodeZetachainPayload(
         outputNetwork.zrc20Address,
+        BigInt(250000), // for ERC20. 120000 for wNative
         outputNetwork.contractAddress,
-        recipient,
-        destinationPayload,
+        address,
+        outputToken.address,
+        BigInt(1),
       );
+
       const tokenSwaps: TokenSwap[] = inputTokens.map(({ amount, decimals, address }) => ({
         amount: parseUnits(amount, decimals),
         token: address,
-        minAmountOut: BigInt(0), // TODO: Set a minimum amount out
+        minAmountOut: BigInt(1), // TODO: Set a minimum amount out
       }));
 
-      // Step 2: Create Permit2 Batch transfer signature
       const permit = await signPermit(tokenSwaps);
 
-      // Step 3: Perform swap and bridge transaction
       writeContract({
-        address: dustTokensContractBaseSep,
+        address: "0xC4b1221701ED9EeCbA01d5f52D60Cb95a9d492a2",
         abi: dustAbi,
         functionName: "SwapAndBridgeTokens",
         args: [tokenSwaps, encodedParameters, permit.nonce, permit.deadline, permit.signature],

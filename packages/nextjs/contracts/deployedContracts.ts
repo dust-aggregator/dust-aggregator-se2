@@ -43,7 +43,7 @@ const deployedContracts = {
           name: "onCall",
           inputs: [
             {
-              name: "",
+              name: "context",
               type: "tuple",
               internalType: "struct MessageContext",
               components: [
@@ -138,7 +138,32 @@ const deployedContracts = {
             {
               name: "recipient",
               type: "bytes",
+              indexed: true,
+              internalType: "bytes",
+            },
+            {
+              name: "asset",
+              type: "address",
               indexed: false,
+              internalType: "address",
+            },
+            {
+              name: "amount",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "SwappedAndWithdrawn",
+          inputs: [
+            {
+              name: "recipient",
+              type: "bytes",
+              indexed: true,
               internalType: "bytes",
             },
             {
@@ -218,6 +243,11 @@ const deployedContracts = {
         },
         {
           type: "error",
+          name: "NotSupportedChainID",
+          inputs: [],
+        },
+        {
+          type: "error",
           name: "ZeroAddress",
           inputs: [],
         },
@@ -248,12 +278,12 @@ const deployedContracts = {
               internalType: "address",
             },
             {
-              name: "_nativeToken",
+              name: "_wNativeToken",
               type: "address",
               internalType: "address payable",
             },
             {
-              name: "initialOwner",
+              name: "_initialOwner",
               type: "address",
               internalType: "address",
             },
@@ -284,9 +314,14 @@ const deployedContracts = {
               internalType: "address",
             },
             {
-              name: "receiver",
+              name: "recipient",
               type: "address",
               internalType: "address",
+            },
+            {
+              name: "minAmount",
+              type: "uint256",
+              internalType: "uint256",
             },
           ],
           outputs: [],
@@ -299,7 +334,7 @@ const deployedContracts = {
             {
               name: "swaps",
               type: "tuple[]",
-              internalType: "struct SwapInput[]",
+              internalType: "struct EvmDustTokens.SwapInput[]",
               components: [
                 {
                   name: "token",
@@ -319,9 +354,59 @@ const deployedContracts = {
               ],
             },
             {
-              name: "payload",
+              name: "message",
               type: "bytes",
               internalType: "bytes",
+            },
+            {
+              name: "nonce",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "deadline",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "signature",
+              type: "bytes",
+              internalType: "bytes",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "SwapTokens",
+          inputs: [
+            {
+              name: "swaps",
+              type: "tuple[]",
+              internalType: "struct EvmDustTokens.SwapInput[]",
+              components: [
+                {
+                  name: "token",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "amount",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "minAmountOut",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+              ],
+            },
+            {
+              name: "outputToken",
+              type: "address",
+              internalType: "address",
             },
             {
               name: "nonce",
@@ -351,12 +436,12 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "addToken",
+          name: "addTokens",
           inputs: [
             {
-              name: "token",
-              type: "address",
-              internalType: "address",
+              name: "tokens",
+              type: "address[]",
+              internalType: "address[]",
             },
           ],
           outputs: [],
@@ -377,19 +462,6 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "deployer",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
           name: "gateway",
           inputs: [],
           outputs: [
@@ -397,19 +469,6 @@ const deployedContracts = {
               name: "",
               type: "address",
               internalType: "contract IGatewayEVM",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "getBalance",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
             },
           ],
           stateMutability: "view",
@@ -670,6 +729,19 @@ const deployedContracts = {
           stateMutability: "nonpayable",
         },
         {
+          type: "function",
+          name: "withdrawTokenFees",
+          inputs: [
+            {
+              name: "tokens",
+              type: "address[]",
+              internalType: "address[]",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
           type: "event",
           name: "FeesWithdrawn",
           inputs: [
@@ -727,7 +799,7 @@ const deployedContracts = {
             {
               name: "recipient",
               type: "address",
-              indexed: false,
+              indexed: true,
               internalType: "address",
             },
             {
@@ -747,7 +819,7 @@ const deployedContracts = {
         },
         {
           type: "event",
-          name: "SwappedAndDeposited",
+          name: "Swapped",
           inputs: [
             {
               name: "executor",
@@ -759,7 +831,7 @@ const deployedContracts = {
               name: "swaps",
               type: "tuple[]",
               indexed: false,
-              internalType: "struct SwapOutput[]",
+              internalType: "struct EvmDustTokens.SwapOutput[]",
               components: [
                 {
                   name: "tokenIn",
@@ -794,19 +866,41 @@ const deployedContracts = {
         },
         {
           type: "event",
-          name: "SwappedAndWithdrawn",
+          name: "SwappedAndDeposited",
           inputs: [
             {
-              name: "receiver",
+              name: "executor",
               type: "address",
               indexed: true,
               internalType: "address",
             },
             {
-              name: "outputToken",
-              type: "address",
+              name: "swaps",
+              type: "tuple[]",
               indexed: false,
-              internalType: "address",
+              internalType: "struct EvmDustTokens.SwapOutput[]",
+              components: [
+                {
+                  name: "tokenIn",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "tokenOut",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "amountIn",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "amountOut",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+              ],
             },
             {
               name: "totalTokensReceived",
@@ -832,6 +926,25 @@ const deployedContracts = {
         },
         {
           type: "event",
+          name: "TokenFeesWithdrawn",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              indexed: false,
+              internalType: "address",
+            },
+            {
+              name: "amount",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
           name: "TokenRemoved",
           inputs: [
             {
@@ -839,6 +952,31 @@ const deployedContracts = {
               type: "address",
               indexed: true,
               internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "Withdrawn",
+          inputs: [
+            {
+              name: "recipient",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "outputToken",
+              type: "address",
+              indexed: false,
+              internalType: "address",
+            },
+            {
+              name: "totalTokensReceived",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
             },
           ],
           anonymous: false,
@@ -931,6 +1069,11 @@ const deployedContracts = {
               name: "token",
               type: "address",
               internalType: "address",
+            },
+            {
+              name: "revertData",
+              type: "bytes",
+              internalType: "bytes",
             },
           ],
         },
@@ -1060,270 +1203,25 @@ const deployedContracts = {
       },
     },
   },
-  42161: {
-    UniversalDApp: {
-      address: "0x5005fd0fe32070fe0551467a8e1e7fab478ed90c",
+  84532: {
+    SimpleSwap: {
+      address: "0x87403f6d3dc3ea0563af9c036136923a9d27a9f9",
       abi: [
         {
           type: "constructor",
           inputs: [
-            {
-              name: "_systemContract",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "_gateway",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "payable",
-        },
-        {
-          type: "function",
-          name: "gateway",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "contract IGatewayZEVM",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "onCall",
-          inputs: [
-            {
-              name: "",
-              type: "tuple",
-              internalType: "struct MessageContext",
-              components: [
-                {
-                  name: "origin",
-                  type: "bytes",
-                  internalType: "bytes",
-                },
-                {
-                  name: "sender",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "chainID",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-              ],
-            },
-            {
-              name: "zrc20",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "amount",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "message",
-              type: "bytes",
-              internalType: "bytes",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "onRevert",
-          inputs: [
-            {
-              name: "revertContext",
-              type: "tuple",
-              internalType: "struct RevertContext",
-              components: [
-                {
-                  name: "sender",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "asset",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "amount",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-                {
-                  name: "revertMessage",
-                  type: "bytes",
-                  internalType: "bytes",
-                },
-              ],
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "systemContract",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "contract SystemContract",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "event",
-          name: "Reverted",
-          inputs: [
-            {
-              name: "recipient",
-              type: "bytes",
-              indexed: false,
-              internalType: "bytes",
-            },
-            {
-              name: "asset",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "amount",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "error",
-          name: "AdditionsOverflow",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CantBeIdenticalAddresses",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CantBeZeroAddress",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "IdenticalAddresses",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InsufficientInputAmount",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InsufficientLiquidity",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidAddress",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidChainToken",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidPath",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidPathLength",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "MultiplicationsOverflow",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "NotGateway",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ZeroAddress",
-          inputs: [],
-        },
-      ],
-      inheritedFunctions: {
-        onCall: "contracts/interfaces/IUniversalContract.sol",
-      },
-    },
-    EvmDustTokens: {
-      address: "0xb037e4672340298c575529277ebf5770a4147040",
-      abi: [
-        {
-          type: "constructor",
-          inputs: [
-            {
-              name: "_gateway",
-              type: "address",
-              internalType: "contract IGatewayEVM",
-            },
             {
               name: "_swapRouter",
               type: "address",
               internalType: "contract ISwapRouter",
             },
             {
-              name: "_universalDApp",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "_nativeToken",
+              name: "_WETH9",
               type: "address",
               internalType: "address payable",
             },
-            {
-              name: "initialOwner",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "_permit2",
-              type: "address",
-              internalType: "contract IPermit2",
-            },
-            {
-              name: "_tokenList",
-              type: "address[]",
-              internalType: "address[]",
-            },
           ],
-          stateMutability: "payable",
+          stateMutability: "nonpayable",
         },
         {
           type: "receive",
@@ -1331,313 +1229,15 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "ReceiveTokens",
+          name: "ExecuteMultiSwapFromWETH",
           inputs: [
             {
-              name: "outputToken",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "receiver",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [],
-          stateMutability: "payable",
-        },
-        {
-          type: "function",
-          name: "SwapAndBridgeTokens",
-          inputs: [
-            {
-              name: "swaps",
-              type: "tuple[]",
-              internalType: "struct SwapInput[]",
-              components: [
-                {
-                  name: "token",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "amount",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-                {
-                  name: "minAmountOut",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-              ],
-            },
-            {
-              name: "payload",
-              type: "bytes",
-              internalType: "bytes",
-            },
-            {
-              name: "nonce",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "deadline",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "signature",
-              type: "bytes",
-              internalType: "bytes",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "acceptOwnership",
-          inputs: [],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "addToken",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "collectedFees",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "deployer",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "gateway",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "contract IGatewayEVM",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "getBalance",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "getTokenList",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address[]",
-              internalType: "address[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "getTokensMetadata",
-          inputs: [
-            {
-              name: "user",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [
-            {
-              name: "addresses",
+              name: "tokenAddresses",
               type: "address[]",
               internalType: "address[]",
             },
             {
-              name: "names",
-              type: "string[]",
-              internalType: "string[]",
-            },
-            {
-              name: "symbols",
-              type: "string[]",
-              internalType: "string[]",
-            },
-            {
-              name: "decimals",
-              type: "uint8[]",
-              internalType: "uint8[]",
-            },
-            {
-              name: "balances",
-              type: "uint256[]",
-              internalType: "uint256[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "isWhitelisted",
-          inputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "onRevert",
-          inputs: [
-            {
-              name: "revertContext",
-              type: "tuple",
-              internalType: "struct RevertContext",
-              components: [
-                {
-                  name: "sender",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "asset",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "amount",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-                {
-                  name: "revertMessage",
-                  type: "bytes",
-                  internalType: "bytes",
-                },
-              ],
-            },
-          ],
-          outputs: [],
-          stateMutability: "payable",
-        },
-        {
-          type: "function",
-          name: "owner",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "pendingOwner",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "permit2",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "contract IPermit2",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "protocolFee",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "removeToken",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "index",
+              name: "amountIn",
               type: "uint256",
               internalType: "uint256",
             },
@@ -1647,20 +1247,13 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "renounceOwnership",
-          inputs: [],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "swapFee",
+          name: "WETH9",
           inputs: [],
           outputs: [
             {
               name: "",
-              type: "uint24",
-              internalType: "uint24",
+              type: "address",
+              internalType: "address payable",
             },
           ],
           stateMutability: "view",
@@ -1678,1335 +1271,17 @@ const deployedContracts = {
           ],
           stateMutability: "view",
         },
-        {
-          type: "function",
-          name: "transferOwnership",
-          inputs: [
-            {
-              name: "newOwner",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "universalDApp",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "wNativeToken",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address payable",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "withdrawFees",
-          inputs: [],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "event",
-          name: "FeesWithdrawn",
-          inputs: [
-            {
-              name: "amount",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "OwnershipTransferStarted",
-          inputs: [
-            {
-              name: "previousOwner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "newOwner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "OwnershipTransferred",
-          inputs: [
-            {
-              name: "previousOwner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "newOwner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "Reverted",
-          inputs: [
-            {
-              name: "recipient",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "asset",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "amount",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "SwappedAndDeposited",
-          inputs: [
-            {
-              name: "executor",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "swaps",
-              type: "tuple[]",
-              indexed: false,
-              internalType: "struct SwapOutput[]",
-              components: [
-                {
-                  name: "tokenIn",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "tokenOut",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "amountIn",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-                {
-                  name: "amountOut",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-              ],
-            },
-            {
-              name: "totalTokensReceived",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "SwappedAndWithdrawn",
-          inputs: [
-            {
-              name: "receiver",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "outputToken",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "totalTokensReceived",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "TokenAdded",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "TokenRemoved",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "error",
-          name: "FeeWithdrawalFailed",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InsufficientAllowance",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "InsufficientBalance",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "InvalidAddress",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidMsgValue",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidToken",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "NoSwaps",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "NotGateway",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "OwnableInvalidOwner",
-          inputs: [
-            {
-              name: "owner",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "OwnableUnauthorizedAccount",
-          inputs: [
-            {
-              name: "account",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "SwapFailed",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "TokenIsNotWhitelisted",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "TokenIsWhitelisted",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "TransferFailed",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "WrongIndex",
-          inputs: [],
-        },
       ],
       inheritedFunctions: {
-        acceptOwnership:
-          "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
-        owner: "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
-        pendingOwner:
-          "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
-        renounceOwnership:
-          "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
-        transferOwnership:
-          "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
-      },
-    },
-  },
-  421614: {
-    UniversalDApp: {
-      address: "0x5005fd0fe32070fe0551467a8e1e7fab478ed90c",
-      abi: [
-        {
-          type: "constructor",
-          inputs: [
-            {
-              name: "_systemContract",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "_gateway",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "payable",
-        },
-        {
-          type: "function",
-          name: "gateway",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "contract IGatewayZEVM",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "onCall",
-          inputs: [
-            {
-              name: "",
-              type: "tuple",
-              internalType: "struct MessageContext",
-              components: [
-                {
-                  name: "origin",
-                  type: "bytes",
-                  internalType: "bytes",
-                },
-                {
-                  name: "sender",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "chainID",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-              ],
-            },
-            {
-              name: "zrc20",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "amount",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "message",
-              type: "bytes",
-              internalType: "bytes",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "onRevert",
-          inputs: [
-            {
-              name: "revertContext",
-              type: "tuple",
-              internalType: "struct RevertContext",
-              components: [
-                {
-                  name: "sender",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "asset",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "amount",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-                {
-                  name: "revertMessage",
-                  type: "bytes",
-                  internalType: "bytes",
-                },
-              ],
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "systemContract",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "contract SystemContract",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "event",
-          name: "Reverted",
-          inputs: [
-            {
-              name: "recipient",
-              type: "bytes",
-              indexed: false,
-              internalType: "bytes",
-            },
-            {
-              name: "asset",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "amount",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "error",
-          name: "AdditionsOverflow",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CantBeIdenticalAddresses",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CantBeZeroAddress",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "IdenticalAddresses",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InsufficientInputAmount",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InsufficientLiquidity",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidAddress",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidChainToken",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidPath",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidPathLength",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "MultiplicationsOverflow",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "NotGateway",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ZeroAddress",
-          inputs: [],
-        },
-      ],
-      inheritedFunctions: {
-        onCall: "contracts/interfaces/IUniversalContract.sol",
-      },
-    },
-    EvmDustTokens: {
-      address: "0xb037e4672340298c575529277ebf5770a4147040",
-      abi: [
-        {
-          type: "constructor",
-          inputs: [
-            {
-              name: "_gateway",
-              type: "address",
-              internalType: "contract IGatewayEVM",
-            },
-            {
-              name: "_swapRouter",
-              type: "address",
-              internalType: "contract ISwapRouter",
-            },
-            {
-              name: "_universalDApp",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "_nativeToken",
-              type: "address",
-              internalType: "address payable",
-            },
-            {
-              name: "initialOwner",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "_permit2",
-              type: "address",
-              internalType: "contract IPermit2",
-            },
-            {
-              name: "_tokenList",
-              type: "address[]",
-              internalType: "address[]",
-            },
-          ],
-          stateMutability: "payable",
-        },
-        {
-          type: "receive",
-          stateMutability: "payable",
-        },
-        {
-          type: "function",
-          name: "ReceiveTokens",
-          inputs: [
-            {
-              name: "outputToken",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "receiver",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [],
-          stateMutability: "payable",
-        },
-        {
-          type: "function",
-          name: "SwapAndBridgeTokens",
-          inputs: [
-            {
-              name: "swaps",
-              type: "tuple[]",
-              internalType: "struct SwapInput[]",
-              components: [
-                {
-                  name: "token",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "amount",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-                {
-                  name: "minAmountOut",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-              ],
-            },
-            {
-              name: "payload",
-              type: "bytes",
-              internalType: "bytes",
-            },
-            {
-              name: "nonce",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "deadline",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "signature",
-              type: "bytes",
-              internalType: "bytes",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "acceptOwnership",
-          inputs: [],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "addToken",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "collectedFees",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "deployer",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "gateway",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "contract IGatewayEVM",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "getBalance",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "getTokenList",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address[]",
-              internalType: "address[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "getTokensMetadata",
-          inputs: [
-            {
-              name: "user",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [
-            {
-              name: "addresses",
-              type: "address[]",
-              internalType: "address[]",
-            },
-            {
-              name: "names",
-              type: "string[]",
-              internalType: "string[]",
-            },
-            {
-              name: "symbols",
-              type: "string[]",
-              internalType: "string[]",
-            },
-            {
-              name: "decimals",
-              type: "uint8[]",
-              internalType: "uint8[]",
-            },
-            {
-              name: "balances",
-              type: "uint256[]",
-              internalType: "uint256[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "isWhitelisted",
-          inputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "onRevert",
-          inputs: [
-            {
-              name: "revertContext",
-              type: "tuple",
-              internalType: "struct RevertContext",
-              components: [
-                {
-                  name: "sender",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "asset",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "amount",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-                {
-                  name: "revertMessage",
-                  type: "bytes",
-                  internalType: "bytes",
-                },
-              ],
-            },
-          ],
-          outputs: [],
-          stateMutability: "payable",
-        },
-        {
-          type: "function",
-          name: "owner",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "pendingOwner",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "permit2",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "contract IPermit2",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "protocolFee",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "removeToken",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "index",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "renounceOwnership",
-          inputs: [],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "swapFee",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "uint24",
-              internalType: "uint24",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "swapRouter",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "contract ISwapRouter",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "transferOwnership",
-          inputs: [
-            {
-              name: "newOwner",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "universalDApp",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "wNativeToken",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address payable",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "withdrawFees",
-          inputs: [],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "event",
-          name: "FeesWithdrawn",
-          inputs: [
-            {
-              name: "amount",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "OwnershipTransferStarted",
-          inputs: [
-            {
-              name: "previousOwner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "newOwner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "OwnershipTransferred",
-          inputs: [
-            {
-              name: "previousOwner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "newOwner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "Reverted",
-          inputs: [
-            {
-              name: "recipient",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "asset",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "amount",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "SwappedAndDeposited",
-          inputs: [
-            {
-              name: "executor",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "swaps",
-              type: "tuple[]",
-              indexed: false,
-              internalType: "struct SwapOutput[]",
-              components: [
-                {
-                  name: "tokenIn",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "tokenOut",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "amountIn",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-                {
-                  name: "amountOut",
-                  type: "uint256",
-                  internalType: "uint256",
-                },
-              ],
-            },
-            {
-              name: "totalTokensReceived",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "SwappedAndWithdrawn",
-          inputs: [
-            {
-              name: "receiver",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "outputToken",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "totalTokensReceived",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "TokenAdded",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "TokenRemoved",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "error",
-          name: "FeeWithdrawalFailed",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InsufficientAllowance",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "InsufficientBalance",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "InvalidAddress",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidMsgValue",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidToken",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "NoSwaps",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "NotGateway",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "OwnableInvalidOwner",
-          inputs: [
-            {
-              name: "owner",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "OwnableUnauthorizedAccount",
-          inputs: [
-            {
-              name: "account",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "SwapFailed",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "TokenIsNotWhitelisted",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "TokenIsWhitelisted",
-          inputs: [
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "TransferFailed",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "WrongIndex",
-          inputs: [],
-        },
-      ],
-      inheritedFunctions: {
-        acceptOwnership:
-          "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
-        owner: "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
-        pendingOwner:
-          "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
-        renounceOwnership:
-          "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
-        transferOwnership:
-          "lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol",
+        allowance: "lib/forge-std/src/interfaces/IERC20.sol",
+        approve: "lib/forge-std/src/interfaces/IERC20.sol",
+        balanceOf: "lib/forge-std/src/interfaces/IERC20.sol",
+        decimals: "lib/forge-std/src/interfaces/IERC20.sol",
+        name: "lib/forge-std/src/interfaces/IERC20.sol",
+        symbol: "lib/forge-std/src/interfaces/IERC20.sol",
+        totalSupply: "lib/forge-std/src/interfaces/IERC20.sol",
+        transfer: "lib/forge-std/src/interfaces/IERC20.sol",
+        transferFrom: "lib/forge-std/src/interfaces/IERC20.sol",
       },
     },
   },
