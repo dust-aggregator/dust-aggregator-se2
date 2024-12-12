@@ -54,16 +54,17 @@ const encodeDestinationPayload = (recipient: string, outputToken: string): strin
 const encodeZetachainPayload = (
   targetChainToken: string,
   gasLimit: bigint,
-  targetChainCounterparty: string,
-  recipient: string,
-  destinationPayload: string,
+  targetChainCounterparty: `0x${string}`,
+  recipient: `0x${string}`,
+  outputToken: `0x${string}`,
+  minAmount: bigint,
 ) => {
   const params = {
-    targetChainToken: "0xADF73ebA3Ebaa7254E859549A44c74eF7cff7501",
-    gasLimit: BigInt(70000),
-    minAmount: BigInt(1),
+    targetChainToken,
+    gasLimit,
+    minAmount,
     originalSender: recipient,
-    targetChainCounterparty: concatHex([pad("0xC4b1221701ED9EeCbA01d5f52D60Cb95a9d492a2", { size: 20 })]),
+    targetChainCounterparty: concatHex([pad(targetChainCounterparty, { size: 20 })]),
     destinationPayload: encodeFunctionData({
       abi: [
         {
@@ -78,7 +79,7 @@ const encodeZetachainPayload = (
         },
       ],
       functionName: "ReceiveTokens",
-      args: ["0x0000000000000000000000000000000000000000", recipient, 1],
+      args: [outputToken, recipient, minAmount],
     }),
   };
 

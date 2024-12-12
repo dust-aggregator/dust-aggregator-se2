@@ -16,7 +16,7 @@ import {
 import { useGlobalState } from "~~/services/store/store";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
-const dustTokensContractBaseSep = "0xC6d53ffb203872b6250Fd18FC83aD5a9e00dC4cE";
+const dustTokensContractPolygon = "0xC4b1221701ED9EeCbA01d5f52D60Cb95a9d492a2";
 
 interface Props {
   togglePreviewModal: () => void;
@@ -40,7 +40,7 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
       const { domain, types, values, deadline, nonce } = await preparePermitData(
         chainId,
         swaps,
-        dustTokensContractBaseSep,
+        dustTokensContractPolygon,
       );
       const signature = await signer.signTypedData(domain, types, values);
 
@@ -48,16 +48,13 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
     };
 
     try {
-      const recipient = address as string;
-
-      const outputTokenAddress = outputToken.address;
-      const destinationPayload = encodeDestinationPayload(recipient, outputTokenAddress);
       const encodedParameters = encodeZetachainPayload(
         outputNetwork.zrc20Address,
-        BigInt(550000),
+        BigInt(250000), // for ERC20. 120000 for wNative
         outputNetwork.contractAddress,
-        recipient,
-        destinationPayload,
+        address,
+        outputToken.address,
+        BigInt(1),
       );
 
       const tokenSwaps: TokenSwap[] = inputTokens.map(({ amount, decimals, address }) => ({
@@ -69,7 +66,7 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
       const permit = await signPermit(tokenSwaps);
 
       writeContract({
-        address: "0x2dB3bF70B10007cDC1b33eB2Fcf7dfB876c2A981",
+        address: "0xC4b1221701ED9EeCbA01d5f52D60Cb95a9d492a2",
         abi: dustAbi,
         functionName: "SwapAndBridgeTokens",
         args: [tokenSwaps, encodedParameters, permit.nonce, permit.deadline, permit.signature],

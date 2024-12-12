@@ -16,7 +16,7 @@ export type SelectedToken = Token & {
 };
 
 export type Network = Chain & {
-  contractAddress: string;
+  contractAddress: `0x${string}`;
   zrc20Address: string;
   alchemyName: string;
 };

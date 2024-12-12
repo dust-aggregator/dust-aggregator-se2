@@ -12,40 +12,6 @@ import { ChainWithAttributes } from "~~/utils/scaffold-eth";
  * Think about it as a global useState.
  */
 
-export const mockOutputTokensByNetwork: any[] = [];
-
-export const mockInputTokens: SelectedToken[] = [
-  {
-    name: "USDC Token",
-    symbol: "USDC",
-    decimals: 6,
-    balance: 3000000,
-    address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-    amount: "0.05",
-    hasPermit2Allowance: false,
-  },
-  // {
-  //   name: "Dai Token",
-  //   symbol: "DAI",
-  //   decimals: 18,
-  //   balance: 20000000,
-  //   address: "0xE6F6e27c0BF1a4841E3F09d03D7D31Da8eAd0a27",
-  //   amount: "2.52",
-  //   isMax: true,
-  //   hasPermit2Allowance: false,
-  // },
-  // {
-  //   name: "Uniswap V2 Token",
-  //   symbol: "UNI",
-  //   decimals: 18,
-  //   balance: 20000000,
-  //   address: "0x74f4b0101a7b9704AD59843a11778AF91e7942aA",
-  //   amount: "2.62",
-  //   isMax: true,
-  //   hasPermit2Allowance: false,
-  // },
-];
-
 type GlobalState = {
   nativeCurrency: {
     price: number;
