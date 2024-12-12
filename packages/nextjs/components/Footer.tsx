@@ -46,7 +46,7 @@ export const Footer = () => {
 
         <div className="absolute inset-0 flex justify-center items-center mb-5">
           <div className="flex justify-center">
-            <Link href="https://discord.com/invite/zetachain" className="mx-3">
+            {/* <Link href="https://discord.com/invite/zetachain" className="mx-3">
               <Image src={discordIcon} alt="discord" />
             </Link>
             <Link href="https://discord.com/invite/zetachain" className="mx-3">
@@ -57,7 +57,8 @@ export const Footer = () => {
             </Link>
             <Link href="https://www.youtube.com/@ZetaBlockchain" className="mx-3">
               <Image src={youtubeIcon} alt="youtube" />
-            </Link>
+            </Link> */}
+            <span className="font-montserrat font-bold opacity-50">Made by UNDR Collective</span>
           </div>
         </div>
       </div>
