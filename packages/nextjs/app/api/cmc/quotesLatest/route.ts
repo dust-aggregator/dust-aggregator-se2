@@ -26,7 +26,6 @@ export const GET = async (request: Request) => {
   if (response) {
     // success
     const json = response.data;
-    console.log(json);
     return NextResponse.json(json.data, { status: 200 });
   }
 };

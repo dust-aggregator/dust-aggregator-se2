@@ -32,7 +32,7 @@ const InputToken = ({ token }) => {
       <div>
         <span className="px-2">•</span>
         <span>
-          {token.name} ({token.ticker})
+          {token.name} ({token.symbol})
         </span>
       </div>
       <span className="text-[#2DC7FF] flex">

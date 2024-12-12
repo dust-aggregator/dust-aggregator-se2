@@ -81,7 +81,6 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
                     <li key={value} className={disabled ? "disabled" : ""}>
                       <a
                         onClick={() => {
-                          console.log("Handled");
                           handleClick(section, {
                             label,
                             value,
