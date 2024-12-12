@@ -25,7 +25,7 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
   const [resultModalOpen, setResultModalOpen] = useState(false);
   const { address } = useAccount();
   const { outputNetwork, outputToken, inputTokens } = useGlobalState();
-  const { writeContract, ...rest } = useWriteContract();
+  const { writeContract, isError, ...rest } = useWriteContract();
   // const { signTypedData } = useSignTypedData();
   const { chainId } = getAccount(wagmiConfig);
 
@@ -105,7 +105,9 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
         togglePreviewModal={togglePreviewModal}
         retryOperation={retryOperation}
         open={resultModalOpen}
+        isError={isError}
         error={rest.error}
+        amountCurency={"4005.3333 DAI"}
       />
     </>
   );

@@ -261,8 +261,10 @@ const InputBox = () => {
     }
   }
 
+
+
   return (
-    <UserActionBoxContainer>
+    <UserActionBoxContainer glow={false}>
       {connectedAccount?.address ? (
         isLoadingTokens ? (
           <p>{"Loading Tokens..."}</p>
