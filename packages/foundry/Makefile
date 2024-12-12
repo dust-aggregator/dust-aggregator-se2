@@ -20,9 +20,9 @@ build:
 # Deploy the project
 deploy:
 	@if [ "$(RPC_URL)" = "localhost" ]; then \
-		forge script script/Deploy.s.sol --rpc-url localhost --password localhost --broadcast --legacy --ffi; \
+		forge script script/Deploy.s.sol --rpc-url localhost --password last --broadcast --legacy --ffi; \
 	else \
-		forge script script/Deploy.s.sol --rpc-url $(RPC_URL) --broadcast --legacy --ffi; \
+		forge script script/Deploy.s.sol --rpc-url $(RPC_URL) --broadcast --legacy --ffi --password last; \
 	fi
 
 # Build and deploy target
@@ -33,8 +33,8 @@ generate-abis:
 	node scripts-js/generateTsAbis.js
 
 verify-keystore:
-	if grep -q "scaffold-eth-default" .env; then \
-		cast wallet address --password localhost; \
+	if grep -q "last" .env; then \
+		cast wallet address --password last; \
   else \
 		cast wallet address; \
   fi

@@ -16,12 +16,12 @@ export const mockOutputTokensByNetwork: any[] = [];
 
 export const mockInputTokens: SelectedToken[] = [
   {
-    name: "Wrapped Ether",
-    symbol: "WETH",
-    decimals: 18,
+    name: "USDC Token",
+    symbol: "USDC",
+    decimals: 6,
     balance: 3000000,
-    address: "0x4200000000000000000000000000000000000006",
-    amount: "0.001",
+    address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    amount: "0.05",
     hasPermit2Allowance: false,
   },
   // {
@@ -52,7 +52,7 @@ const mockOutputNetwork: Network = {
   label: "Binance Smart Chain Testnet",
   enabled: true,
   rpc: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
-  contractAddress: "0x03385697B62270019402A3fA5e538F6d8B52e4da",
+  contractAddress: "0x1F8a0e5E66D808bA4BE3D27D7FB1B1190A30DD63",
   zrc20Address: "0xd97B1de3619ed2c6BEb3860147E30cA8A7dC9891",
   nativeToken: {
     name: "BNB",

@@ -30,12 +30,6 @@ const SwapPreview = () => {
   const [quoteTime, setQuoteTime] = useState(30);
   const previewModalRef = useRef<HTMLDialogElement>(null);
 
-  const errorSignature = "SwapFailed(address,bytes)";
-  const errorHash = keccak256(toUtf8Bytes(errorSignature));
-  const errorSelector = errorHash.substring(0, 10); // First 4 bytes as selector
-  console.log(`Error hash: ${errorHash}`);
-  console.log(`Selector: ${errorSelector}`);
-
   const client = usePublicClient({ config: wagmiConfig });
 
   // useEffect(() => {

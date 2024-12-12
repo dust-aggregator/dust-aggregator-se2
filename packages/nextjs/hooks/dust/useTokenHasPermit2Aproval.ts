@@ -25,7 +25,6 @@ export const useTokenHasPermit2Approval = (tokenAddress: string, amount: bigint)
   useEffect(() => {
     if (approvedAmount !== undefined && !isError) {
       if (approvedAmount >= BigInt(amount)) {
-        console.log({ approvedAmount, amount, tokenAddress });
         setHasApproval(true);
       }
       setNeedsRefresh(false);
