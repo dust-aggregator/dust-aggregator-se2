@@ -6,6 +6,7 @@ import { encode } from "punycode";
 import { parseUnits } from "viem";
 import { useAccount, useSignTypedData, useWriteContract } from "wagmi";
 import { getAccount } from "wagmi/actions";
+import { getGasLimitByOutputToken } from "~~/lib/constants";
 import { TokenSwap } from "~~/lib/types";
 import {
   encodeDestinationPayload,
@@ -47,12 +48,15 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
       return { deadline, nonce, signature };
     };
 
+    const gasLimit = getGasLimitByOutputToken(outputToken.address);
+    const recipient = address as `0x${string}`;
+
     try {
       const encodedParameters = encodeZetachainPayload(
         outputNetwork.zrc20Address,
-        BigInt(250000), // for ERC20. 120000 for wNative
+        gasLimit,
         outputNetwork.contractAddress,
-        address,
+        recipient,
         outputToken.address,
         BigInt(1),
       );

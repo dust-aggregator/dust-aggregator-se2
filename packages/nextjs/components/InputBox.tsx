@@ -77,8 +77,6 @@ const InputBox = () => {
         : section,
     );
 
-    console.log(updatedOptions);
-
     const filteredTokens = updatedOptions
       .flatMap((section: any) => section.options)
       .filter((option: any) => {
