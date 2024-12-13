@@ -176,7 +176,7 @@ const InputBox = () => {
       //   }
       // }
       const filteredTokens = filteredBalancesByUsdValue.filter(
-        token => token?.chainId?.replace("eip155:", "") === networks[i].chainId.toString(),
+        token => token?.chainId?.replace("eip155:", "") === networks[i].chainId.toString() && token?.address,
       );
 
       if (filteredTokens.length > 0) {
@@ -261,8 +261,6 @@ const InputBox = () => {
       }
     }
   }
-
-
 
   return (
     <UserActionBoxContainer glow={false}>
