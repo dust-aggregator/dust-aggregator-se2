@@ -17,8 +17,6 @@ import {
 import { useGlobalState } from "~~/services/store/store";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
-const dustTokensContractPolygon = "0xC4b1221701ED9EeCbA01d5f52D60Cb95a9d492a2";
-
 interface Props {
   togglePreviewModal: () => void;
 }
@@ -26,7 +24,7 @@ interface Props {
 const ConfirmButton = ({ togglePreviewModal }: Props) => {
   const [resultModalOpen, setResultModalOpen] = useState(false);
   const { address } = useAccount();
-  const { outputNetwork, outputToken, inputTokens } = useGlobalState();
+  const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   const { writeContract, isError, ...rest } = useWriteContract();
   // const { signTypedData } = useSignTypedData();
   const { chainId } = getAccount(wagmiConfig);
@@ -41,7 +39,7 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
       const { domain, types, values, deadline, nonce } = await preparePermitData(
         chainId,
         swaps,
-        dustTokensContractPolygon,
+        inputNetwork?.contractAddress,
       );
       const signature = await signer.signTypedData(domain, types, values);
 
@@ -70,10 +68,11 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
       const permit = await signPermit(tokenSwaps);
 
       writeContract({
-        address: "0xC4b1221701ED9EeCbA01d5f52D60Cb95a9d492a2",
+        address: inputNetwork?.contractAddress,
         abi: dustAbi,
         functionName: "SwapAndBridgeTokens",
         args: [tokenSwaps, encodedParameters, permit.nonce, permit.deadline, permit.signature],
+        enabled: !!inputNetwork,
       });
     } catch (error) {
       console.error("WHOOOPS", error);

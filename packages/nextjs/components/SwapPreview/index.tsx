@@ -4,7 +4,6 @@ import InputToken from "./InputToken";
 import { keccak256, toUtf8Bytes } from "ethers";
 import { ethers } from "ethers";
 import { parseUnits } from "viem";
-import chains from "viem/chains";
 import { useAccount, usePublicClient } from "wagmi";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 // import { useEthersProvider } from "~~/hooks/dust";
@@ -27,11 +26,10 @@ const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
 };
 
 const SwapPreview = () => {
-  const { outputNetwork, outputToken, inputTokens } = useGlobalState();
+  const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
   const previewModalRef = useRef<HTMLDialogElement>(null);
-  const { chain } = useAccount(wagmiConfig);
 
   const client = usePublicClient({ config: wagmiConfig });
 
@@ -98,7 +96,7 @@ const SwapPreview = () => {
     }
   };
 
-  const readyForPreview = !!outputNetwork && !!outputToken && inputTokens.length > 0;
+  const readyForPreview = !!inputNetwork && !!outputNetwork && !!outputToken && inputTokens.length > 0;
 
   const togglePreviewModal = getToggleModal(previewModalRef);
   const closePreviewModal = () => {
@@ -127,7 +125,7 @@ const SwapPreview = () => {
         <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded">
           <h3 className="font-bold text-xl">Input Tokens</h3>
           <div className="text-[#9D9D9D]">
-            <span>{chain?.name}</span>
+            <span>{inputNetwork?.name}</span>
             <ul>
               {inputTokens.map(token => (
                 <li key={token.symbol} className="flex justify-between">

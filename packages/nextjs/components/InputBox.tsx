@@ -10,7 +10,7 @@ import { AllTokensPrices } from "./token-prices/AllTokensPrices";
 import { useAccount } from "wagmi";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
 import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
-import { networks } from "~~/lib/constants";
+import { SUPPORTED_NETWORKS, networks } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
 
@@ -268,10 +268,11 @@ const InputBox = () => {
   const setInputNetwork = useGlobalState(({ setInputNetwork }) => setInputNetwork);
 
   useEffect(() => {
-    const inputNetwork = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
+    const inputNetworkName = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
+    const inputNetwork = SUPPORTED_NETWORKS.find(network => network.name === inputNetworkName);
 
-    setInputNetwork(inputNetwork);
-    setInputNetworkLocal(inputNetwork);
+    setInputNetwork(inputNetwork || null);
+    setInputNetworkLocal(inputNetworkName);
   }, [networkOptions2, networkOptions2.length]);
 
   let updatedOptions2: any[] = [];
