@@ -267,7 +267,6 @@ const InputBox = () => {
   }
 
   const selectedNetwork = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
-  console.log(selectedNetwork);
 
   let updatedOptions2: any[] = [];
   if (selectedNetwork === undefined) {
@@ -277,8 +276,6 @@ const InputBox = () => {
       return option.section === selectedNetwork;
     });
   }
-
-  console.log(updatedOptions2);
 
   return (
     <UserActionBoxContainer glow={false}>
