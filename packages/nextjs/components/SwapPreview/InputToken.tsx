@@ -8,7 +8,6 @@ import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
 
 const InputToken = ({ token }) => {
   const parsedAmount = parseUnits(token.amount, token.decimals);
-  console.log(token);
   const { hasApproval, refresh } = useTokenHasPermit2Approval(token.address, parsedAmount);
   const { writeContract, isPending, isError, isSuccess, error } = useWriteContract();
 

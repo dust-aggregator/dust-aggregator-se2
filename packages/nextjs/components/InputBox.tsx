@@ -52,8 +52,6 @@ const InputBox = () => {
         const apiResponseJson = await apiResponse.json();
 
         setWalletConnectBalances(apiResponseJson.balances);
-
-        console.log(apiResponseJson.balances);
       }
 
       setIsLoadingTokens(false);
@@ -79,7 +77,7 @@ const InputBox = () => {
         : section,
     );
 
-    // console.log(updatedOptions);
+    console.log(updatedOptions);
 
     const filteredTokens = updatedOptions
       .flatMap((section: any) => section.options)
@@ -267,7 +265,16 @@ const InputBox = () => {
     }
   }
 
-  const selectedNetwork = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
+  const [selectedNetwork, setSelectedNetworkLocal] = useState();
+
+  const setSelectedNetwork = useGlobalState(({ setSelectedNetwork }) => setSelectedNetwork);
+
+  useEffect(() => {
+    const selectedNetwork = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
+
+    setSelectedNetwork(selectedNetwork);
+    setSelectedNetworkLocal(selectedNetwork);
+  }, [networkOptions2, networkOptions2.length]);
 
   let updatedOptions2: any[] = [];
   if (selectedNetwork === undefined) {
