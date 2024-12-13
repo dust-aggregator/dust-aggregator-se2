@@ -47,6 +47,7 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
     };
 
     const gasLimit = getGasLimitByOutputToken(outputToken.address);
+    console.log({ gasLimit });
     const recipient = address as `0x${string}`;
 
     try {

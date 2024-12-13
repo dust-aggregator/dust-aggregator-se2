@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { Alchemy, Network } from "alchemy-sdk";
-import { erc20Abi, parseUnits } from "viem";
-import { useAccount, useReadContract } from "wagmi";
+import { Alchemy } from "alchemy-sdk";
+import { zeroAddress } from "viem";
+import { useReadContract } from "wagmi";
 import dustAbi from "~~/components/SwapPreview/dustAbi.json";
-import { ADDRESSES_BY_CHAIN_ID, PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
 import { OutputToken } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
 
@@ -11,10 +10,9 @@ export const useTokenWhitelist = () => {
   const [tokens, setTokens] = useState<OutputToken[]>([]);
   const { outputNetwork } = useGlobalState();
 
-  // get DT address
   const evmDustTokensAddress = outputNetwork?.contractAddress;
 
-  const { data: tokenAddresses, ...rest } = useReadContract({
+  const { data: tokenAddresses } = useReadContract({
     abi: dustAbi,
     address: evmDustTokensAddress,
     functionName: "getTokenList",
@@ -28,6 +26,7 @@ export const useTokenWhitelist = () => {
   const alchemy = new Alchemy(config);
 
   useEffect(() => {
+    const nativeCurrencyWithAddress = { address: zeroAddress, ...outputNetwork?.nativeCurrency };
     const getAllTokenMetadata = async addresses => {
       const allTokenData = await Promise.all(
         addresses.map(async address => {
@@ -35,7 +34,7 @@ export const useTokenWhitelist = () => {
           return { address, ...tokenMetadata };
         }),
       );
-      setTokens(allTokenData);
+      setTokens([nativeCurrencyWithAddress, ...allTokenData]);
     };
 
     if (tokenAddresses) {

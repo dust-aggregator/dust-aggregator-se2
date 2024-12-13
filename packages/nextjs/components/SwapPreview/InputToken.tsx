@@ -13,7 +13,8 @@ const InputToken = ({ token }) => {
 
   useEffect(() => {
     if (isSuccess) refresh();
-  }, [isSuccess, refresh]);
+    if (error) console.error(error);
+  }, [isSuccess, refresh, error]);
 
   const handleApprove = async () => {
     writeContract({

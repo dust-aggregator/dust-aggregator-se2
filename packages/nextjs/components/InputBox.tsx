@@ -268,7 +268,8 @@ const InputBox = () => {
   const setInputNetwork = useGlobalState(({ setInputNetwork }) => setInputNetwork);
 
   useEffect(() => {
-    const inputNetworkName = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
+    let inputNetworkName = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
+    if (inputNetworkName === "Matic") inputNetworkName = "Polygon";
     const inputNetwork = SUPPORTED_NETWORKS.find(network => network.name === inputNetworkName);
 
     setInputNetwork(inputNetwork || null);
