@@ -6,6 +6,7 @@ import { ethers } from "ethers";
 import { parseUnits } from "viem";
 import chains from "viem/chains";
 import { useAccount, usePublicClient } from "wagmi";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 // import { useEthersProvider } from "~~/hooks/dust";
 import { truncateToDecimals } from "~~/lib/utils";
 import { getUniswapV3EstimatedAmountOut } from "~~/lib/zetachainUtils";
@@ -112,7 +113,6 @@ const SwapPreview = () => {
   totalUsdValue -= networkFee;
   totalUsdValue -= commission;
 
-  console.log(inputTokens);
   return (
     <div>
       <button
