@@ -20,11 +20,11 @@ const OutputBox = () => {
   const { tokens: whitelistedTokens } = useTokenWhitelist();
 
   const handleSelectNetwork = network => {
-    const newSelectedNetwork = SUPPORTED_NETWORKS.find(({ id }) => id === network.value);
-    setOutputNetwork(newSelectedNetwork);
+    const newInputNetwork = SUPPORTED_NETWORKS.find(({ id }) => id === network.value);
+    setOutputNetwork(newInputNetwork);
   };
 
-  const formattedSelectedNetwork = {
+  const formattedInputNetwork = {
     label: outputNetwork?.name || "Select Network",
     value: outputNetwork?.id || "",
   };
@@ -38,7 +38,7 @@ const OutputBox = () => {
             title="Select Network"
             options={networkOptions}
             onChange={handleSelectNetwork}
-            selectedOption={formattedSelectedNetwork}
+            selectedOption={formattedInputNetwork}
           />
           <div className="flex justify-center">
             <p className="text-[#9D9D9D] text-xs my-1">And</p>
