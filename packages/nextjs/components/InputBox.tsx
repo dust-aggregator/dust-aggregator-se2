@@ -95,6 +95,7 @@ const InputBox = () => {
         amount: token.amountToDust,
         address: token.address,
         symbol: token.symbol,
+        usdValue: token.usdValue,
         hasPermit2Allowance: false,
       };
     });

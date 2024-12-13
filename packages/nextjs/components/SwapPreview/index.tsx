@@ -106,6 +106,13 @@ const SwapPreview = () => {
     }
   };
 
+  const networkFee = 0.43;
+  const commission = 0.21;
+  let totalUsdValue = inputTokens.reduce((sum, item) => sum + (item.usdValue || 0), 0);
+  totalUsdValue -= networkFee;
+  totalUsdValue -= commission;
+
+  console.log(inputTokens);
   return (
     <div>
       <button
@@ -144,13 +151,18 @@ const SwapPreview = () => {
             <div className="w-full flex justify-center">
               <p>new quote in: 0:{String(quoteTime).padStart(2, "0")}</p>
             </div>
+
             <div className="flex justify-between">
               <h4 className="font-bold">Network fee</h4>
-              <span className="text-[#FFFFFF]">$0.43</span>
+              <span className="text-[#FFFFFF]">${networkFee}</span>
             </div>
             <div className="flex justify-between">
               <h4 className="font-bold">Commission (0.25%)</h4>
-              <span className="text-[#FFFFFF]">$0.21</span>
+              <span className="text-[#FFFFFF]">${commission}</span>
+            </div>
+            <div className="flex justify-between">
+              <h4 className="font-bold">Estimated Return</h4>
+              <span className="text-[#FFFFFF]">${totalUsdValue.toFixed(2)}</span>
             </div>
             <div className="text=[#FFFFF]"></div>
           </div>

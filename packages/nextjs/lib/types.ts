@@ -12,6 +12,7 @@ export interface Token {
 
 export type SelectedToken = Token & {
   amount: string;
+  usdValue: number;
   hasPermit2Allowance: boolean;
 };
 
