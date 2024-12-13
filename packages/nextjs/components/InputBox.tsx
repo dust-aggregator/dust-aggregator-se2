@@ -52,6 +52,8 @@ const InputBox = () => {
         const apiResponseJson = await apiResponse.json();
 
         setWalletConnectBalances(apiResponseJson.balances);
+
+        console.log(apiResponseJson.balances);
       }
 
       setIsLoadingTokens(false);
@@ -76,6 +78,8 @@ const InputBox = () => {
           }
         : section,
     );
+
+    // console.log(updatedOptions);
 
     const filteredTokens = updatedOptions
       .flatMap((section: any) => section.options)
@@ -262,6 +266,20 @@ const InputBox = () => {
     }
   }
 
+  const selectedNetwork = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
+  console.log(selectedNetwork);
+
+  let updatedOptions2: any[] = [];
+  if (selectedNetwork === undefined) {
+    updatedOptions2 = networkOptions2;
+  } else {
+    updatedOptions2 = networkOptions2.filter((option: any) => {
+      return option.section === selectedNetwork;
+    });
+  }
+
+  console.log(updatedOptions2);
+
   return (
     <UserActionBoxContainer glow={false}>
       {connectedAccount?.address ? (
@@ -288,7 +306,7 @@ const InputBox = () => {
             <div className="flex gap-2">
               <CategorySelectInputBox
                 title="Select tokens"
-                options={networkOptions2}
+                options={updatedOptions2}
                 // onSelect={updateSpecificOption}
                 onChange={updateSpecificOption}
               />
