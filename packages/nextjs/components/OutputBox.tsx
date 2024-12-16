@@ -11,6 +11,7 @@ import { Token } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
 import pasteSVG from "~~/public/assets/paste.svg";
 import Image from "next/image";
+import ConfirmButton from "./SwapPreview/ConfirmButton";
 
 const evmNetworkOptions = SUPPORTED_NETWORKS.map(({ id, name }) => ({ label: name, value: id }));
 
@@ -60,7 +61,12 @@ const OutputBox = () => {
           <div className="flex justify-center">
             <p className="text-[#9D9D9D] text-xs my-1">And</p>
           </div>
-          <Select title="Select Token" options={tokenOptions} onChange={setOutputToken} selectedOption={outputToken} />
+          <Select
+            title="Select Token"
+            options={whitelistedTokens}
+            onChange={setOutputToken}
+            selectedOption={outputToken}
+          />
 
           <div className="flex flex-col gap-2 my-2">
             <div>
@@ -131,6 +137,8 @@ const OutputBox = () => {
           </div>
 
           <SwapPreview />
+
+          {/* <ConfirmButton togglePreviewModal={() => {{}}} /> */}
         </>
       ) : (
         <></>
