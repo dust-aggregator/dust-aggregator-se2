@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import CategorySelect from "./CategorySelect";
 import CategorySelectInputBox from "./CategorySelectInputBox";
@@ -10,12 +10,13 @@ import { AllTokensPrices } from "./token-prices/AllTokensPrices";
 import { useAccount } from "wagmi";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
 import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
-import { networks } from "~~/lib/constants";
+import { SUPPORTED_NETWORKS, networks } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
 
 const InputBox = () => {
   const [dustThresholdValue, setDustThresholdValue] = useState<number>(5);
+  const { inputTokens } = useGlobalState();
 
   function handleChange(e: any) {
     setDustThresholdValue(e.target.value);
@@ -61,7 +62,7 @@ const InputBox = () => {
 
   const [networkOptions2, setNetworkOptions2] = useState<any[]>([]);
 
-  const setOutputTokensByNetwork = useGlobalState(({ setOutputTokensByNetwork }) => setOutputTokensByNetwork);
+  const setInputTokens = useGlobalState(({ setInputTokens }) => setInputTokens);
 
   // Update disabled property function
   const updateSpecificOption = (sectionKey: string, optionValue: string, selected: boolean, amountToDust: number) => {
@@ -82,7 +83,7 @@ const InputBox = () => {
         return option.selected === true;
       });
 
-    const outputTokens = filteredTokens.map((token: any, index: number) => {
+    const selectedInputTokens = filteredTokens.map((token: any, index: number) => {
       return {
         name: token.label,
         decimals: token.decimals,
@@ -90,11 +91,12 @@ const InputBox = () => {
         amount: token.amountToDust,
         address: token.address,
         symbol: token.symbol,
+        usdValue: token.usdValue,
         hasPermit2Allowance: false,
       };
     });
 
-    setOutputTokensByNetwork(outputTokens);
+    setInputTokens(selectedInputTokens);
 
     setNetworkOptions2(updatedOptions);
   };
@@ -175,7 +177,7 @@ const InputBox = () => {
       //   }
       // }
       const filteredTokens = filteredBalancesByUsdValue.filter(
-        token => token?.chainId?.replace("eip155:", "") === networks[i].chainId.toString(),
+        token => token?.chainId?.replace("eip155:", "") === networks[i].chainId.toString() && token?.address,
       );
 
       if (filteredTokens.length > 0) {
@@ -261,7 +263,27 @@ const InputBox = () => {
     }
   }
 
+  const [inputNetwork, setInputNetworkLocal] = useState();
 
+  const setInputNetwork = useGlobalState(({ setInputNetwork }) => setInputNetwork);
+
+  useEffect(() => {
+    let inputNetworkName = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
+    if (inputNetworkName === "Matic") inputNetworkName = "Polygon";
+    const inputNetwork = SUPPORTED_NETWORKS.find(network => network.name === inputNetworkName);
+
+    setInputNetwork(inputNetwork || null);
+    setInputNetworkLocal(inputNetworkName);
+  }, [networkOptions2, networkOptions2.length]);
+
+  let updatedOptions2: any[] = [];
+  if (inputNetwork === undefined) {
+    updatedOptions2 = networkOptions2;
+  } else {
+    updatedOptions2 = networkOptions2.filter((option: any) => {
+      return option.section === inputNetwork;
+    });
+  }
 
   return (
     <UserActionBoxContainer>
@@ -289,7 +311,7 @@ const InputBox = () => {
             <div className="flex gap-2">
               <CategorySelectInputBox
                 title="Select tokens"
-                options={networkOptions2}
+                options={updatedOptions2}
                 // onSelect={updateSpecificOption}
                 onChange={updateSpecificOption}
               />

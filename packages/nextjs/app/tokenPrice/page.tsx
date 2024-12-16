@@ -49,8 +49,6 @@ const TokenPrice: NextPage = () => {
   // const [tokens, setTokens] = useState([]);
   const [tokens2, setTokens2] = useState<any[]>([]);
 
-  console.log(tokens2);
-
   // const tokenComponents = tokens.map((token: any, index: number) => {
   //   return (
   //     <div className="flex gap-1">

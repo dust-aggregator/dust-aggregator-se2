@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import SwapResultModal from "../SwapResultModal";
 import dustAbi from "./dustAbi.json";
 import { ethers } from "ethers";
+import { encode } from "punycode";
 import { parseUnits } from "viem";
 import { useAccount, useSignTypedData, useWriteContract } from "wagmi";
 import { getAccount } from "wagmi/actions";
+import { getGasLimitByOutputToken } from "~~/lib/constants";
 import { TokenSwap } from "~~/lib/types";
 import {
   encodeDestinationPayload,
@@ -15,8 +17,6 @@ import {
 import { useGlobalState } from "~~/services/store/store";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
-const dustTokensContractBaseSep = "0x300abcE823C6C015c8dD31e35cA7B0602d9f2a10";
-
 interface Props {
   togglePreviewModal: () => void;
 }
@@ -24,7 +24,7 @@ interface Props {
 const ConfirmButton = ({ togglePreviewModal }: Props) => {
   const [resultModalOpen, setResultModalOpen] = useState(false);
   const { address } = useAccount();
-  const { outputNetwork, outputToken, inputTokens } = useGlobalState();
+  const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   const { writeContract, isError, ...rest } = useWriteContract();
   // const { signTypedData } = useSignTypedData();
   const { chainId } = getAccount(wagmiConfig);
@@ -39,40 +39,41 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
       const { domain, types, values, deadline, nonce } = await preparePermitData(
         chainId,
         swaps,
-        dustTokensContractBaseSep,
+        inputNetwork?.contractAddress,
       );
       const signature = await signer.signTypedData(domain, types, values);
 
       return { deadline, nonce, signature };
     };
 
-    try {
-      const recipient = address as string;
+    const gasLimit = getGasLimitByOutputToken(outputToken.address);
+    console.log({ gasLimit });
+    const recipient = address as `0x${string}`;
 
-      // Step 1: Prepare payloads
-      const outputTokenAddress = outputToken.address;
-      const destinationPayload = encodeDestinationPayload(recipient, outputTokenAddress);
+    try {
       const encodedParameters = encodeZetachainPayload(
         outputNetwork.zrc20Address,
+        gasLimit,
         outputNetwork.contractAddress,
         recipient,
-        destinationPayload,
+        outputToken.address,
+        BigInt(1),
       );
+
       const tokenSwaps: TokenSwap[] = inputTokens.map(({ amount, decimals, address }) => ({
         amount: parseUnits(amount, decimals),
         token: address,
-        minAmountOut: BigInt(0), // TODO: Set a minimum amount out
+        minAmountOut: BigInt(1), // TODO: Set a minimum amount out
       }));
 
-      // Step 2: Create Permit2 Batch transfer signature
       const permit = await signPermit(tokenSwaps);
 
-      // Step 3: Perform swap and bridge transaction
       writeContract({
-        address: dustTokensContractBaseSep,
+        address: inputNetwork?.contractAddress,
         abi: dustAbi,
         functionName: "SwapAndBridgeTokens",
         args: [tokenSwaps, encodedParameters, permit.nonce, permit.deadline, permit.signature],
+        enabled: !!inputNetwork,
       });
     } catch (error) {
       console.error("WHOOOPS", error);

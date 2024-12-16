@@ -1,9 +1,8 @@
 import { Token } from "~~/lib/types";
 
 interface Option {
-  value: string;
-  label: string;
-  decorator: any;
+  name: string;
+  symbol: string;
 }
 
 interface Props {
@@ -34,14 +33,11 @@ const Select = ({ className, title, options, selectedOption, onChange }: Props) 
         {selectedOption?.name || title}
       </div>
       <ul tabIndex={0} className="w-full dropdown-content menu rounded-box z-[1] p-2 shadow-inner-xl mt-1 bg-[#3C3731]">
-        {options.map(({ value, label, decorator }) => (
-          <li key={value}>
-            <a
-              onClick={() => handleClick({ label, value })}
-              className="text-xs text-[#9D9D9D] px-2 py-1 flex justify-between"
-            >
-              <span>{label}</span>
-              <span>{decorator}</span>
+        {options.map(option => (
+          <li key={option.symbol}>
+            <a onClick={() => handleClick(option)} className="text-xs text-[#9D9D9D] px-2 py-1 flex justify-between">
+              <span>{option.name}</span>
+              <span>{option.symbol}</span>
             </a>
           </li>
         ))}

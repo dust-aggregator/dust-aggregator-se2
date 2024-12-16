@@ -9,11 +9,12 @@ import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
 const InputToken = ({ token }) => {
   const parsedAmount = parseUnits(token.amount, token.decimals);
   const { hasApproval, refresh } = useTokenHasPermit2Approval(token.address, parsedAmount);
-  const { writeContract, isPending, isError, isSuccess } = useWriteContract();
+  const { writeContract, isPending, isError, isSuccess, error } = useWriteContract();
 
   useEffect(() => {
     if (isSuccess) refresh();
-  }, [isSuccess, refresh]);
+    if (error) console.error(error);
+  }, [isSuccess, refresh, error]);
 
   const handleApprove = async () => {
     writeContract({
@@ -31,7 +32,7 @@ const InputToken = ({ token }) => {
       <div>
         <span className="px-2">•</span>
         <span>
-          {token.name} ({token.ticker})
+          {token.name} ({token.symbol})
         </span>
       </div>
       <span className="text-[#2DC7FF] flex">

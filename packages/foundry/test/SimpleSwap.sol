@@ -82,7 +82,7 @@ contract SimpleSwap {
                     fee: 3000,
                     recipient: msg.sender, // Swap to this contract
                     amountIn: amountIn,
-                    amountOutMinimum: 1, // Adjust for slippage tolerance
+                    amountOutMinimum: 0, // Adjust for slippage tolerance
                     sqrtPriceLimitX96: 0
                 });
 

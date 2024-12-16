@@ -178,7 +178,7 @@
               <div className="flex items-center justify-center mt-4">
                 <SwapPreviewDrawer
                   selectedTokens={selectedTokens}
-                  selectedNetwork={selectedNetwork}
+                  inputNetwork={inputNetwork}
                   selectedOutputToken={selectedOutputToken}
                   disabled={loading || transactionStatus !== "notStarted"}
                 />
@@ -221,7 +221,7 @@
                             loading || transactionStatus !== "notStarted"
                           }
                         >
-                          {selectedNetwork?.label || "Select Network"}
+                          {inputNetwork?.label || "Select Network"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -240,7 +240,7 @@
                                   <Check
                                     className={cn(
                                       "mr-2 h-4 w-4",
-                                      selectedNetwork?.value === network.value
+                                      inputNetwork?.value === network.value
                                         ? "opacity-100"
                                         : "opacity-0"
                                     )}
@@ -266,13 +266,13 @@
                           className="w-full justify-between"
                           disabled={
                             loading ||
-                            !selectedNetwork ||
+                            !inputNetwork ||
                             transactionStatus !== "notStarted" ||
                             balancesPendingDestination
                           }
                         >
                           {selectedOutputToken?.name ||
-                            (!selectedNetwork
+                            (!inputNetwork
                               ? "Select Network"
                               : balancesPendingDestination
                               ? "Loading..."

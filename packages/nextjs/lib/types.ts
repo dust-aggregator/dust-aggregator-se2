@@ -1,4 +1,6 @@
+import { Network as AlchemyNetwork } from "alchemy-sdk";
 import { BigNumberish, ethers } from "ethers";
+import { Chain } from "viem/chains";
 
 export interface Token {
   name: string;
@@ -10,18 +12,15 @@ export interface Token {
 
 export type SelectedToken = Token & {
   amount: string;
+  usdValue: number;
   hasPermit2Allowance: boolean;
 };
 
-export type Network = {
-  id: number;
-  value: string;
-  label: string;
-  enabled: boolean;
-  rpc: string;
-  contractAddress: string;
+export type Network = Chain & {
+  contractAddress: `0x${string}`;
   zrc20Address: string;
-  nativeToken: Token;
+  alchemyName: string;
+  wNativeAddress: string;
 };
 
 export type TransactionState = "notStarted" | "sourcePending" | "zetaPending" | "destinationPending" | "completed";
@@ -30,4 +29,15 @@ export type TokenSwap = {
   amount: BigNumberish;
   token: string;
   minAmountOut: BigNumberish;
+};
+
+export type AlchemyTokenData = {
+  decimals: number;
+  logo: string | null;
+  name: string;
+  symbol: string;
+};
+
+export type OutputToken = AlchemyTokenData & {
+  address: string;
 };

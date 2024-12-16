@@ -4,7 +4,8 @@ import InputToken from "./InputToken";
 import { keccak256, toUtf8Bytes } from "ethers";
 import { ethers } from "ethers";
 import { parseUnits } from "viem";
-import { usePublicClient } from "wagmi";
+import { useAccount, usePublicClient } from "wagmi";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 // import { useEthersProvider } from "~~/hooks/dust";
 import { truncateToDecimals } from "~~/lib/utils";
 import { getUniswapV3EstimatedAmountOut } from "~~/lib/zetachainUtils";
@@ -25,16 +26,10 @@ const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
 };
 
 const SwapPreview = () => {
-  const { outputNetwork, outputToken, inputTokens } = useGlobalState();
+  const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
   const previewModalRef = useRef<HTMLDialogElement>(null);
-
-  const errorSignature = "SwapFailed(address,bytes)";
-  const errorHash = keccak256(toUtf8Bytes(errorSignature));
-  const errorSelector = errorHash.substring(0, 10); // First 4 bytes as selector
-  console.log(`Error hash: ${errorHash}`);
-  console.log(`Selector: ${errorSelector}`);
 
   const client = usePublicClient({ config: wagmiConfig });
 
@@ -101,7 +96,7 @@ const SwapPreview = () => {
     }
   };
 
-  const readyForPreview = !!outputNetwork && !!outputToken;
+  const readyForPreview = !!inputNetwork && !!outputNetwork && !!outputToken && inputTokens.length > 0;
 
   const togglePreviewModal = getToggleModal(previewModalRef);
   const closePreviewModal = () => {
@@ -109,6 +104,12 @@ const SwapPreview = () => {
       previewModalRef.current.close();
     }
   };
+
+  const networkFee = 0.43;
+  const commission = 0.21;
+  let totalUsdValue = inputTokens.reduce((sum, item) => sum + (item.usdValue || 0), 0);
+  totalUsdValue -= networkFee;
+  totalUsdValue -= commission;
 
   return (
     <div>
@@ -124,7 +125,7 @@ const SwapPreview = () => {
         <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded">
           <h3 className="font-bold text-xl">Input Tokens</h3>
           <div className="text-[#9D9D9D]">
-            <span>Optimism</span>
+            <span>{inputNetwork?.name}</span>
             <ul>
               {inputTokens.map(token => (
                 <li key={token.symbol} className="flex justify-between">
@@ -134,7 +135,7 @@ const SwapPreview = () => {
             </ul>
           </div>
           <h3 className="font-bold text-xl mt-2">Output Token</h3>
-          <span className="text-[#9D9D9D]">{outputNetwork?.label}</span>
+          <span className="text-[#9D9D9D]">{outputNetwork?.name}</span>
           <div key={outputToken?.name} className="flex justify-between mb-24">
             <div>
               <span className="px-2">•</span>
@@ -148,13 +149,18 @@ const SwapPreview = () => {
             <div className="w-full flex justify-center">
               <p>new quote in: 0:{String(quoteTime).padStart(2, "0")}</p>
             </div>
+
             <div className="flex justify-between">
               <h4 className="font-bold">Network fee</h4>
-              <span className="text-[#FFFFFF]">$0.43</span>
+              <span className="text-[#FFFFFF]">${networkFee}</span>
             </div>
             <div className="flex justify-between">
               <h4 className="font-bold">Commission (0.25%)</h4>
-              <span className="text-[#FFFFFF]">$0.21</span>
+              <span className="text-[#FFFFFF]">${commission}</span>
+            </div>
+            <div className="flex justify-between">
+              <h4 className="font-bold">Estimated Return</h4>
+              <span className="text-[#FFFFFF]">${totalUsdValue.toFixed(2)}</span>
             </div>
             <div className="text=[#FFFFF]"></div>
           </div>

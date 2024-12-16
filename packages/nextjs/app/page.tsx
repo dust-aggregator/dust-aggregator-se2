@@ -110,7 +110,7 @@ export default function Component() {
   // const [openNetwork, setOpenNetwork] = useState(false);
   // const [openOutputToken, setOpenOutputToken] = useState(false);
   // const [selectedTokens, setSelectedTokens] = useState<any[]>(MOCK_SELECTED_TOKENS);
-  // const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
+  // const [inputNetwork, setInputNetwork] = useState<Network | null>(null);
   // const [transactionStatus, setTransactionStatus] = useState<TransactionState>("notStarted");
 
   // const { address, isConnected } = useAccount();
@@ -155,24 +155,24 @@ export default function Component() {
   // // MARK: Destination chain contract hooks
   // const { data: rawBalancesDestination, isPending: balancesPendingDestination } = useReadContract({
   //   abi: EvmDustTokens.abi,
-  //   address: selectedNetwork?.contractAddress as `0x${string}`,
-  //   chainId: selectedNetwork?.id,
+  //   address: inputNetwork?.contractAddress as `0x${string}`,
+  //   chainId: inputNetwork?.id,
   //   functionName: "getBalances",
   //   args: [address],
   //   query: {
-  //     enabled: !!address && !!selectedNetwork,
+  //     enabled: !!address && !!inputNetwork,
   //   },
   // });
 
   // useWatchContractEvent({
   //   abi: EvmDustTokens.abi,
-  //   address: selectedNetwork?.contractAddress as `0x${string}`,
-  //   chainId: selectedNetwork?.id,
+  //   address: inputNetwork?.contractAddress as `0x${string}`,
+  //   chainId: inputNetwork?.id,
   //   eventName: "SwappedAndWithdrawn",
   //   args: {
   //     receiver: address,
   //   },
-  //   enabled: !!address && !!selectedNetwork,
+  //   enabled: !!address && !!inputNetwork,
   //   onLogs(logs) {
   //     // Loop through logs and check if the executor is the recipient
   //     logs.forEach((log: any) => {
@@ -235,7 +235,7 @@ export default function Component() {
   // };
 
   // const handleSelectNetwork = (network: Network) => {
-  //   setSelectedNetwork(network);
+  //   setInputNetwork(network);
   //   setOpenNetwork(false);
   // };
 
@@ -264,7 +264,7 @@ export default function Component() {
   // const handleReset = () => {
   //   setSelectedTokens([]);
   //   setSelectedOutputToken(null);
-  //   setSelectedNetwork(null);
+  //   setInputNetwork(null);
   //   setTransactionStatus("notStarted");
   // };
 

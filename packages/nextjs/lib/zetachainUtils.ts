@@ -5,7 +5,7 @@ import { simulateContract } from "@wagmi/core";
 import { createConfig, http } from "@wagmi/core";
 import { baseSepolia, mainnet, sepolia } from "@wagmi/core/chains";
 import { AbiCoder, ethers } from "ethers";
-import { PublicClient, encodeFunctionData, parseAbi } from "viem";
+import { PublicClient, concatHex, encodeAbiParameters, encodeFunctionData, pad, parseAbi } from "viem";
 
 type AddressData = {
   chain: string;
@@ -53,34 +53,54 @@ const encodeDestinationPayload = (recipient: string, outputToken: string): strin
 
 const encodeZetachainPayload = (
   targetChainToken: string,
-  targetChainCounterparty: string,
-  recipient: string,
-  destinationPayload: string,
+  gasLimit: bigint,
+  targetChainCounterparty: `0x${string}`,
+  recipient: `0x${string}`,
+  outputToken: `0x${string}`,
+  minAmount: bigint,
 ) => {
-  const args = {
-    types: ["address", "bytes", "bytes", "bytes"],
-    values: [targetChainToken, targetChainCounterparty, recipient, destinationPayload],
+  const params = {
+    targetChainToken,
+    gasLimit,
+    minAmount,
+    originalSender: recipient,
+    targetChainCounterparty: concatHex([pad(targetChainCounterparty, { size: 20 })]),
+    destinationPayload: encodeFunctionData({
+      abi: [
+        {
+          name: "ReceiveTokens",
+          type: "function",
+          inputs: [
+            { name: "outputToken", type: "address" },
+            { name: "recipient", type: "address" },
+            { name: "minAmount", type: "uint256" },
+          ],
+          outputs: [],
+        },
+      ],
+      functionName: "ReceiveTokens",
+      args: [outputToken, recipient, minAmount],
+    }),
   };
 
-  // Prepare encoded parameters for the call
-  const valuesArray = args.values.map((value, index) => {
-    const type = args.types[index];
-    if (type === "bool") {
-      try {
-        return JSON.parse(value.toLowerCase());
-      } catch (e) {
-        throw new Error(`Invalid boolean value: ${value}`);
-      }
-    } else if (type.startsWith("uint") || type.startsWith("int")) {
-      return BigInt(value);
-    } else {
-      return value;
-    }
-  });
+  const encodedParams = encodeAbiParameters(
+    [
+      {
+        type: "tuple",
+        components: [
+          { name: "targetChainToken", type: "address" },
+          { name: "gasLimit", type: "uint256" },
+          { name: "minAmount", type: "uint256" },
+          { name: "originalSender", type: "address" },
+          { name: "targetChainCounterparty", type: "bytes" },
+          { name: "destinationPayload", type: "bytes" },
+        ],
+      },
+    ],
+    [params],
+  );
 
-  const encodedParameters = AbiCoder.defaultAbiCoder().encode(args.types, valuesArray);
-
-  return encodedParameters;
+  return encodedParams;
 };
 
 const preparePermitData = async (chainId: number, swaps: TokenSwap[], spender: string) => {
@@ -125,14 +145,13 @@ async function getUniswapV3EstimatedAmountOut(
   ];
 
   // Initialize the Quoter contract
-  console.log({ tokenIn, tokenOut, amountIn });
   const quoterContract = new ethers.Contract(quoterAddress, abi, provider);
   try {
     const amountOut: ethers.BigNumber = await quoterContract.callStatic.quoteExactInputSingle([
       tokenIn,
       tokenOut,
       String(amountIn),
-      3000,
+      550000,
       0, // sqrtPriceLimitX96, set to 0 for no limit
     ]);
 

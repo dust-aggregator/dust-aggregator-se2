@@ -20,14 +20,14 @@ import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
 type ProfileFormDrawerProps = {
   selectedTokens: SelectedToken[];
-  selectedNetwork: Network;
+  inputNetwork: Network;
   selectedOutputToken: Token;
   disabled?: boolean;
 };
 
 export function SwapPreviewDrawer({
   selectedTokens,
-  selectedNetwork,
+  inputNetwork,
   selectedOutputToken,
   disabled = false,
 }: ProfileFormDrawerProps) {
@@ -49,7 +49,7 @@ export function SwapPreviewDrawer({
     };
 
     initializeProvider();
-  }, [open, selectedTokens, selectedNetwork, selectedOutputToken]);
+  }, [open, selectedTokens, inputNetwork, selectedOutputToken]);
 
   function truncateToDecimals(value: string, decimals: number) {
     if (value.indexOf(".") === -1) {
@@ -63,7 +63,7 @@ export function SwapPreviewDrawer({
   }
 
   const calculateOutputTokenAmount = async () => {
-    if (!open || !selectedOutputToken || !selectedNetwork || !client) {
+    if (!open || !selectedOutputToken || !inputNetwork || !client) {
       return;
     }
     setAmountOut(null);
@@ -141,8 +141,8 @@ export function SwapPreviewDrawer({
       const outputToken = selectedOutputToken.address;
       const destinationPayload = encodeDestinationPayload(recipient, outputToken);
       const encodedParameters = encodeZetachainPayload(
-        selectedNetwork.zrc20Address,
-        selectedNetwork.contractAddress,
+        inputNetwork.zrc20Address,
+        inputNetwork.contractAddress,
         recipient,
         destinationPayload,
       );
@@ -195,7 +195,7 @@ export function SwapPreviewDrawer({
           </div>
           <div className="font-semibold">Output Network & Token:</div>
           <div className="flex justify-between items-center">
-            <span>{`${selectedOutputToken?.name} @ ${selectedNetwork?.label}`}</span>
+            <span>{`${selectedOutputToken?.name} @ ${inputNetwork?.label}`}</span>
             <span>{amountOut ? `${amountOut} ${selectedOutputToken?.symbol}` : "Calculating..."}</span>
           </div>
         </div>
