@@ -1,3 +1,5 @@
+import { Network } from "~~/lib/types";
+
 interface OptionInfo {
   value: string;
   label: string;
@@ -12,7 +14,7 @@ interface Props {
   title: string;
   options: Option[];
   onChange: any; //(option: OptionInfo) => void;
-  selectedOption?: string;
+  selectedOption?: Network;
   className?: string;
 }
 

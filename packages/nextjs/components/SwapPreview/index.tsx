@@ -90,7 +90,7 @@ const SwapPreview = () => {
         slippageBPS,
       );
 
-      const parsedOutputTokenAmount = ethers.utils.formatUnits(outputTokenAmount, outputToken.decimals);
+      const parsedOutputTokenAmount = ethers.formatUnits(outputTokenAmount, outputToken.decimals);
 
       // Truncate to 4 decimal places
       const outputAmountWithFourDecimals = truncateToDecimals(parsedOutputTokenAmount, 4);

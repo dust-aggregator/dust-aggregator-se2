@@ -1,3 +1,5 @@
+import { Token } from "~~/lib/types";
+
 interface Option {
   value: string;
   label: string;
@@ -7,7 +9,7 @@ interface Option {
 interface Props {
   title: string;
   options: Option[];
-  onChange: (option: Option) => void;
+  onChange: (newOutputToken: Token) => void
   selectedOption?: string;
   className?: string;
 }
