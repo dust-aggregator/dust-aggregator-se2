@@ -16,7 +16,7 @@ export const PERMIT2_BASE_SEPOLIA = "0x000000000022D473030F116dDEE9F6B43aC78BA3"
 
 export const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
-export const SUPPORTED_NETWORKS: Network[] = [
+export const SUPPORTED_INPUT_NETWORKS: Network[] = [
   {
     ...polygon,
     contractAddress: "0xC4b1221701ED9EeCbA01d5f52D60Cb95a9d492a2",
@@ -33,16 +33,27 @@ export const SUPPORTED_NETWORKS: Network[] = [
   },
 ];
 
-const GAS_LIMIT_BY_TOKEN_TYPE = {
-  native: 75000,
-  wNative: 120000,
+export const BitcoinNetwork = {
+  name: "Bitcoin",
+  id: "bitcoin",
+  zrc20Address: "0x13A0c5930C028511Dc02665E7285134B6d11A5f4",
+};
+
+export const SUPPORTED_OUTPUT_NETWORKS_BY_ECOSYSTEM = [
+  {
+    ecosystem: "Ethereum",
+    networks: SUPPORTED_INPUT_NETWORKS,
+  },
+  {
+    ecosystem: "Bitcoin",
+    networks: [BitcoinNetwork],
+  },
+];
+
+export const GAS_LIMIT_BY_TOKEN_TYPE = {
+  native: 100000,
+  wNative: 130000,
   erc20: 250000,
 };
 
-const WRAPPED_NATIVE_TOKENS = SUPPORTED_NETWORKS.map(network => network.wNativeAddress);
-
-export const getGasLimitByOutputToken = (address: string): bigint => {
-  if (address === zeroAddress) return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.native);
-  if (WRAPPED_NATIVE_TOKENS.includes(address)) return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.wNative);
-  return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.erc20);
-};
+export const WRAPPED_NATIVE_TOKENS = SUPPORTED_INPUT_NETWORKS.map(network => network.wNativeAddress);

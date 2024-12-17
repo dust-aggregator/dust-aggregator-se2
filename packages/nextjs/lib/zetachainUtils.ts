@@ -37,18 +37,23 @@ const readLocalnetAddresses = (chain: string, type: string) => {
   return "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1";
 };
 
-const encodeDestinationPayload = (recipient: string, outputToken: string): string => {
-  const destinationPayloadTypes = ["address", "address"];
-  const destinationFunctionParams = AbiCoder.defaultAbiCoder().encode(destinationPayloadTypes, [
-    outputToken,
-    recipient,
-  ]);
-
-  const functionName = "ReceiveTokens(address,address)";
-  const functionSignature = ethers.id(functionName).slice(0, 10);
-  const destinationPayload = ethers.hexlify(ethers.concat([functionSignature, destinationFunctionParams]));
-
-  return destinationPayload;
+const encodeDestinationPayload = (recipient: string, outputToken: string, minAmount): string => {
+  return encodeFunctionData({
+    abi: [
+      {
+        name: "ReceiveTokens",
+        type: "function",
+        inputs: [
+          { name: "outputToken", type: "address" },
+          { name: "recipient", type: "address" },
+          { name: "minAmount", type: "uint256" },
+        ],
+        outputs: [],
+      },
+    ],
+    functionName: "ReceiveTokens",
+    args: [outputToken, recipient, minAmount],
+  });
 };
 
 const encodeZetachainPayload = (
@@ -58,29 +63,17 @@ const encodeZetachainPayload = (
   recipient: `0x${string}`,
   outputToken: `0x${string}`,
   minAmount: bigint,
+  isBitcoin: boolean,
 ) => {
+  const destinationPayload = isBitcoin ? "0x" : encodeDestinationPayload(recipient, outputToken, minAmount);
+
   const params = {
     targetChainToken,
     gasLimit,
     minAmount,
     originalSender: recipient,
     targetChainCounterparty: concatHex([pad(targetChainCounterparty, { size: 20 })]),
-    destinationPayload: encodeFunctionData({
-      abi: [
-        {
-          name: "ReceiveTokens",
-          type: "function",
-          inputs: [
-            { name: "outputToken", type: "address" },
-            { name: "recipient", type: "address" },
-            { name: "minAmount", type: "uint256" },
-          ],
-          outputs: [],
-        },
-      ],
-      functionName: "ReceiveTokens",
-      args: [outputToken, recipient, minAmount],
-    }),
+    destinationPayload,
   };
 
   const encodedParams = encodeAbiParameters(

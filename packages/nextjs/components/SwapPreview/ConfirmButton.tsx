@@ -1,13 +1,14 @@
 import { RefObject, useEffect, useRef, useState } from "react";
 import SwapResultModal from "../SwapResultModal";
+import WaitingModal from "../WaitingModal";
 import dustAbi from "./dustAbi.json";
 import { ethers } from "ethers";
 import { encode } from "punycode";
 import { parseUnits } from "viem";
 import { useAccount, useSignTypedData, useWriteContract } from "wagmi";
 import { getAccount } from "wagmi/actions";
-import { getGasLimitByOutputToken } from "~~/lib/constants";
 import { TokenSwap } from "~~/lib/types";
+import { getGasLimitByOutputToken } from "~~/lib/utils";
 import {
   encodeDestinationPayload,
   encodeZetachainPayload,
@@ -16,7 +17,6 @@ import {
 } from "~~/lib/zetachainUtils";
 import { useGlobalState } from "~~/services/store/store";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
-import WaitingModal from "../WaitingModal";
 
 interface Props {
   togglePreviewModal: () => void;
@@ -26,7 +26,7 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
   const [resultModalOpen, setResultModalOpen] = useState(false);
   const [waitingModalOpen, setWaitingModalOpen] = useState(false);
   const { address } = useAccount();
-  const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
+  const { outputNetwork, outputToken, inputTokens, inputNetwork, recipient } = useGlobalState();
   const { writeContract, data: swapHash, isError, ...rest } = useWriteContract();
   // const { signTypedData } = useSignTypedData();
   const { chainId } = getAccount(wagmiConfig);
@@ -34,7 +34,10 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
   const handleConfirm = async (e?: any) => {
     e?.preventDefault();
 
-    if (!outputNetwork || !outputToken || !inputTokens.length || !chainId) return;
+    const isBitcoin = outputNetwork.id === "bitcoin";
+
+    if (!outputNetwork) return;
+    if (!isBitcoin && (!outputToken || !inputTokens.length)) return;
 
     const signPermit = async (swaps: TokenSwap[]) => {
       if (!inputNetwork) {
@@ -53,18 +56,19 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
       return { deadline, nonce, signature };
     };
 
-    const gasLimit = getGasLimitByOutputToken(outputToken.address);
-    console.log({ gasLimit });
-    const recipient = address as `0x${string}`;
+    const gasLimit = isBitcoin ? BigInt(130000) : getGasLimitByOutputToken(outputToken?.address);
+    const recipientAddress = (recipient || address) as `0x${string}`;
+    const targetChainCounterparty = isBitcoin ? recipientAddress : outputNetwork.contractAddress;
 
     try {
       const encodedParameters = encodeZetachainPayload(
         outputNetwork.zrc20Address,
         gasLimit,
-        outputNetwork.contractAddress,
-        recipient,
-        outputToken.address as `0x${string}`,
+        targetChainCounterparty,
+        recipientAddress,
+        outputToken?.address as `0x${string}`,
         BigInt(1),
+        isBitcoin,
       );
 
       const tokenSwaps: TokenSwap[] = inputTokens.map(({ amount, decimals, address }) => ({
@@ -115,7 +119,10 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
       </button>
       <SwapResultModal
         // togglePreviewModal={togglePreviewModal}
-        rebootMachine={() => { { } }}
+        rebootMachine={() => {
+          {
+          }
+        }}
         retryOperation={retryOperation}
         open={resultModalOpen}
         isError={isError}
