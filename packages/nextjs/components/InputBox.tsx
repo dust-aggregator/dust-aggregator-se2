@@ -13,9 +13,10 @@ import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
 import { SUPPORTED_NETWORKS, networks } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
+import TokenSelector from "./TokenSelector";
 
 const InputBox = () => {
-  const [dustThresholdValue, setDustThresholdValue] = useState<number>(5);
+  const [dustThresholdValue, setDustThresholdValue] = useState<number>(0);
   const { inputTokens } = useGlobalState();
 
   function handleChange(e: any) {
@@ -69,11 +70,11 @@ const InputBox = () => {
     const updatedOptions: any[] = networkOptions2.map((section: any) =>
       section.section === sectionKey
         ? {
-            ...section,
-            options: section.options.map((option: any) =>
-              option.value === optionValue ? { ...option, selected, amountToDust } : option,
-            ),
-          }
+          ...section,
+          options: section.options.map((option: any) =>
+            option.value === optionValue ? { ...option, selected, amountToDust } : option,
+          ),
+        }
         : section,
     );
 
@@ -117,43 +118,50 @@ const InputBox = () => {
 
   const comps = filteredNetworkOptions.map((e: any, index: number) => {
     return (
-      <div key={"sjf" + index} className="flex flex-col gap-1">
-        <p className="m-0 text-xl text-bold">{e.section}</p>
+      <div key={"sjf" + index} className="flex flex-col gap-2">
+        {/* <p className="m-0 text-xl text-bold">{e.section}</p> */}
         {e.options.map((option: any, index: number) => {
           return (
             <div
-              className={`min-h-0 h-8 py-1 px-2 leading-tight shadow-inner-xl flex items-center w-full text-xs bg-[#3C3731] justify-between`}
+              className={`px-4 h-10 leading-tight shadow-inner-xl flex items-center w-full text-xs justify-between rounded-lg border bg-[#514B44] shadow-inner shadow-[inset_0_1px_30px_rgba(0,0,0,1)]`}
               key={"sndn" + index}
             >
-              <div className="flex gap-1">
+              <div className="flex gap-2">
                 <button
                   className="m-0"
                   onClick={() => {
                     updateSpecificOption(e.section, option.value, !option.selected, option.amountToDust);
                   }}
                 >
-                  <Image src={"/Vector.png"} alt="" width={"12"} height={"12"} className="h-4" />
+                  <Image src={"/Vector.png"} alt="" width={"8"} height={"8"} />
                 </button>
-                <p className="m-0 text-xs">{option.label}</p>
+                <p className="m-0 text-xs opacity-70">
+                  {e.section} / {option.label}
+                </p>
               </div>
 
-              <input
-                type="number"
-                value={Number(option.amountToDust).toFixed(6)}
-                onChange={(a: any) => {
-                  updateSpecificOption(e.section, option.value, option.selected, a.target.value);
-                }}
-                className="w-10"
-              />
-              <div className="flex items-center justify-center gap-1">
-                <p className="text-xs">{formatDecimal(option.tokenBalance)}</p>
-                <Image src={"/particles.png"} alt="" width={"12"} height={"12"} className="h-4" />
+              <div className="flex gap-2 h-full items-center py-1">
+                <p className="text-xs opacity-70">
+                  Balance: {formatDecimal(option.tokenBalance)} {option.symbol}
+                </p>
+
+                <input
+                  type="number"
+                  min={0}
+                  value={Number(option.amountToDust).toFixed(6)}
+                  onChange={(a: any) => {
+                    updateSpecificOption(e.section, option.value, option.selected, a.target.value);
+                  }}
+                  className="w-[70px] text-xs h-full px-1 rounded border bg-[#3C3731] shadow-inner shadow-[inset_0_1px_13px_rgba(0,0,0,0.7)]"
+                />
+
+                <button className="h-full px-2 text-xs rounded-lg border bg-[#4C463F]">Max</button>
               </div>
 
-              <div className="flex items-center justify-center gap-1 text-xs">
+              {/* <div className="flex items-center justify-center gap-1 text-xs">
                 <p>$</p>
                 <p>{option.usdValue?.toFixed(2)}</p>
-              </div>
+              </div> */}
             </div>
           );
         })}
@@ -292,41 +300,44 @@ const InputBox = () => {
           <p>{"Loading Tokens..."}</p>
         ) : (
           <>
-            <p className="font-bold m-0">DUST Threshold</p>
-            <div className="flex gap-2">
+            <p className="font-bold m-0 text-sm">{`Up to what value is considered "DUST"?`}</p>
+            <div className="flex gap-2 items-center mt-2">
               <input
-                className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8"
+                className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8 w-2/3"
                 placeholder={""}
                 name={"dustThreshold"}
                 type="number"
                 value={dustThresholdValue}
                 onChange={handleChange}
               />
-              <button className="px-4 hover:brightness-50 bg-[url('/button1.png')] bg-no-repeat bg-center bg-cover">
-                <p className="pb-2 m-0">Save</p>
+              <button className="px-4 rounded-lg hover:brightness-50 bg-[url('/button1.png')] bg-no-repeat bg-center bg-cover w-1/3 h-full text-xs font-black">
+                <p className="pb-2 pt-1 m-0 font-montserrat">Save</p>
               </button>
             </div>
             <p className="font-bold m-0">Input</p>
 
-            <div className="flex gap-2">
+            <TokenSelector _options={updatedOptions2} _updateSpecificOption={updateSpecificOption} _comps={comps} />
+
+            {/* <div className="flex gap-2">
               <CategorySelectInputBox
                 title="Select tokens"
                 options={updatedOptions2}
                 // onSelect={updateSpecificOption}
                 onChange={updateSpecificOption}
               />
-            </div>
-            <div className="p-[0.4px] bg-[#FFFFFF] rounded my-3"></div>
-            <div className="overflow-scroll h-40">
-              {comps}
-              {/* <AllTokensPrices /> */}
-              {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
-            </div>
+            </div> */}
+
+            {/* <div className="p-[0.4px] bg-[#FFFFFF] rounded my-3"></div> */}
+            {/* <div className="overflow-scroll h-40">
+              {comps} */}
+            {/* <AllTokensPrices /> */}
+            {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
+            {/* </div>
             <div className="flex items-center justify-center gap-1">
               <p>Total: </p>
               <p>$</p>
               <p>{totalDustInUsd?.toFixed(2)}</p>
-            </div>
+            </div> */}
           </>
         )
       ) : (
