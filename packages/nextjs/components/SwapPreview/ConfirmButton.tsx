@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import SwapResultModal from "../SwapResultModal";
+import WaitingModal from "../WaitingModal";
 import dustAbi from "./dustAbi.json";
 import { ethers } from "ethers";
 import { encode } from "punycode";
 import { parseUnits } from "viem";
 import { useAccount, useSignTypedData, useWriteContract } from "wagmi";
 import { getAccount } from "wagmi/actions";
-import { getGasLimitByOutputToken } from "~~/lib/constants";
 import { TokenSwap } from "~~/lib/types";
+import { getGasLimitByOutputToken } from "~~/lib/utils";
 import {
   encodeDestinationPayload,
   encodeZetachainPayload,
@@ -23,17 +24,26 @@ interface Props {
 
 const ConfirmButton = ({ togglePreviewModal }: Props) => {
   const [resultModalOpen, setResultModalOpen] = useState(false);
+  const [waitingModalOpen, setWaitingModalOpen] = useState(false);
   const { address } = useAccount();
-  const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
-  const { writeContract, isError, ...rest } = useWriteContract();
+  const { outputNetwork, outputToken, inputTokens, inputNetwork, recipient } = useGlobalState();
+  const { writeContract, data: swapHash, isError, ...rest } = useWriteContract();
   // const { signTypedData } = useSignTypedData();
   const { chainId } = getAccount(wagmiConfig);
 
-  const handleConfirm = async e => {
+  const handleConfirm = async (e?: any) => {
     e?.preventDefault();
-    if (!outputNetwork || !outputToken || !inputTokens.length || !chainId) return;
+
+    const isBitcoin = outputNetwork.id === "bitcoin";
+
+    if (!outputNetwork) return;
+    if (!isBitcoin && (!outputToken || !inputTokens.length)) return;
 
     const signPermit = async (swaps: TokenSwap[]) => {
+      if (!inputNetwork) {
+        throw new Error("No input network");
+      }
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const { domain, types, values, deadline, nonce } = await preparePermitData(
@@ -46,18 +56,19 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
       return { deadline, nonce, signature };
     };
 
-    const gasLimit = getGasLimitByOutputToken(outputToken.address);
-    console.log({ gasLimit });
-    const recipient = address as `0x${string}`;
+    const gasLimit = isBitcoin ? BigInt(130000) : getGasLimitByOutputToken(outputToken?.address);
+    const recipientAddress = (recipient || address) as `0x${string}`;
+    const targetChainCounterparty = isBitcoin ? recipientAddress : outputNetwork.contractAddress;
 
     try {
       const encodedParameters = encodeZetachainPayload(
         outputNetwork.zrc20Address,
         gasLimit,
-        outputNetwork.contractAddress,
-        recipient,
-        outputToken.address,
+        targetChainCounterparty,
+        recipientAddress,
+        outputToken?.address as `0x${string}`,
         BigInt(1),
+        isBitcoin,
       );
 
       const tokenSwaps: TokenSwap[] = inputTokens.map(({ amount, decimals, address }) => ({
@@ -69,11 +80,11 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
       const permit = await signPermit(tokenSwaps);
 
       writeContract({
-        address: inputNetwork?.contractAddress,
+        address: inputNetwork?.contractAddress as string,
         abi: dustAbi,
         functionName: "SwapAndBridgeTokens",
         args: [tokenSwaps, encodedParameters, permit.nonce, permit.deadline, permit.signature],
-        enabled: !!inputNetwork,
+        // enabled: inputNetwork, ??
       });
     } catch (error) {
       console.error("WHOOOPS", error);
@@ -87,6 +98,10 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
       setResultModalOpen(true);
     }
   }, [rest.error]);
+
+  useEffect(() => {
+    if (swapHash) setWaitingModalOpen(true);
+  }, [swapHash]);
 
   const retryOperation = () => {
     setResultModalOpen(false);
@@ -103,13 +118,18 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
         Approve
       </button>
       <SwapResultModal
-        togglePreviewModal={togglePreviewModal}
+        // togglePreviewModal={togglePreviewModal}
+        rebootMachine={() => {
+          {
+          }
+        }}
         retryOperation={retryOperation}
         open={resultModalOpen}
         isError={isError}
         error={rest.error}
         amountCurency={"4005.3333 DAI"}
       />
+      <WaitingModal open={waitingModalOpen} />
     </>
   );
 };

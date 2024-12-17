@@ -1,3 +1,5 @@
+import { Token } from "~~/lib/types";
+
 interface Option {
   name: string;
   symbol: string;
@@ -6,13 +8,14 @@ interface Option {
 interface Props {
   title: string;
   options: Option[];
-  onChange: (option: Option) => void;
+  onChange: (newOutputToken: Token) => void;
   selectedOption?: string;
-  className?: string;
+  disabled?: boolean;
 }
 
-const Select = ({ className, title, options, selectedOption, onChange }: Props) => {
+const Select = ({ disabled, title, options, selectedOption, onChange }: Props) => {
   const handleClick = (option: Option) => {
+    if (disabled) return;
     const elem = document.activeElement;
     if (elem) {
       elem?.blur();
@@ -22,11 +25,11 @@ const Select = ({ className, title, options, selectedOption, onChange }: Props) 
   return (
     <div className="dropdown w-full text-[#E4E4E4]">
       <div
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
         role="button"
         className={`min-h-0 h-8 py-1 px-2 leading-tight shadow-inner-xl flex items-center border-2 border-slate-50 w-full text-xs select bg-[#3C3731] ${
           !!selectedOption ? "text-[#E4E4E4]" : "text-[#9D9D9D]"
-        }`}
+        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         {selectedOption?.name || title}
       </div>
