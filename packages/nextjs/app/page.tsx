@@ -291,7 +291,7 @@ export default function Component() {
     <div className="flex-col items-center justify-center h-500 mt-20 px-24">
       <div className="flex justify-center">
         <h1 className="text-4xl text-center font-theory">
-          DUST.FUN CONVERT ALL DUST TOKENS FROM YOUR WALLET IN ONE TRANSACTION
+          Combine All Small Token Balances in Your Wallet into One Asset with a Single Transaction
         </h1>
       </div>
       <div className="flex justify-center">
@@ -315,7 +315,9 @@ export default function Component() {
         <p className="font-bold text-[#9D9D9D] px-4">Powered by Zetachain cross-chain engine</p>
         <hr className="w-1/6 bg-[#9D9D9D]" />
       </div>
-      <FAQ />
+      <div id="faq">
+        <FAQ />
+      </div>
     </div>
   );
 }
