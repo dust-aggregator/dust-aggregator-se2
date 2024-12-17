@@ -68,13 +68,13 @@ const InputToken = ({ token }: Props) => {
         </div>
         <div className="rounded-lg border flex items-center bg-[#3C3731]">
           <button
-            className={`px-2 p-1 text-sm rounded-lg font-medium ${slippage === 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)] text-black"}`}
+            className={`px-2 p-1 text-sm rounded-lg ${slippage === 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)] text-black"}`}
             onClick={() => setSlippage(0)}
           >
             Auto
           </button>
           <button
-            className={`px-2 p-1 text-sm rounded-lg font-medium ${slippage > 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)]  text-black"}`}
+            className={`px-2 p-1 text-sm rounded-lg ${slippage > 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)]  text-black"}`}
             onClick={() => setSlippage(2.5)}
           >
             2.50%
