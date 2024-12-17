@@ -32,8 +32,8 @@ export const Footer = () => {
             </div>
 
             <div className="w-1/2 flex flex-col justify-end gap-4">
-              <Link href={""}>Privacy Policy</Link>
-              <Link href={""}>Terms of Service</Link>
+              <Link href={"/privacy"}>Privacy Policy</Link>
+              <Link href={"/terms"}>Terms of Service</Link>
             </div>
           </div>
 
