@@ -55,5 +55,5 @@ export const useGlobalState = create<GlobalState>(set => ({
   setOutputTokensByNetwork: (newOutputTokensByNetwork: SelectedToken[]) =>
     set(() => ({ outputTokensByNetwork: newOutputTokensByNetwork })),
   inputNetwork: null,
-  setInputNetwork: (newNetwork: Network) => set(() => ({ inputNetwork: newNetwork })),
+  setInputNetwork: (newNetwork: Network | null) => set(() => ({ inputNetwork: newNetwork })),
 }));
