@@ -1,7 +1,7 @@
 import { readLocalnetAddresses } from "./zetachainUtils";
 import { Network as AlchemyNetwork } from "alchemy-sdk";
 import { zeroAddress } from "viem";
-import { base, polygon } from "viem/chains";
+import { base, bsc, polygon } from "viem/chains";
 import { Network } from "~~/lib/types";
 
 export const networks = [
@@ -30,6 +30,13 @@ export const SUPPORTED_INPUT_NETWORKS: Network[] = [
     zrc20Address: "0x1de70f3e971B62A0707dA18100392af14f7fB677",
     alchemyName: "base-mainnet",
     wNativeAddress: "0x4200000000000000000000000000000000000006",
+  },
+  {
+    ...bsc,
+    contractAddress: "0x04b869e9e9b557314935085ec8213662AfE7c956",
+    zrc20Address: "0x48f80608B672DC30DC7e3dbBd0343c5F02C738Eb",
+    alchemyName: "bsc-mainnet",
+    wNativeAddress: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
   },
 ];
 
