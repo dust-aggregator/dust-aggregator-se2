@@ -1,4 +1,5 @@
 import { RefObject, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import ConfirmButton from "./ConfirmButton";
 import InputToken from "./InputToken";
 import { keccak256, toUtf8Bytes } from "ethers";
@@ -9,11 +10,10 @@ import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 // import { useEthersProvider } from "~~/hooks/dust";
 import { truncateToDecimals } from "~~/lib/utils";
 import { getUniswapV3EstimatedAmountOut } from "~~/lib/zetachainUtils";
+import infoSVG from "~~/public/assets/info.svg";
+import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
 import { useGlobalState } from "~~/services/store/store";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
-import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
-import infoSVG from "~~/public/assets/info.svg";
-import Image from "next/image";
 
 const quoterAddressBaseSep = "0xC5290058841028F1614F3A6F0F5816cAd0df5E27";
 const wethBaseSep = "0x4200000000000000000000000000000000000006";
@@ -32,8 +32,9 @@ const SwapPreview = () => {
   const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
-  const [approvalCount, setApprovalCount] = useState(0)
+  const [approvalCount, setApprovalCount] = useState(0);
   const previewModalRef = useRef<HTMLDialogElement>(null);
+  const isBitcoin = outputNetwork?.id === "bitcoin";
 
   const client = usePublicClient({ config: wagmiConfig });
 
@@ -100,7 +101,8 @@ const SwapPreview = () => {
     }
   };
 
-  const readyForPreview = !!inputNetwork && !!outputNetwork && !!outputToken && inputTokens.length > 0;
+  const readyForPreview =
+    !!inputNetwork && !!outputNetwork && inputTokens.length > 0 && (!isBitcoin ? !!outputToken : true);
 
   const togglePreviewModal = getToggleModal(previewModalRef);
   const closePreviewModal = () => {
@@ -127,7 +129,6 @@ const SwapPreview = () => {
       </button>
       <dialog ref={previewModalRef} className="modal">
         <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded">
-
           <div className="flex justify-between items-center bg-auto">
             <h3 className="font-bold text-xl">Input Tokens</h3>
             <div className="relative">
@@ -150,15 +151,17 @@ const SwapPreview = () => {
           </div>
           <h3 className="font-bold text-xl mt-2">Output Token</h3>
           <span className="text-[#9D9D9D]">{outputNetwork?.name}</span>
-          <div key={outputToken?.name} className="flex justify-between mb-24">
-            <div>
-              <span className="px-2">•</span>
-              <span>{outputToken?.name}</span>
+          {outputToken && (
+            <div key={outputToken?.name} className="flex justify-between mb-24">
+              <div>
+                <span className="px-2">•</span>
+                <span>{outputToken?.name}</span>
+              </div>
+              <span className="text-[#F0BF26] flex font-bold">
+                {amountOut} {outputToken?.name}
+              </span>
             </div>
-            <span className="text-[#F0BF26] flex font-bold">
-              {amountOut} {outputToken?.name}
-            </span>
-          </div>
+          )}
           <div className="text-[#9D9D9D]">
             <div className="w-full flex justify-center">
               <p>new quote in: 0:{String(quoteTime).padStart(2, "0")}</p>

@@ -1,37 +1,45 @@
+import { useState } from "react";
+import Image from "next/image";
 import CategorySelect from "./CategorySelect";
 import Select from "./Select";
 import SwapPreview from "./SwapPreview";
+import ConfirmButton from "./SwapPreview/ConfirmButton";
 import UserActionBoxContainer from "./UserActionBoxContainer";
 import { useAccount } from "wagmi";
 import { useTokenWhitelist } from "~~/hooks/dust";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
-import { SUPPORTED_NETWORKS } from "~~/lib/constants";
-import { useGlobalState } from "~~/services/store/store";
+import { BitcoinNetwork, SUPPORTED_INPUT_NETWORKS } from "~~/lib/constants";
 import pasteSVG from "~~/public/assets/paste.svg";
-import Image from "next/image";
-import ConfirmButton from "./SwapPreview/ConfirmButton";
+import { useGlobalState } from "~~/services/store/store";
 
-const evmNetworkOptions = SUPPORTED_NETWORKS.map(({ id, name }) => ({ label: name, value: id }));
+const evmNetworkOptions = SUPPORTED_INPUT_NETWORKS.map(({ id, name }) => ({ label: name, value: id }));
 
-const networkOptions = [{ ecosystem: "Ethereum", options: evmNetworkOptions }];
+const networkOptions = [
+  { ecosystem: "Bitcoin", options: [{ label: "Bitcoin", value: "bitcoin" }] },
+  { ecosystem: "Ethereum", options: evmNetworkOptions },
+];
 
 const OutputBox = () => {
-  const outputTokensByNetwork = useGlobalState(({ outputTokensByNetwork }) => outputTokensByNetwork);
-
-  console.log(outputTokensByNetwork);
-
   const { outputNetwork, setOutputNetwork, outputToken, setOutputToken } = useGlobalState();
   const [outputBalances, setOutputBalances] = useState<Token[]>([]);
-  const [receiverWalletMode, setReceiverWalletMode] = useState<string>("")
-  const [receiverWallet, setReceiverWallet] = useState("")
-  const [understoodRisk, setUnderstoodRisk] = useState(false)
+  const [receiverWalletMode, setReceiverWalletMode] = useState<string>("");
+  const [receiverWallet, setReceiverWallet] = useState("");
+  const [understoodRisk, setUnderstoodRisk] = useState(false);
+
+  const isBitcoin = outputNetwork?.id === "bitcoin";
 
   const { address } = useAccount();
   const { tokens: whitelistedTokens } = useTokenWhitelist();
 
   const handleSelectNetwork = network => {
-    const newInputNetwork = SUPPORTED_NETWORKS.find(({ id }) => id === network.value);
-    setOutputNetwork(newInputNetwork);
+    if (network.value === "bitcoin") {
+      setOutputNetwork(BitcoinNetwork);
+      setOutputToken(null);
+      setReceiverWalletMode("");
+    } else {
+      const newInputNetwork = SUPPORTED_INPUT_NETWORKS.find(({ id }) => id === network.value);
+      setOutputNetwork(newInputNetwork);
+    }
   };
 
   const formattedOuputNetwork = {
@@ -40,10 +48,9 @@ const OutputBox = () => {
   };
 
   const handlePaste = async () => {
-    const copiedAdd = await navigator.clipboard.readText()
-    if (copiedAdd)
-      setReceiverWallet(copiedAdd)
-  }
+    const copiedAdd = await navigator.clipboard.readText();
+    if (copiedAdd) setReceiverWallet(copiedAdd);
+  };
 
   return (
     <UserActionBoxContainer>
@@ -60,6 +67,7 @@ const OutputBox = () => {
             <p className="text-[#9D9D9D] text-xs my-1">And</p>
           </div>
           <Select
+            disabled={isBitcoin || !outputNetwork}
             title="Select Token"
             options={whitelistedTokens}
             onChange={setOutputToken}
@@ -73,6 +81,7 @@ const OutputBox = () => {
 
             <div className="flex gap-1">
               <button
+                disabled={isBitcoin}
                 style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
                 className={`${receiverWalletMode === "connected" && "drop-shadow-[0_0_3px_rgba(0,_187,_255,_1)]"} text-[#FFFFFF] text-sm p-0 bg-center btn w-1/2 min-h-0 h-8 rounded-lg font-normal text-xs transition-all duration-700`}
                 onClick={() => setReceiverWalletMode("connected")}
@@ -105,7 +114,7 @@ const OutputBox = () => {
                     name={"destinationAddress"}
                     type="string"
                     value={receiverWallet}
-                    onChange={(e) => setReceiverWallet(e.target.value)}
+                    onChange={e => setReceiverWallet(e.target.value)}
                   />
                   <Image
                     onClick={handlePaste}
@@ -133,10 +142,7 @@ const OutputBox = () => {
               </div>
             )}
           </div>
-
           <SwapPreview />
-
-          {/* <ConfirmButton togglePreviewModal={() => {{}}} /> */}
         </>
       ) : (
         <></>
