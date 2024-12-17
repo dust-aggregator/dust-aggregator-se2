@@ -13,6 +13,7 @@ import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
 import { SUPPORTED_INPUT_NETWORKS, networks } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import TokenSelector from "./TokenSelector";
 
 const InputBox = () => {
@@ -300,8 +301,15 @@ const InputBox = () => {
           <p>{"Loading Tokens..."}</p>
         ) : (
           <>
-            <p className="font-bold m-0 text-sm">{`Up to what value is considered "DUST"?`}</p>
-            <div className="flex gap-2 items-center mt-2">
+            <p className="font-bold m-0 flex items-center">DUST Threshold
+              <div className="relative group inline-block ml-2">
+                <InformationCircleIcon className="w-5 h-5" />
+                <div className="absolute bottom-full mb-2 hidden group-hover:block w-64 p-2 text-xs text-white bg-black rounded">
+                  Dust threshold is the value limit you set to define small token balances (dust). For example, with a $5 threshold, any tokens worth less than $5 are considered dust and can be swapped.
+                </div>
+              </div>
+            </p>
+            <div className="flex gap-2">
               <input
                 className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8 w-2/3"
                 placeholder={""}
