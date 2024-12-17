@@ -1,13 +1,11 @@
-import { useEffect, useState } from "react";
 import CategorySelect from "./CategorySelect";
 import Select from "./Select";
 import SwapPreview from "./SwapPreview";
 import UserActionBoxContainer from "./UserActionBoxContainer";
-import { useAccount, useReadContract, useToken, useWatchContractEvent } from "wagmi";
+import { useAccount } from "wagmi";
 import { useTokenWhitelist } from "~~/hooks/dust";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
-import { SUPPORTED_NETWORKS, networks } from "~~/lib/constants";
-import { Token } from "~~/lib/types";
+import { SUPPORTED_NETWORKS } from "~~/lib/constants";
 import { useGlobalState } from "~~/services/store/store";
 import pasteSVG from "~~/public/assets/paste.svg";
 import Image from "next/image";
@@ -36,7 +34,7 @@ const OutputBox = () => {
     setOutputNetwork(newInputNetwork);
   };
 
-  const formattedInputNetwork = {
+  const formattedOuputNetwork = {
     label: outputNetwork?.name || "Select Network",
     value: outputNetwork?.id || "",
   };
@@ -56,7 +54,7 @@ const OutputBox = () => {
             title="Select Network"
             options={networkOptions}
             onChange={handleSelectNetwork}
-            selectedOption={formattedInputNetwork}
+            selectedOption={formattedOuputNetwork}
           />
           <div className="flex justify-center">
             <p className="text-[#9D9D9D] text-xs my-1">And</p>
