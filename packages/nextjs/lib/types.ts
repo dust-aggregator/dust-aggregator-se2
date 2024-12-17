@@ -20,6 +20,7 @@ export type Network = Chain & {
   contractAddress: `0x${string}`;
   zrc20Address: string;
   alchemyName: string;
+  wNativeAddress: string;
 };
 
 export type TransactionState = "notStarted" | "sourcePending" | "zetaPending" | "destinationPending" | "completed";

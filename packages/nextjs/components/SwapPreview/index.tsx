@@ -14,6 +14,9 @@ import { truncateToDecimals } from "~~/lib/utils";
 import { getUniswapV3EstimatedAmountOut } from "~~/lib/zetachainUtils";
 import { useGlobalState } from "~~/services/store/store";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
+import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
+import infoSVG from "~~/public/assets/info.svg";
+import Image from "next/image";
 
 const quoterAddressBaseSep = "0xC5290058841028F1614F3A6F0F5816cAd0df5E27";
 const wethBaseSep = "0x4200000000000000000000000000000000000006";
@@ -29,11 +32,11 @@ const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
 };
 
 const SwapPreview = () => {
-  const { outputNetwork, outputToken, inputTokens } = useGlobalState();
+  const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
+  const [approvalCount, setApprovalCount] = useState(0)
   const previewModalRef = useRef<HTMLDialogElement>(null);
-  const { chain } = useAccount(wagmiConfig);
 
   const client = usePublicClient({ config: wagmiConfig });
 
@@ -194,7 +197,7 @@ const SwapPreview = () => {
         slippageBPS,
       );
 
-      const parsedOutputTokenAmount = ethers.utils.formatUnits(outputTokenAmount, outputToken.decimals);
+      const parsedOutputTokenAmount = ethers.formatUnits(outputTokenAmount, outputToken.decimals);
 
       // Truncate to 4 decimal places
       const outputAmountWithFourDecimals = truncateToDecimals(parsedOutputTokenAmount, 4);
@@ -205,7 +208,7 @@ const SwapPreview = () => {
     }
   };
 
-  const readyForPreview = !!outputNetwork && !!outputToken && inputTokens.length > 0;
+  const readyForPreview = !!inputNetwork && !!outputNetwork && !!outputToken && inputTokens.length > 0;
 
   const togglePreviewModal = getToggleModal(previewModalRef);
   const closePreviewModal = () => {
@@ -232,9 +235,19 @@ const SwapPreview = () => {
       </button>
       <dialog ref={previewModalRef} className="modal">
         <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded">
-          <h3 className="font-bold text-xl">Input Tokens</h3>
+
+          <div className="flex justify-between items-center bg-auto">
+            <h3 className="font-bold text-xl">Input Tokens</h3>
+            <div className="relative">
+              <Image src={requiredApprovalsSVG} alt="required" className="w-[220px]" />
+              <div className="absolute top-0 left-0 w-full h-full flex justify-center">
+                <span className="text-xs mt-1 font-bold">{`Tokens Required Approval: ${approvalCount}/${inputTokens.length}`}</span>
+              </div>
+            </div>
+          </div>
+
           <div className="text-[#9D9D9D]">
-            <span>{chain?.name}</span>
+            <span>{inputNetwork?.name}</span>
             <ul>
               {inputTokens.map(token => (
                 <li key={token.symbol} className="flex justify-between">
@@ -260,15 +273,32 @@ const SwapPreview = () => {
             </div>
 
             <div className="flex justify-between">
-              <h4 className="font-bold">Network fee</h4>
+              <div className="flex gap-2 items-center relative">
+                <span className="font-bold">Network fee</span>
+                <div className="relative group">
+                  <Image src={infoSVG} alt="info" className="cursor-pointer" />
+                  <span className="absolute hidden group-hover:block border rounded-lg bg-[#3C3731] text-xs px-2 py-1 w-[200px] top-0 -translate-x-[50%] -translate-y-[100%] font-montserrat">
+                    Lorem ipsum dolor sit amet, consectetur Lor em ipsum dolor sit amet.
+                  </span>
+                </div>
+              </div>
+
               <span className="text-[#FFFFFF]">${networkFee}</span>
             </div>
             <div className="flex justify-between">
-              <h4 className="font-bold">Commission (0.25%)</h4>
+              <div className="flex gap-2 items-center relative">
+                <span className="font-bold">Commission (0.25%)</span>
+                <div className="relative group">
+                  <Image src={infoSVG} alt="info" className="cursor-pointer" />
+                  <span className="absolute hidden group-hover:block border rounded-lg bg-[#3C3731] text-xs px-2 py-1 w-[200px] top-0 -translate-x-[50%] -translate-y-[100%] font-montserrat">
+                    Lorem ipsum dolor sit amet, consectetur Lor em ipsum dolor sit amet.
+                  </span>
+                </div>
+              </div>
               <span className="text-[#FFFFFF]">${commission}</span>
             </div>
             <div className="flex justify-between">
-              <h4 className="font-bold">Estimated Return</h4>
+              <span className="font-bold">Estimated Return</span>
               <span className="text-[#FFFFFF]">${totalUsdValue.toFixed(2)}</span>
             </div>
             <div className="text=[#FFFFF]"></div>

@@ -10,7 +10,7 @@ import { AllTokensPrices } from "./token-prices/AllTokensPrices";
 import { useAccount } from "wagmi";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
 import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
-import { networks } from "~~/lib/constants";
+import { SUPPORTED_NETWORKS, networks } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
 
@@ -76,8 +76,6 @@ const InputBox = () => {
           }
         : section,
     );
-
-    console.log(updatedOptions);
 
     const filteredTokens = updatedOptions
       .flatMap((section: any) => section.options)
@@ -265,28 +263,30 @@ const InputBox = () => {
     }
   }
 
-  const [selectedNetwork, setSelectedNetworkLocal] = useState();
+  const [inputNetwork, setInputNetworkLocal] = useState();
 
-  const setSelectedNetwork = useGlobalState(({ setSelectedNetwork }) => setSelectedNetwork);
+  const setInputNetwork = useGlobalState(({ setInputNetwork }) => setInputNetwork);
 
   useEffect(() => {
-    const selectedNetwork = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
+    let inputNetworkName = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
+    if (inputNetworkName === "Matic") inputNetworkName = "Polygon";
+    const inputNetwork = SUPPORTED_NETWORKS.find(network => network.name === inputNetworkName);
 
-    setSelectedNetwork(selectedNetwork);
-    setSelectedNetworkLocal(selectedNetwork);
+    setInputNetwork(inputNetwork || null);
+    setInputNetworkLocal(inputNetworkName);
   }, [networkOptions2, networkOptions2.length]);
 
   let updatedOptions2: any[] = [];
-  if (selectedNetwork === undefined) {
+  if (inputNetwork === undefined) {
     updatedOptions2 = networkOptions2;
   } else {
     updatedOptions2 = networkOptions2.filter((option: any) => {
-      return option.section === selectedNetwork;
+      return option.section === inputNetwork;
     });
   }
 
   return (
-    <UserActionBoxContainer glow={false}>
+    <UserActionBoxContainer>
       {connectedAccount?.address ? (
         isLoadingTokens ? (
           <p>{"Loading Tokens..."}</p>
