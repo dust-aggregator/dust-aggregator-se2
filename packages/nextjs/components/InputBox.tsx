@@ -10,7 +10,7 @@ import { AllTokensPrices } from "./token-prices/AllTokensPrices";
 import { useAccount } from "wagmi";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
 import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
-import { SUPPORTED_NETWORKS, networks } from "~~/lib/constants";
+import { SUPPORTED_INPUT_NETWORKS, networks } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
 import TokenSelector from "./TokenSelector";
@@ -278,7 +278,7 @@ const InputBox = () => {
   useEffect(() => {
     let inputNetworkName = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
     if (inputNetworkName === "Matic") inputNetworkName = "Polygon";
-    const inputNetwork = SUPPORTED_NETWORKS.find(network => network.name === inputNetworkName);
+    const inputNetwork = SUPPORTED_INPUT_NETWORKS.find(network => network.name === inputNetworkName);
 
     setInputNetwork(inputNetwork || null);
     setInputNetworkLocal(inputNetworkName);
