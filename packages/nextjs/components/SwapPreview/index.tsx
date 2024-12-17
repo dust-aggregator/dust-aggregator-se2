@@ -1,11 +1,13 @@
 import { RefObject, useEffect, useRef, useState } from "react";
 import ConfirmButton from "./ConfirmButton";
 import InputToken from "./InputToken";
+import { QUOTER_ADDRESSES } from "@uniswap/sdk-core";
 import { keccak256, toUtf8Bytes } from "ethers";
 import { ethers } from "ethers";
-import { parseUnits } from "viem";
+import { formatEther, parseUnits } from "viem";
 import chains from "viem/chains";
 import { useAccount, usePublicClient } from "wagmi";
+import { readContract, writeContract } from "wagmi/actions";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 // import { useEthersProvider } from "~~/hooks/dust";
 import { truncateToDecimals } from "~~/lib/utils";
@@ -52,6 +54,111 @@ const SwapPreview = () => {
     }, 1000);
     return () => clearInterval(interval);
   });
+
+  const publicClient = usePublicClient();
+
+  const account = useAccount();
+  console.log(account);
+  console.log(publicClient);
+
+  const [totalOutputAmount, setTotalOutputAmount] = useState(BigInt(0));
+
+  useEffect(() => {
+    async function fn() {
+      if (inputTokens.length <= 0) return;
+      if (publicClient === undefined) return;
+      if (outputToken?.address === undefined) return;
+      if (outputNetwork === undefined) return;
+
+      const abi = [
+        {
+          inputs: [
+            {
+              components: [
+                { internalType: "address", name: "tokenIn", type: "address" },
+                { internalType: "address", name: "tokenOut", type: "address" },
+                { internalType: "uint256", name: "amountIn", type: "uint256" },
+                { internalType: "uint24", name: "fee", type: "uint24" },
+                { internalType: "uint160", name: "sqrtPriceLimitX96", type: "uint160" },
+              ],
+              internalType: "struct IQuoterV2.QuoteExactInputSingleParams",
+              name: "params",
+              type: "tuple",
+            },
+          ],
+          name: "quoteExactInputSingle",
+          outputs: [
+            { internalType: "uint256", name: "amountOut", type: "uint256" },
+            { internalType: "uint160", name: "sqrtPriceX96After", type: "uint160" },
+            { internalType: "uint32", name: "initializedTicksCrossed", type: "uint32" },
+            { internalType: "uint256", name: "gasEstimate", type: "uint256" },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ];
+
+      let total = BigInt(0);
+
+      for (const token of inputTokens) {
+        const { result } = await publicClient.simulateContract({
+          address: QUOTER_ADDRESSES[outputNetwork?.id || 1],
+          abi,
+          functionName: "quoteExactInputSingle",
+          args: [
+            {
+              tokenIn: token.address, // tokenIn
+              tokenOut: outputToken?.address, // tokenOut (base WETH)
+              amountIn: parseUnits(token.amount, token.decimals), // amountIn
+              fee: BigInt(500), // fee tier
+              sqrtPriceLimitX96: BigInt(0), // price limit
+            },
+          ],
+        });
+
+        console.log(result);
+
+        console.log("Amount out: ");
+
+        total += result[0];
+      }
+
+      setTotalOutputAmount(total);
+      // setAmountOut(total.toString());
+
+      // console.log(formatEther(result[0]));
+
+      // const slippageBPS = 50;
+
+      // const outputTokenAmount = await getUniswapV3EstimatedAmountOut(
+      //   client,
+      //   "", //quoter
+      //   "0x4200000000000000000000000000000000000006",
+      //   inputTokens[0].address,
+      //   10000,
+      //   slippageBPS,
+      // );
+
+      // console.log(outputTokenAmount);
+
+      // const result = await writeContract(wagmiConfig, {
+      //   abi,
+      //   address: "0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a", // base Quoter
+      //   functionName: "quoteExactInputSingle",
+      //   args: [
+      //     inputTokens[0].address, // tokenIn
+      //     "0x4200000000000000000000000000000000000006", // tokenOut (base WETH)
+      //     parseUnits(inputTokens[0].amount, inputTokens[0].decimals), // amountIn
+      //     550000,
+      //     0,
+      //   ],
+      // });
+
+      // console.log("HELLO!");
+      // console.log(result);
+    }
+    fn();
+  }, [inputTokens.length, publicClient?.chain?.id, outputToken?.address, outputNetwork?.id]);
 
   const calculateOutputTokenAmount = async () => {
     if (!outputToken || !outputNetwork || !inputTokens.length || !client || !provider) {
@@ -144,7 +251,7 @@ const SwapPreview = () => {
               <span>{outputToken?.name}</span>
             </div>
             <span className="text-[#F0BF26] flex font-bold">
-              {amountOut} {outputToken?.name}
+              {Number(formatEther(totalOutputAmount)).toFixed(4)} {outputToken?.name}
             </span>
           </div>
           <div className="text-[#9D9D9D]">

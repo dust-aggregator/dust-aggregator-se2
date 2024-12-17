@@ -146,8 +146,17 @@ async function getUniswapV3EstimatedAmountOut(
 
   // Initialize the Quoter contract
   const quoterContract = new ethers.Contract(quoterAddress, abi, provider);
+
+  console.log(quoterContract);
+  console.log(provider);
+  console.log(quoterAddress);
+  console.log(tokenIn);
+  console.log(tokenOut);
+  console.log(amountIn);
+  console.log(slippageBPS);
+
   try {
-    const amountOut: ethers.BigNumber = await quoterContract.callStatic.quoteExactInputSingle([
+    const amountOut: ethers.BigNumber = await quoterContract.quoteExactInputSingle([
       tokenIn,
       tokenOut,
       String(amountIn),
