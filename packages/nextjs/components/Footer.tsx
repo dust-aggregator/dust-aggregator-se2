@@ -27,8 +27,8 @@ export const Footer = () => {
 
           <div className="w-[30%] flex font-bold text-base opacity-50 pb-5">
             <div className="w-1/2 flex flex-col justify-end gap-4">
-              <Link href={""}>About us</Link>
-              <Link href={""}>Supported Chains</Link>
+              <Link href={"https://fingerpump.gitbook.io/dust.fun/about-us"} target="_blank" rel="noopener noreferrer">About us</Link>
+              <Link href={"https://fingerpump.gitbook.io/dust.fun/available-chains-and-whitelisted-tokens"} target="_blank" rel="noopener noreferrer">Supported Chains</Link>
             </div>
 
             <div className="w-1/2 flex flex-col justify-end gap-4">

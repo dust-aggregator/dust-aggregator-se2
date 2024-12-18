@@ -170,6 +170,36 @@ const InputBox = () => {
     );
   });
 
+  const compsShort = filteredNetworkOptions.map((e: any, index: number) => {
+    return (
+      <div key={"sjf" + index} className="flex flex-col gap-2">        
+        {e.options.map((option: any, index: number) => {
+          return (
+            <div key={"sndn" + index}>
+              <div
+                className={`px-4 h-10 flex items-center w-full text-xs justify-between rounded-lg`}
+              >
+                <div className="flex gap-2">
+                  <p className="m-0 text-xs ">
+                    {e.section} / {option.label}
+                  </p>
+                </div>
+
+                <div className="flex gap-2 h-full items-center py-1">
+                  <div className="border-t border-gray-400 mx-2"></div>
+                  <p className="text-xs opacity-70">
+                    {formatDecimal(option.tokenBalance)} {option.symbol}
+                  </p>                              
+                </div>           
+              </div>
+              <hr className="border-gray-400 my-2" />
+            </div>
+          );
+        })}
+      </div>
+    );
+  });
+
   useEffect(() => {
     const networkOptions2: any[] = [];
 
@@ -301,23 +331,26 @@ const InputBox = () => {
           <p>{"Loading Tokens..."}</p>
         ) : (
           <>
-            <p className="font-bold m-0 flex items-center">DUST Threshold
+            <div className="font-bold m-0 flex items-center">DUST Threshold
               <div className="relative group inline-block ml-2">
                 <InformationCircleIcon className="w-5 h-5" />
                 <div className="absolute bottom-full mb-2 hidden group-hover:block w-64 p-2 text-xs text-white bg-black rounded">
                   Dust threshold is the value limit you set to define small token balances (dust). For example, with a $5 threshold, any tokens worth less than $5 are considered dust and can be swapped.
                 </div>
               </div>
-            </p>
+            </div>
             <div className="flex gap-2">
-              <input
-                className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8 w-2/3"
-                placeholder={""}
-                name={"dustThreshold"}
-                type="number"
-                value={dustThresholdValue}
-                onChange={handleChange}
-              />
+              <div className="relative w-2/3">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+                <input
+                  className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8 pl-7 w-full"
+                  placeholder={""}
+                  name={"dustThreshold"}
+                  type="number"
+                  value={dustThresholdValue}
+                  onChange={handleChange}
+                />
+              </div>
               <button className="px-4 rounded-lg hover:brightness-50 bg-[url('/button1.png')] bg-no-repeat bg-center bg-cover w-1/3 h-full text-xs font-black">
                 <p className="pb-2 pt-1 m-0 font-montserrat">Save</p>
               </button>
@@ -335,17 +368,17 @@ const InputBox = () => {
               />
             </div> */}
 
-            {/* <div className="p-[0.4px] bg-[#FFFFFF] rounded my-3"></div> */}
-            {/* <div className="overflow-scroll h-40">
-              {comps} */}
+            <div className="p-[0.4px] bg-[#FFFFFF] rounded my-3"></div>
+            <div className="overflow-scroll h-40">
+              {compsShort}
             {/* <AllTokensPrices /> */}
             {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
-            {/* </div>
+            </div>
             <div className="flex items-center justify-center gap-1">
-              <p>Total: </p>
+              <p>Total ≈ </p>
               <p>$</p>
               <p>{totalDustInUsd?.toFixed(2)}</p>
-            </div> */}
+            </div>
           </>
         )
       ) : (
