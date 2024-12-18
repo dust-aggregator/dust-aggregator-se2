@@ -18,14 +18,15 @@ contract UniversalDApp is IUniversalContract {
 
     SystemContract public immutable systemContract;
     IGatewayZEVM public immutable gateway;
-    address constant BITCOIN = 0x65a45c57636f9BcCeD4fe193A602008578BcA90b;
-    uint256 constant BITCOIN_CHAIN_ID = 18332;
+    address constant BITCOIN = 0x13A0c5930C028511Dc02665E7285134B6d11A5f4;
+    uint256 constant BITCOIN_CHAIN_ID = 8332;
 
     event Reverted(bytes indexed recipient, address asset, uint256 amount);
     event SwappedAndWithdrawn(bytes indexed recipient, address asset, uint256 amount);
 
     error InvalidAddress();
     error InvalidChainToken();
+    error NotEnoughBTC(uint256 amount);
     error NotGateway();
     error NotSupportedChainID();
 
@@ -130,6 +131,7 @@ contract UniversalDApp is IUniversalContract {
         // Swap and approve the tokens
         (uint256 outputAmount, RevertOptions memory revertOptions) =
             swapAndApprove(gasZRC20, gasFee, inputToken, amount, params);
+        if (outputAmount < 1000) revert NotEnoughBTC(outputAmount);
 
         // Execute the withdrawal via the gateway
         gateway.withdraw(params.targetChainCounterparty, outputAmount, params.targetChainToken, revertOptions);
