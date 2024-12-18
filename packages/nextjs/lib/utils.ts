@@ -1,3 +1,4 @@
+import { GAS_LIMIT_BY_TOKEN_TYPE, WRAPPED_NATIVE_TOKENS, zeroAddress } from "./constants";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -14,4 +15,10 @@ export const truncateToDecimals = (value: string, decimals: number) => {
   const integerPart = parts[0];
   const decimalPart = parts[1].slice(0, decimals);
   return `${integerPart}.${decimalPart}`;
+};
+
+export const getGasLimitByOutputToken = (address: string): bigint => {
+  if (address === zeroAddress) return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.native);
+  if (WRAPPED_NATIVE_TOKENS.includes(address)) return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.wNative);
+  return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.erc20);
 };

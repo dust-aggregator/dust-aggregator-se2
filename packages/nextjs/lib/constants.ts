@@ -1,7 +1,7 @@
 import { readLocalnetAddresses } from "./zetachainUtils";
 import { Network as AlchemyNetwork } from "alchemy-sdk";
 import { zeroAddress } from "viem";
-import { base, polygon } from "viem/chains";
+import { base, bsc, polygon } from "viem/chains";
 import { Network } from "~~/lib/types";
 
 export const networks = [
@@ -9,13 +9,14 @@ export const networks = [
   { key: "Matic", alchemyEnum: AlchemyNetwork.MATIC_MAINNET, chainId: 137 },
   { key: "Binance", alchemyEnum: AlchemyNetwork.BNB_MAINNET, chainId: 56 },
   { key: "Base", alchemyEnum: AlchemyNetwork.BASE_MAINNET, chainId: 8453 },
+  { key: "Optimism", alchemyEnum: AlchemyNetwork.OPT_MAINNET, chainId: 10 },
 ];
 
 export const PERMIT2_BASE_SEPOLIA = "0x000000000022D473030F116dDEE9F6B43aC78BA3";
 
 export const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
-export const SUPPORTED_NETWORKS: Network[] = [
+export const SUPPORTED_INPUT_NETWORKS: Network[] = [
   {
     ...polygon,
     contractAddress: "0xC4b1221701ED9EeCbA01d5f52D60Cb95a9d492a2",
@@ -30,18 +31,36 @@ export const SUPPORTED_NETWORKS: Network[] = [
     alchemyName: "base-mainnet",
     wNativeAddress: "0x4200000000000000000000000000000000000006",
   },
+  {
+    ...bsc,
+    contractAddress: "0x04b869e9e9b557314935085ec8213662AfE7c956",
+    zrc20Address: "0x48f80608B672DC30DC7e3dbBd0343c5F02C738Eb",
+    alchemyName: "bsc-mainnet",
+    wNativeAddress: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+  },
 ];
 
-const GAS_LIMIT_BY_TOKEN_TYPE = {
-  native: 75000,
-  wNative: 120000,
+export const BitcoinNetwork = {
+  name: "Bitcoin",
+  id: "bitcoin",
+  zrc20Address: "0x13A0c5930C028511Dc02665E7285134B6d11A5f4",
+};
+
+export const SUPPORTED_OUTPUT_NETWORKS_BY_ECOSYSTEM = [
+  {
+    ecosystem: "Ethereum",
+    networks: SUPPORTED_INPUT_NETWORKS,
+  },
+  {
+    ecosystem: "Bitcoin",
+    networks: [BitcoinNetwork],
+  },
+];
+
+export const GAS_LIMIT_BY_TOKEN_TYPE = {
+  native: 100000,
+  wNative: 130000,
   erc20: 250000,
 };
 
-const WRAPPED_NATIVE_TOKENS = SUPPORTED_NETWORKS.map(network => network.wNativeAddress);
-
-export const getGasLimitByOutputToken = (address: string): bigint => {
-  if (address === zeroAddress) return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.native);
-  if (WRAPPED_NATIVE_TOKENS.includes(address)) return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.wNative);
-  return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.erc20);
-};
+export const WRAPPED_NATIVE_TOKENS = SUPPORTED_INPUT_NETWORKS.map(network => network.wNativeAddress);

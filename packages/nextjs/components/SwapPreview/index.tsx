@@ -1,21 +1,25 @@
 import { RefObject, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import ConfirmButton from "./ConfirmButton";
 import InputToken from "./InputToken";
+import { QUOTER_ADDRESSES } from "@uniswap/sdk-core";
 import { keccak256, toUtf8Bytes } from "ethers";
 import { ethers } from "ethers";
-import { parseUnits } from "viem";
+import { formatEther, parseUnits } from "viem";
+import chains from "viem/chains";
 import { useAccount, usePublicClient } from "wagmi";
+import { readContract, writeContract } from "wagmi/actions";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 // import { useEthersProvider } from "~~/hooks/dust";
 import { truncateToDecimals } from "~~/lib/utils";
 import { getUniswapV3EstimatedAmountOut } from "~~/lib/zetachainUtils";
+import infoSVG from "~~/public/assets/info.svg";
+import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
 import { useGlobalState } from "~~/services/store/store";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
 import infoSVG from "~~/public/assets/info.svg";
 import Image from "next/image";
-import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
-import { useApprovePermit2 } from "~~/hooks/dust/useApprovePermit2";
 
 const quoterAddressBaseSep = "0xC5290058841028F1614F3A6F0F5816cAd0df5E27";
 const wethBaseSep = "0x4200000000000000000000000000000000000006";
@@ -36,6 +40,7 @@ const SwapPreview = () => {
   const [quoteTime, setQuoteTime] = useState(30);
   const [approvalCount, setApprovalCount] = useState(0);
   const previewModalRef = useRef<HTMLDialogElement>(null);
+  const isBitcoin = outputNetwork?.id === "bitcoin";
 
   const client = usePublicClient({ config: wagmiConfig });
 
@@ -84,6 +89,111 @@ const SwapPreview = () => {
     return () => clearInterval(interval);
   });
 
+  const publicClient = usePublicClient();
+
+  const account = useAccount();
+  console.log(account);
+  console.log(publicClient);
+
+  const [totalOutputAmount, setTotalOutputAmount] = useState(BigInt(0));
+
+  useEffect(() => {
+    async function fn() {
+      if (inputTokens.length <= 0) return;
+      if (publicClient === undefined) return;
+      if (outputToken?.address === undefined) return;
+      if (outputNetwork === undefined) return;
+
+      const abi = [
+        {
+          inputs: [
+            {
+              components: [
+                { internalType: "address", name: "tokenIn", type: "address" },
+                { internalType: "address", name: "tokenOut", type: "address" },
+                { internalType: "uint256", name: "amountIn", type: "uint256" },
+                { internalType: "uint24", name: "fee", type: "uint24" },
+                { internalType: "uint160", name: "sqrtPriceLimitX96", type: "uint160" },
+              ],
+              internalType: "struct IQuoterV2.QuoteExactInputSingleParams",
+              name: "params",
+              type: "tuple",
+            },
+          ],
+          name: "quoteExactInputSingle",
+          outputs: [
+            { internalType: "uint256", name: "amountOut", type: "uint256" },
+            { internalType: "uint160", name: "sqrtPriceX96After", type: "uint160" },
+            { internalType: "uint32", name: "initializedTicksCrossed", type: "uint32" },
+            { internalType: "uint256", name: "gasEstimate", type: "uint256" },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ];
+
+      let total = BigInt(0);
+
+      for (const token of inputTokens) {
+        const { result } = await publicClient.simulateContract({
+          address: QUOTER_ADDRESSES[outputNetwork?.id || 1],
+          abi,
+          functionName: "quoteExactInputSingle",
+          args: [
+            {
+              tokenIn: token.address, // tokenIn
+              tokenOut: outputToken?.address, // tokenOut (base WETH)
+              amountIn: parseUnits(token.amount, token.decimals), // amountIn
+              fee: BigInt(500), // fee tier
+              sqrtPriceLimitX96: BigInt(0), // price limit
+            },
+          ],
+        });
+
+        console.log(result);
+
+        console.log("Amount out: ");
+
+        total += result[0];
+      }
+
+      setTotalOutputAmount(total);
+      // setAmountOut(total.toString());
+
+      // console.log(formatEther(result[0]));
+
+      // const slippageBPS = 50;
+
+      // const outputTokenAmount = await getUniswapV3EstimatedAmountOut(
+      //   client,
+      //   "", //quoter
+      //   "0x4200000000000000000000000000000000000006",
+      //   inputTokens[0].address,
+      //   10000,
+      //   slippageBPS,
+      // );
+
+      // console.log(outputTokenAmount);
+
+      // const result = await writeContract(wagmiConfig, {
+      //   abi,
+      //   address: "0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a", // base Quoter
+      //   functionName: "quoteExactInputSingle",
+      //   args: [
+      //     inputTokens[0].address, // tokenIn
+      //     "0x4200000000000000000000000000000000000006", // tokenOut (base WETH)
+      //     parseUnits(inputTokens[0].amount, inputTokens[0].decimals), // amountIn
+      //     550000,
+      //     0,
+      //   ],
+      // });
+
+      // console.log("HELLO!");
+      // console.log(result);
+    }
+    fn();
+  }, [inputTokens.length, publicClient?.chain?.id, outputToken?.address, outputNetwork?.id]);
+
   const calculateOutputTokenAmount = async () => {
     if (!outputToken || !outputNetwork || !inputTokens.length || !client || !provider) {
       return;
@@ -129,7 +239,8 @@ const SwapPreview = () => {
     }
   };
 
-  const readyForPreview = !!inputNetwork && !!outputNetwork && !!outputToken && inputTokens.length > 0;
+  const readyForPreview =
+    !!inputNetwork && !!outputNetwork && inputTokens.length > 0 && (!isBitcoin ? !!outputToken : true);
 
   const togglePreviewModal = getToggleModal(previewModalRef);
   const closePreviewModal = () => {
@@ -156,7 +267,6 @@ const SwapPreview = () => {
       </button>
       <dialog ref={previewModalRef} className="modal">
         <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded">
-
           <div className="flex justify-between items-center bg-auto">
             <h3 className="font-bold text-xl">Input Tokens</h3>
             <div className="relative">
@@ -179,15 +289,17 @@ const SwapPreview = () => {
           </div>
           <h3 className="font-bold text-xl mt-2">Output Token</h3>
           <span className="text-[#9D9D9D]">{outputNetwork?.name}</span>
-          <div key={outputToken?.name} className="flex justify-between mb-24">
-            <div>
-              <span className="px-2">•</span>
-              <span>{outputToken?.name}</span>
+          {outputToken && (
+            <div key={outputToken?.name} className="flex justify-between mb-24">
+              <div>
+                <span className="px-2">•</span>
+                <span>{outputToken?.name}</span>
+              </div>
+              <span className="text-[#F0BF26] flex font-bold">
+                {Number(formatEther(totalOutputAmount)).toFixed(4)} {outputToken?.name}
+              </span>
             </div>
-            <span className="text-[#F0BF26] flex font-bold">
-              {amountOut} {outputToken?.name}
-            </span>
-          </div>
+          )}
           <div className="text-[#9D9D9D]">
             <div className="w-full flex justify-center">
               <p>new quote in: 0:{String(quoteTime).padStart(2, "0")}</p>
