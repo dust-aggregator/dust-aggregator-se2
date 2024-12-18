@@ -142,7 +142,7 @@ const OutputBox = () => {
               </div>
             )}
           </div>
-          <SwapPreview isDisabled={!understoodRisk} />
+          <SwapPreview isDisabled={receiverWalletMode !== "connected" && !understoodRisk} />
         </>
       ) : (
         <></>

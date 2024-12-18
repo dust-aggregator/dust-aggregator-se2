@@ -1,4 +1,4 @@
-import { RefObject, useRef } from "react";
+import { RefObject, useRef, useState } from "react";
 import CategorySelectInputBox from "./CategorySelectInputBox";
 
 interface OptionInfo {
@@ -24,6 +24,8 @@ interface Props {
 }
 
 const TokenSelector = ({ _options, _updateSpecificOption, _comps }: Props) => {
+  const [tokensSelected, setTokensSelected] = useState(false);
+  const [hover, setHover] = useState(false);
 
   const previewModalRef = useRef<HTMLDialogElement>(null);
 
@@ -39,15 +41,24 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps }: Props) => {
 
   const togglePreviewModal = getToggleModal(previewModalRef);
 
+  const handleConfirm = () => {
+    setTokensSelected(true);
+    togglePreviewModal();
+  };
+
   return (
     <div>
       <button
         // disabled={!readyForPreview}
         style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-        className="text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4"
+        className={`text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4 ${
+          tokensSelected ? "bg-green-500" : ""
+        }`}
         onClick={togglePreviewModal}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
       >
-        Select Tokens
+        {tokensSelected ? (hover ? "Update Selection" : "Tokens Selected") : "Select Tokens"}
       </button>
       <dialog ref={previewModalRef} className="modal">
         <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded-lg">
@@ -69,7 +80,7 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps }: Props) => {
               <button
                 style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
                 className="flex-1 text-[#FFFFFF] my-0 pb-1 text-sm bg-center btn  min-h-0 h-10 rounded-lg"
-                onClick={togglePreviewModal}
+                onClick={handleConfirm}
               >
                 Confirm
               </button>
@@ -82,7 +93,6 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps }: Props) => {
               </button>
             </form>
           </div>
-
         </div>
       </dialog>
     </div>
