@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useEffect } from "react";
 import { formatEther, parseUnits } from "viem";
 
 interface OptionInfo {
@@ -38,10 +39,10 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
   // };
 
   const handleClick = (section: string, option: OptionInfo) => {
-    const elem = document.activeElement;
-    if (elem) {
-      elem?.blur();
-    }
+    // const elem = document.activeElement;
+    // if (elem) {
+    //   elem?.blur();
+    // }
     onChange(section, option.value, option.selected, option.amountToDust);
   };
 
@@ -57,9 +58,8 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
       <div
         tabIndex={0}
         role="button"
-        className={`min-h-0 h-8 py-1 px-2 leading-tight shadow-inner-xl flex items-center border-2 border-slate-50 w-full text-xs select bg-[#3C3731] ${
-          selectedOption ? "text-[#E4E4E4]" : "text-[#9D9D9D]"
-        }`}
+        className={`min-h-0 h-8 py-1 px-2 leading-tight shadow-inner-xl flex items-center border-2 border-slate-50 w-full text-xs select bg-[#3C3731] ${selectedOption ? "text-[#E4E4E4]" : "text-[#9D9D9D]"
+          }`}
       >
         {title}
       </div>

@@ -20,9 +20,10 @@ import WaitingModal from "../WaitingModal";
 
 interface Props {
   togglePreviewModal: () => void;
+  _handleApproveTokens: () => void;
 }
 
-const ConfirmButton = ({ togglePreviewModal }: Props) => {
+const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens }: Props) => {
   const [resultModalOpen, setResultModalOpen] = useState(false);
   const [waitingModalOpen, setWaitingModalOpen] = useState(false);
   const { address } = useAccount();
@@ -35,6 +36,10 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
     e?.preventDefault();
 
     if (!outputNetwork || !outputToken || !inputTokens.length || !chainId) return;
+
+    // ===================
+    await _handleApproveTokens();
+    // ===================
 
     const signPermit = async (swaps: TokenSwap[]) => {
       if (!inputNetwork) {

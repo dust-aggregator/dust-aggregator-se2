@@ -20,7 +20,7 @@ const networkOptions = [{ ecosystem: "Ethereum", options: evmNetworkOptions }];
 const OutputBox = () => {
   const outputTokensByNetwork = useGlobalState(({ outputTokensByNetwork }) => outputTokensByNetwork);
 
-  console.log(outputTokensByNetwork);
+  // console.log(outputTokensByNetwork);
 
   const { outputNetwork, setOutputNetwork, outputToken, setOutputToken } = useGlobalState();
   const [outputBalances, setOutputBalances] = useState<Token[]>([]);

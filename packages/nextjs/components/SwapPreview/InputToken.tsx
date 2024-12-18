@@ -1,37 +1,38 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { erc20Abi, formatUnits, parseUnits } from "viem";
-import { useWriteContract } from "wagmi";
+// import { useWriteContract } from "wagmi";
 import { useTokenHasPermit2Approval } from "~~/hooks/dust";
-import { maxUint256 } from "~~/lib/constants";
-import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
+// import { maxUint256 } from "~~/lib/constants";
+// import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
 
 interface Props {
   token: SelectedToken;
+  _approveIndexState: string;
 }
 
-const InputToken = ({ token }: Props) => {
+const InputToken = ({ token, _approveIndexState }: Props) => {
   const parsedAmount = parseUnits(token.amount, token.decimals);
   const { hasApproval, refresh } = useTokenHasPermit2Approval(token.address, parsedAmount);
-  const { writeContract, isPending, isError, isSuccess, error } = useWriteContract();
+  // const { writeContract, isPending, isError, isSuccess, error } = useWriteContract();
   const [slippage, setSlippage] = useState(0)
 
-  useEffect(() => {
-    if (isSuccess) refresh();
-    if (error) console.error(error);
-  }, [isSuccess, refresh, error]);
+  // useEffect(() => {
+  //   if (isSuccess) refresh();
+  //   if (error) console.error(error);
+  // }, [isSuccess, refresh, error]);
 
-  const handleApprove = async () => {
-    writeContract({
-      abi: erc20Abi,
-      address: token.address,
-      functionName: "approve",
-      args: [PERMIT2_BASE_SEPOLIA, maxUint256],
-    });
-  };
+  // const handleApprove = async () => {
+  //   writeContract({
+  //     abi: erc20Abi,
+  //     address: token.address,
+  //     functionName: "approve",
+  //     args: [PERMIT2_BASE_SEPOLIA, maxUint256],
+  //   });
+  // };
 
-  const btnText = isSuccess ? "Approved!" : isError ? "Error" : isPending ? "Waiting for signature" : "Approve Token";
+  // const btnText = isSuccess ? "Approved!" : isError ? "Error" : isPending ? "Waiting for signature" : "Approve Token";
 
   return (
     <div className="w-full flex flex-col gap-2">
@@ -45,8 +46,18 @@ const InputToken = ({ token }: Props) => {
             <div
               className={`rounded-full w-[6px] h-[6px] ${hasApproval ? "bg-[#75FF4A] drop-shadow-[0_0_7px_rgba(_66,_255,0,_0.8)]" : "bg-[#FF7171] drop-shadow-[0_0_7px_rgba(_255,0,0,_0.8)]"}`}
             />
-            <span className={`text-xs ${hasApproval ? "text-[#75FF4A]" : "text-[#FF7171]"}`}>
-              {hasApproval ? "Approbed" : "Requires Approval"}
+            <span
+              className={`text-xs
+              ${!_approveIndexState && "text-orange-500"}
+              ${_approveIndexState === "loading" && "text-amber-500"}
+              ${_approveIndexState === "success" && "text-[#75FF4A]"}
+              ${_approveIndexState === "error" && "text-[#FF7171]"}
+              `}>
+              {!_approveIndexState && "Requires Approval"}
+              {_approveIndexState === "loading" && "Loading"}
+              {_approveIndexState === "success" && "Approved"}
+              {_approveIndexState === "error" && "Error"}
+              {/* {hasApproval ? "Approbed" : "Requires Approval"} */}
             </span>
           </div>
         </div>

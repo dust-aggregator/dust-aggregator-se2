@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef, useState } from "react"; 
+import { RefObject, useEffect, useRef, useState } from "react";
 import ConfirmButton from "./ConfirmButton";
 import InputToken from "./InputToken";
 import { keccak256, toUtf8Bytes } from "ethers";
@@ -14,6 +14,8 @@ import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
 import infoSVG from "~~/public/assets/info.svg";
 import Image from "next/image";
+import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
+import { useApprovePermit2 } from "~~/hooks/dust/useApprovePermit2";
 
 const quoterAddressBaseSep = "0xC5290058841028F1614F3A6F0F5816cAd0df5E27";
 const wethBaseSep = "0x4200000000000000000000000000000000000006";
@@ -32,10 +34,37 @@ const SwapPreview = () => {
   const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
-  const [approvalCount, setApprovalCount] = useState(0)
+  const [approvalCount, setApprovalCount] = useState(0);
   const previewModalRef = useRef<HTMLDialogElement>(null);
 
   const client = usePublicClient({ config: wagmiConfig });
+
+  const callApprovePermit2 = useApprovePermit2();
+  const [tokensApproveStates, setTokensApproveStates] = useState<{ [key: number]: string }>({});
+
+  const handleApproveTokens = async () => {
+    for (const token of inputTokens) {
+      setTokensApproveStates(prev => ({
+        ...prev,
+        [index]: "loading",
+      }));
+      const index = inputTokens.indexOf(token);
+      const result = await callApprovePermit2(token.address, PERMIT2_BASE_SEPOLIA);
+      if (result.success)
+        setTokensApproveStates(prev => ({
+          ...prev,
+          [index]: "success",
+        }));
+      else
+        setTokensApproveStates(prev => ({
+          ...prev,
+          [index]: "error",
+        }));
+
+      setApprovalCount(prev => prev + 1);
+    }
+    setApprovalCount(0);
+  };
 
   // useEffect(() => {
   //   calculateOutputTokenAmount();
@@ -141,9 +170,9 @@ const SwapPreview = () => {
           <div className="text-[#9D9D9D]">
             <span>{inputNetwork?.name}</span>
             <ul>
-              {inputTokens.map(token => (
+              {inputTokens.map((token, index) => (
                 <li key={token.symbol} className="flex justify-between">
-                  <InputToken token={token} />
+                  <InputToken token={token} _approveIndexState={tokensApproveStates[index]} />
                 </li>
               ))}
             </ul>
@@ -196,7 +225,7 @@ const SwapPreview = () => {
             <div className="text=[#FFFFF]"></div>
           </div>
           <form method="dialog" className="w-full flex justify-center mt-6">
-            <ConfirmButton togglePreviewModal={togglePreviewModal} />
+            <ConfirmButton togglePreviewModal={togglePreviewModal} _handleApproveTokens={handleApproveTokens} />
             <button
               style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
               className="flex-1 text-[#FFFFFF] my-0 text-sm bg-center btn  min-h-0 h-10 rounded-lg"
