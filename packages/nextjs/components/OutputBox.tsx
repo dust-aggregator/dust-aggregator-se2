@@ -20,13 +20,10 @@ const networkOptions = [
 ];
 
 const OutputBox = () => {
-<<<<<<< HEAD
   const outputTokensByNetwork = useGlobalState(({ outputTokensByNetwork }) => outputTokensByNetwork);
 
   // console.log(outputTokensByNetwork);
 
-=======
->>>>>>> 29e8539b24fa19fda834a75079ff4ba3d4dd7a3c
   const { outputNetwork, setOutputNetwork, outputToken, setOutputToken } = useGlobalState();
   const [outputBalances, setOutputBalances] = useState<Token[]>([]);
   const [receiverWalletMode, setReceiverWalletMode] = useState<string>("");

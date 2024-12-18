@@ -17,9 +17,8 @@ import infoSVG from "~~/public/assets/info.svg";
 import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
 import { useGlobalState } from "~~/services/store/store";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
-import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
-import infoSVG from "~~/public/assets/info.svg";
-import Image from "next/image";
+import { useApprovePermit2 } from "~~/hooks/dust/useApprovePermit2";
+import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
 
 const quoterAddressBaseSep = "0xC5290058841028F1614F3A6F0F5816cAd0df5E27";
 const wethBaseSep = "0x4200000000000000000000000000000000000006";
