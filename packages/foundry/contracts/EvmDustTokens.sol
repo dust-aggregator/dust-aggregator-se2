@@ -32,6 +32,7 @@ contract EvmDustTokens is Ownable2Step {
     address public immutable universalDApp;
     address payable public immutable wNativeToken;
     uint256 public collectedFees;
+    uint256 public refunds;
 
     // Allowed tokens to receive
     mapping(address => bool) public isWhitelisted;
@@ -199,17 +200,21 @@ contract EvmDustTokens is Ownable2Step {
      * @dev To receive native tokens, set outputToken to address(0)
      */
     function ReceiveTokens(address outputToken, address recipient, uint256 minAmount) external payable {
-        if (msg.value == 0) revert InvalidMsgValue();
+        // Early exit
+        if (msg.value == 0) return;
         // Check if the output token is native or whitelisted
-        if (outputToken != address(0) && !isWhitelisted[outputToken]) revert TokenIsNotWhitelisted(outputToken);
+        if (outputToken != address(0) && !isWhitelisted[outputToken]) {
+            refunds = refunds + msg.value;
 
-        // If outputToken is 0x, send msg.value to the recipient
-        if (outputToken == address(0)) {
+            emit WithdrawFailed(recipient, msg.value);
+        } else if (outputToken == address(0)) {
+            // If outputToken is 0x, send msg.value to the recipient
             (bool s,) = recipient.call{value: msg.value}("");
             if (s) {
                 emit Withdrawn(recipient, outputToken, msg.value);
             } else {
-                collectedFees = collectedFees + msg.value;
+                refunds = refunds + msg.value;
+
                 emit WithdrawFailed(recipient, msg.value);
             }
         } else if (outputToken == wNativeToken) {
@@ -300,6 +305,18 @@ contract EvmDustTokens is Ownable2Step {
             token.safeTransfer(msg.sender, amount);
             emit TokenFeesWithdrawn(token, amount);
         }
+    }
+
+    /**
+     * Send refunds to the original sender
+     * @param receiver - The address of the original sender
+     * @param amount - The amount of refunds
+     */
+    function sendRefunds(address receiver, uint256 amount) external onlyOwner {
+        // Reverts if the amount is greater than the refunds
+        refunds = refunds - amount;
+        (bool s,) = receiver.call{value: amount}("");
+        if (!s) revert TransferFailed();
     }
 
     /**
