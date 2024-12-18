@@ -94,15 +94,14 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
                           // onSelect(section, value, !selected);
                           disabled = !disabled;
                         }}
-                        className="text-xs text-[#9D9D9D] px-2 py-1 justify-between"
+                        className="text-xs text-[#9D9D9D] px-2 py-1 flex justify-between items-center"
                       >
                         <p>{label}</p>
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex items-center gap-1">
                           <p>{formatDecimal(tokenBalance)}</p>
                           <Image src={"/particles.png"} alt="" width={"12"} height={"12"} className="h-4" />
                         </div>
-
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex items-center gap-1">
                           <p>$</p>
                           <p>{usdValue?.toFixed(2)}</p>
                         </div>

@@ -31,7 +31,7 @@ const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
   }
 };
 
-const SwapPreview = () => {
+const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
@@ -228,7 +228,7 @@ const SwapPreview = () => {
   return (
     <div>
       <button
-        disabled={!readyForPreview}
+        disabled={!readyForPreview || isDisabled}
         style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
         className="text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4"
         onClick={togglePreviewModal}

@@ -43,7 +43,7 @@ const OutputBox = () => {
   };
 
   const formattedOuputNetwork = {
-    label: outputNetwork?.name || "Select Network",
+    label: outputNetwork?.name || "Select Chain",
     value: outputNetwork?.id || "",
   };
 
@@ -58,7 +58,7 @@ const OutputBox = () => {
         <>
           <h3 className="font-bold">Output</h3>
           <CategorySelect
-            title="Select Network"
+            title="Select Chain"
             options={networkOptions}
             onChange={handleSelectNetwork}
             selectedOption={formattedOuputNetwork}
@@ -142,7 +142,7 @@ const OutputBox = () => {
               </div>
             )}
           </div>
-          <SwapPreview />
+          <SwapPreview isDisabled={!understoodRisk} />
         </>
       ) : (
         <></>
