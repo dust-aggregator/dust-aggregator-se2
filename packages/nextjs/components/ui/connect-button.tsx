@@ -66,7 +66,9 @@ const ConnectButton = React.forwardRef<HTMLDivElement, ConnectButtonProps>(
 
             {!isEthConnected ? (
               <div className="absolute top-0 left-0 w-full h-[90%] flex items-center justify-end">
-                <span className="w-[70%] text-xs 2xl:text-base text-center">Connect</span>
+                <span className="w-[70%] text-xs 2xl:text-base text-center">
+                  {_chain === "sol" ? "Soon" : "Connect"}
+                </span>
               </div>
             ) : (
               <div className="absolute w-full h-[90%] flex items-center justify-start drop-shadow-[0_0_3px_rgba(0,_187,_255,_1)] group">

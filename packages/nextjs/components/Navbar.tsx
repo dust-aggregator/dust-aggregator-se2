@@ -23,25 +23,25 @@ export const Navbar = () => {
 
         <div className="absolute inset-0 flex justify-between items-center mb-5 px-[7%]">
           <div className="w-1/4 h-1/2">
-            <Link href="" className="w-1/3 h-full flex">
+            <Link href="/" className="w-1/3 h-full flex">
               <span className=""></span>
             </Link>
           </div>
 
           <div className="w-1/4 flex justify-evenly text-xs lg:text-sm 2xl:text-base">
-            <Link href="" className="">
-              <span className="text-white font-bold">SWAP</span>
-            </Link>
-            <Link href="" className="">
+           
+            <Link href="https://fingerpump.gitbook.io/dust.fun" className="" target="_blank" rel="noopener noreferrer">
               <span className="text-white font-bold">HOW IT WORKS</span>
             </Link>
-            <Link href="" className="">
+            <Link href="#faq" className="">
+              <span className="text-white font-bold">F.A.Q</span>
+            </Link>
+            <Link href="https://discord.com/invite/FTSeFc9Yh4" target="_blank" rel="noopener noreferrer">
               <span className="text-white font-bold">SUPPORT</span>
             </Link>
           </div>
 
-          <div className="w-1/4 flex justify-between">
-            <ConnectButton _chain="btc" />
+          <div className="w-1/4 flex justify-around">           
             <ConnectButton _chain="sol" />
             <ConnectButton _chain="eth" />
           </div>
@@ -101,6 +101,11 @@ export const Navbar = () => {
           </div>
         </div>
       </div>
+      <style jsx global>{`
+        html {
+          scroll-behavior: smooth;
+        }
+      `}</style>
     </div>
   );
 };
