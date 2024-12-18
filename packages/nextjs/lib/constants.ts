@@ -35,7 +35,7 @@ export const SUPPORTED_INPUT_NETWORKS: Network[] = [
     ...bsc,
     contractAddress: "0x04b869e9e9b557314935085ec8213662AfE7c956",
     zrc20Address: "0x48f80608B672DC30DC7e3dbBd0343c5F02C738Eb",
-    alchemyName: "bsc-mainnet",
+    alchemyName: "bnb-mainnet",
     wNativeAddress: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
   },
 ];
