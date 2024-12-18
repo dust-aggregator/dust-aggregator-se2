@@ -1,4 +1,5 @@
-import { GAS_LIMIT_BY_TOKEN_TYPE, WRAPPED_NATIVE_TOKENS, zeroAddress } from "./constants";
+import { GAS_LIMIT_BY_TOKEN_TYPE, WRAPPED_NATIVE_TOKENS } from "./constants";
+import { zeroAddress } from "viem";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
