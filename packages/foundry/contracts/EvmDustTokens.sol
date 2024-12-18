@@ -57,6 +57,7 @@ contract EvmDustTokens is Ownable2Step {
     event Swapped(address indexed executor, SwapOutput[] swaps, uint256 totalTokensReceived);
     event SwappedAndDeposited(address indexed executor, SwapOutput[] swaps, uint256 totalTokensReceived);
     event Withdrawn(address indexed recipient, address outputToken, uint256 totalTokensReceived);
+    event WithdrawFailed(address indexed recipient, uint256 totalTokensReceived);
     event Reverted(address indexed recipient, address asset, uint256 amount);
 
     error FeeWithdrawalFailed();
@@ -205,9 +206,12 @@ contract EvmDustTokens is Ownable2Step {
         // If outputToken is 0x, send msg.value to the recipient
         if (outputToken == address(0)) {
             (bool s,) = recipient.call{value: msg.value}("");
-            if (!s) revert TransferFailed();
-
-            emit Withdrawn(recipient, outputToken, msg.value);
+            if (s) {
+                emit Withdrawn(recipient, outputToken, msg.value);
+            } else {
+                collectedFees = collectedFees + msg.value;
+                emit WithdrawFailed(recipient, msg.value);
+            }
         } else if (outputToken == wNativeToken) {
             // Wrap native token to the wrapped native token (i.e: WETH, WPOL, etc)
             IWTOKEN(wNativeToken).deposit{value: msg.value}();
