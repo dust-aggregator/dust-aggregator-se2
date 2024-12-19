@@ -90,13 +90,7 @@ const ConnectButton = React.forwardRef<HTMLDivElement, ConnectButtonProps>(
             )}
           </div>
 
-        </div>
-
-        {!isEthConnected && _chain === "eth" && (
-          <div className="absolute w-full h-full top-0 left-0 opacity-0">
-            <RainbowKitCustomConnectButton />
-          </div>
-        )}
+        </div>        
       </div>
     )
   }

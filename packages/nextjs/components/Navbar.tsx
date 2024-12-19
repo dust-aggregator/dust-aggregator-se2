@@ -7,6 +7,7 @@ import navBottomSVG from "~~/public/assets/nav-bottom.svg";
 import navbarMobileSVG from "~~/public/assets/navbar-mobile.svg";
 import navbarSVG from "~~/public/assets/navbar.svg";
 import openSVG from "~~/public/assets/open.svg";
+import { RainbowKitCustomConnectButton } from "./scaffold-eth";
 
 /**
  * Site navbar
@@ -42,8 +43,9 @@ export const Navbar = () => {
           </div>
 
           <div className="w-1/4 flex justify-around">           
-            <ConnectButton _chain="sol" />
-            <ConnectButton _chain="eth" />
+            {/* <ConnectButton _chain="sol" /> */}
+            {/* <ConnectButton _chain="eth" /> */}
+            <RainbowKitCustomConnectButton />
           </div>
         </div>
       </div>
@@ -80,9 +82,9 @@ export const Navbar = () => {
                 </div>
 
                 <div className="w-full flex justify-between z-30">
-                  <ConnectButton _chain="btc" />
-                  <ConnectButton _chain="sol" />
-                  <ConnectButton _chain="eth" />
+                  {/* <ConnectButton _chain="btc" />
+                  <ConnectButton _chain="sol" /> */}
+                  <RainbowKitCustomConnectButton />
                 </div>
 
                 <Image
