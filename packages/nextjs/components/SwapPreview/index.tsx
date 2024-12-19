@@ -62,8 +62,6 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const publicClient = usePublicClient();
 
   const account = useAccount();
-  console.log(account);
-  console.log(publicClient);
 
   const [totalOutputAmount, setTotalOutputAmount] = useState(BigInt(0));
 
@@ -120,9 +118,9 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
           ],
         });
 
-        console.log(result);
+        // console.log(result);
 
-        console.log("Amount out: ");
+        // console.log("Amount out: ");
 
         total += result[0];
       }

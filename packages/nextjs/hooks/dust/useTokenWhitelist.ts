@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Alchemy } from "alchemy-sdk";
 import { zeroAddress } from "viem";
 import { useReadContract } from "wagmi";
-import dustAbi from "~~/components/SwapPreview/dustAbi.json";
+import dustAbi from "~~/lib/abis/EvmDustTokens.json";
 import { OutputToken } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
 

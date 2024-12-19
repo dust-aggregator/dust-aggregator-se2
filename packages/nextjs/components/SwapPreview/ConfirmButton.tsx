@@ -1,12 +1,12 @@
 import { RefObject, useEffect, useRef, useState } from "react";
 import SwapResultModal from "../SwapResultModal";
 import WaitingModal from "../WaitingModal";
-import dustAbi from "./dustAbi.json";
 import { ethers } from "ethers";
 import { encode } from "punycode";
 import { parseUnits } from "viem";
-import { useAccount, useSignTypedData, useWriteContract } from "wagmi";
+import { useAccount, useWriteContract } from "wagmi";
 import { getAccount } from "wagmi/actions";
+import dustAbi from "~~/lib/abis/EvmDustTokens.json";
 import { TokenSwap } from "~~/lib/types";
 import { getGasLimitByOutputToken } from "~~/lib/utils";
 import {
@@ -27,8 +27,9 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
   const [waitingModalOpen, setWaitingModalOpen] = useState(false);
   const { address } = useAccount();
   const { outputNetwork, outputToken, inputTokens, inputNetwork, recipient } = useGlobalState();
+
   const { writeContract, data: swapHash, isError, ...rest } = useWriteContract();
-  // const { signTypedData } = useSignTypedData();
+
   const { chainId } = getAccount(wagmiConfig);
 
   const handleConfirm = async (e?: any) => {
@@ -129,7 +130,7 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
         error={rest.error}
         amountCurency={"4005.3333 DAI"}
       />
-      <WaitingModal open={waitingModalOpen} />
+      {waitingModalOpen && <WaitingModal open={waitingModalOpen} swapHash={swapHash} />}
     </>
   );
 };

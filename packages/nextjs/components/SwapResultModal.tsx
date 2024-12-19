@@ -1,19 +1,19 @@
 import { useEffect, useRef } from "react";
-import SuccessSVG from "~~/public/assets/success.svg"
-import discordIcon from "~~/public/assets/discord_icon.svg";
-import instagramIcon from "~~/public/assets/instagram_icon.svg";
-import tiktokIcon from "~~/public/assets/tiktok_icon.svg";
-import youtubeIcon from "~~/public/assets/youtube_icon.svg";
 import Image from "next/image";
 import Link from "next/link";
+import discordIcon from "~~/public/assets/discord_icon.svg";
+import instagramIcon from "~~/public/assets/instagram_icon.svg";
+import SuccessSVG from "~~/public/assets/success.svg";
+import tiktokIcon from "~~/public/assets/tiktok_icon.svg";
+import youtubeIcon from "~~/public/assets/youtube_icon.svg";
 
 interface Props {
-  isError: boolean
+  isError: boolean;
   error: any;
   open: boolean;
   retryOperation: () => void;
-  rebootMachine: () => void
-  amountCurency?: string
+  rebootMachine: () => void;
+  amountCurency?: string;
 }
 
 const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, amountCurency }: Props) => {
@@ -50,7 +50,6 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
                 <span>Thank you very much for using Dust.Fun, your dust has been transformed</span>
               </>
             )}
-
           </div>
           <form method="dialog" className="w-full flex justify-center mt-6">
             {/* <button

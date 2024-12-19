@@ -3,6 +3,10 @@ import { Network as AlchemyNetwork } from "alchemy-sdk";
 import { zeroAddress } from "viem";
 import { base, bsc, polygon } from "viem/chains";
 import { Network } from "~~/lib/types";
+import baseSVG from "~~/public/base.svg";
+import bnbSVG from "~~/public/bnb.svg";
+import dustSVG from "~~/public/logo2.svg";
+import polSVG from "~~/public/pol.svg";
 
 export const networks = [
   { key: "Ethereum", alchemyEnum: AlchemyNetwork.ETH_MAINNET, chainId: 1 },
@@ -23,6 +27,9 @@ export const SUPPORTED_INPUT_NETWORKS: Network[] = [
     zrc20Address: "0xADF73ebA3Ebaa7254E859549A44c74eF7cff7501",
     alchemyName: "polygon-mainnet",
     wNativeAddress: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+    numBlocksForConfirmation: 300,
+    blockTime: 2.1,
+    logo: polSVG,
   },
   {
     ...base,
@@ -30,6 +37,9 @@ export const SUPPORTED_INPUT_NETWORKS: Network[] = [
     zrc20Address: "0x1de70f3e971B62A0707dA18100392af14f7fB677",
     alchemyName: "base-mainnet",
     wNativeAddress: "0x4200000000000000000000000000000000000006",
+    numBlocksForConfirmation: 300,
+    blockTime: 2,
+    logo: baseSVG,
   },
   {
     ...bsc,
@@ -37,6 +47,9 @@ export const SUPPORTED_INPUT_NETWORKS: Network[] = [
     zrc20Address: "0x48f80608B672DC30DC7e3dbBd0343c5F02C738Eb",
     alchemyName: "bnb-mainnet",
     wNativeAddress: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    numBlocksForConfirmation: 20,
+    blockTime: 3,
+    logo: bnbSVG,
   },
 ];
 
@@ -44,6 +57,7 @@ export const BitcoinNetwork = {
   name: "Bitcoin",
   id: "bitcoin",
   zrc20Address: "0x13A0c5930C028511Dc02665E7285134B6d11A5f4",
+  numBlocksForConfirmation: 3,
 };
 
 export const SUPPORTED_OUTPUT_NETWORKS_BY_ECOSYSTEM = [
@@ -56,6 +70,8 @@ export const SUPPORTED_OUTPUT_NETWORKS_BY_ECOSYSTEM = [
     networks: [BitcoinNetwork],
   },
 ];
+
+export const UNIVERSAL_DAPP_ADDRESS = "0x78357ACa2F46b0aC0783368d17CA9cEc7d8aBCE6";
 
 export const GAS_LIMIT_BY_TOKEN_TYPE = {
   native: 100000,
