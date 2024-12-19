@@ -354,7 +354,7 @@ const InputBox = () => {
           <p>{"Loading Tokens..."}</p>
         ) : (
           <>
-            <div className="font-bold m-0 flex items-center">DUST Threshold
+            <div className="font-bold m-0 flex items-center mb-4">DUST Threshold
               <div className="relative group inline-block ml-2">
                 <InformationCircleIcon className="w-5 h-5" />
                 <div className="absolute bottom-full mb-2 hidden group-hover:block w-64 p-2 text-xs text-white bg-black rounded">
@@ -362,7 +362,7 @@ const InputBox = () => {
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-4 mb-4">
               <div className="relative w-2/3">
                 <input
                   className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8 pr-7 w-full appearance-none
@@ -375,20 +375,20 @@ const InputBox = () => {
                   value={dustThresholdValue}
                   onChange={handleChange}
                 />
-                <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">USD</span>
+                <span className="absolute text-sm inset-y-0 right-0 pr-3 flex items-center text-gray-500">USD</span>
               </div>
             </div>
             <p className="font-bold m-0">Input</p>
 
             <TokenSelector _options={networkOptions2} _updateSpecificOption={updateSpecificOption} _comps={comps} />
 
-            <div className="p-[0.4px] bg-[#FFFFFF] rounded my-3"></div>
-            <div className="overflow-scroll h-40">
+            <div className="p-[0.4px] bg-[#FFFFFF] rounded my-4"></div>
+            <div className="overflow-scroll h-40 mb-4">
               {compsShort}
             {/* <AllTokensPrices /> */}
             {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
             </div>
-            <div className="flex items-center justify-center gap-1">
+            <div className="flex items-center justify-center gap-2">
               <p>Total ≈ </p>
               <p>$</p>
               <p>{totalDustInUsd?.toFixed(2)}</p>
