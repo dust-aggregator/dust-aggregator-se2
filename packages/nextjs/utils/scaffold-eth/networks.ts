@@ -52,8 +52,8 @@ export const NETWORKS_EXTRA_DATA: Record<string, ChainAttributes> = {
   [chains.gnosis.id]: {
     color: "#48a9a6",
   },
-  [chains.polygon.id]: {
-    color: "#2bbdf7",
+  [chains.polygon.id]: {    
+    color: "#5f4bb6",
     nativeCurrencyTokenAddress: "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
   },
   [chains.polygonMumbai.id]: {
@@ -80,6 +80,19 @@ export const NETWORKS_EXTRA_DATA: Record<string, ChainAttributes> = {
   },
   [chains.scrollSepolia.id]: {
     color: "#fbebd4",
+  },
+  [chains.baseSepolia.id]: {
+    color: "#1969ff",
+  },
+  [chains.base.id]: {
+    color: "#1969ff",
+  },
+  [chains.bsc.id]: {
+    color: "#b8af0c",
+  },
+  [chains.zetachain.id]: {
+    // green
+    color: "#00bd8c",
   },
 };
 
