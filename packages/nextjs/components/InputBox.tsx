@@ -18,10 +18,13 @@ import TokenSelector from "./TokenSelector";
 
 const InputBox = () => {
   const [dustThresholdValue, setDustThresholdValue] = useState<number>(0);
+  const [isSaved, setIsSaved] = useState(false);
   const { inputTokens } = useGlobalState();
 
   function handleChange(e: any) {
     setDustThresholdValue(e.target.value);
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 2000);
   }
 
   // const { allObjects: allTokensFromAlchemy, isLoading } = useTokenBalancesWithMetadataByNetwork(
@@ -66,6 +69,8 @@ const InputBox = () => {
 
   const setInputTokens = useGlobalState(({ setInputTokens }) => setInputTokens);
 
+  const [totalDustInUsd, setTotalDustInUsd] = useState(0);
+
   // Update disabled property function
   const updateSpecificOption = (sectionKey: string, optionValue: string, selected: boolean, amountToDust: number) => {
     const updatedOptions: any[] = networkOptions2.map((section: any) =>
@@ -73,7 +78,7 @@ const InputBox = () => {
         ? {
           ...section,
           options: section.options.map((option: any) =>
-            option.value === optionValue ? { ...option, selected, amountToDust } : option,
+            option.value === optionValue ? { ...option, selected, amountToDust: Math.min(amountToDust, option.tokenBalance) } : option,
           ),
         }
         : section,
@@ -81,26 +86,32 @@ const InputBox = () => {
 
     const filteredTokens = updatedOptions
       .flatMap((section: any) => section.options)
-      .filter((option: any) => {
-        return option.selected === true;
-      });
+      .filter((option: any) => option.selected);
 
-    const selectedInputTokens = filteredTokens.map((token: any, index: number) => {
-      return {
-        name: token.label,
-        decimals: token.decimals,
-        balance: token.tokenBalance,
-        amount: token.amountToDust,
-        address: token.address,
-        symbol: token.symbol,
-        usdValue: token.usdValue,
-        hasPermit2Allowance: false,
-      };
-    });
+    const selectedInputTokens = filteredTokens.map((token: any) => ({
+      name: token.label,
+      decimals: token.decimals,
+      balance: token.tokenBalance,
+      amount: token.amountToDust.toString(),
+      address: token.address,
+      symbol: token.symbol,
+      usdValue: token.usdValue,
+      hasPermit2Allowance: false,
+    }));
 
     setInputTokens(selectedInputTokens);
-
     setNetworkOptions2(updatedOptions);
+
+    // Update totalDustInUsd
+    let totalDust = 0;
+    for (let i = 0; i < updatedOptions.length; i++) {
+      for (let j = 0; j < updatedOptions[i].options.length; j++) {
+        if (updatedOptions[i].options[j].selected) {
+          totalDust += updatedOptions[i].options[j].usdValue * updatedOptions[i].options[j].amountToDust / updatedOptions[i].options[j].tokenBalance;
+        }
+      }
+    }
+    setTotalDustInUsd(totalDust);
   };
 
   const filteredNetworkOptions = networkOptions2
@@ -149,14 +160,23 @@ const InputBox = () => {
                 <input
                   type="number"
                   min={0}
-                  value={Number(option.amountToDust).toFixed(6)}
+                  max={option.tokenBalance}
+                  value={option.amountToDust}
                   onChange={(a: any) => {
-                    updateSpecificOption(e.section, option.value, option.selected, a.target.value);
+                    const value = Math.min(a.target.value, option.tokenBalance);
+                    updateSpecificOption(e.section, option.value, option.selected, value);
                   }}
                   className="w-[70px] text-xs h-full px-1 rounded border bg-[#3C3731] shadow-inner shadow-[inset_0_1px_13px_rgba(0,0,0,0.7)]"
                 />
 
-                <button className="h-full px-2 text-xs rounded-lg border bg-[#4C463F]">Max</button>
+                <button
+                  className="h-full px-2 text-xs rounded-lg border bg-[#4C463F]"
+                  onClick={() => {
+                    updateSpecificOption(e.section, option.value, option.selected, option.tokenBalance);
+                  }}
+                >
+                  Max
+                </button>
               </div>
 
               {/* <div className="flex items-center justify-center gap-1 text-xs">
@@ -170,35 +190,35 @@ const InputBox = () => {
     );
   });
 
-  const compsShort = filteredNetworkOptions.map((e: any, index: number) => {
-    return (
-      <div key={"sjf" + index} className="flex flex-col gap-2">        
-        {e.options.map((option: any, index: number) => {
-          return (
-            <div key={"sndn" + index}>
-              <div
-                className={`px-4 h-10 flex items-center w-full text-xs justify-between rounded-lg`}
-              >
-                <div className="flex gap-2">
-                  <p className="m-0 text-xs ">
-                    {e.section} / {option.label}
-                  </p>
-                </div>
-
-                <div className="flex gap-2 h-full items-center py-1">
-                  <div className="border-t border-gray-400 mx-2"></div>
-                  <p className="text-xs opacity-70">
-                    {formatDecimal(option.tokenBalance)} {option.symbol}
-                  </p>                              
-                </div>           
+  const compsShort = networkOptions2
+    .map(network => ({
+      ...network,
+      options: network.options.filter((option: any) => option.selected),
+    }))
+    .filter(network => network.options.length > 0)
+    .map((e: any, index: number) => (
+      <div key={"sjf" + index} className="flex flex-col gap-2">
+        {e.options.map((option: any, index: number) => (
+          <div key={"sndn" + index}>
+            <div className={`px-4 h-10 flex items-center w-full text-xs justify-between rounded-lg`}>
+              <div className="flex gap-2">
+                <p className="m-0 text-xs ">
+                  {e.section} / {option.label}
+                </p>
               </div>
-              <hr className="border-gray-400 my-2" />
+
+              <div className="flex gap-2 h-full items-center py-1">
+                <div className="border-t border-gray-400 mx-2"></div>
+                <p className="text-xs opacity-70">
+                  {formatDecimal(option.amountToDust)} {option.symbol}
+                </p>
+              </div>
             </div>
-          );
-        })}
+            <hr className="border-gray-400 my-2" />
+          </div>
+        ))}
       </div>
-    );
-  });
+    ));
 
   useEffect(() => {
     const networkOptions2: any[] = [];
@@ -291,16 +311,18 @@ const InputBox = () => {
     // }
 
     setNetworkOptions2(networkOptions2);
-  }, [walletConnectBalances.length, dustThresholdValue]);
 
-  let totalDustInUsd = 0;
-  for (let i = 0; i < networkOptions2.length; i++) {
-    for (let j = 0; j < networkOptions2[i].options.length; j++) {
-      if (networkOptions2[i].options[j].selected) {
-        totalDustInUsd += networkOptions2[i].options[j].usdValue;
+    // Update totalDustInUsd
+    let totalDust = 0;
+    for (let i = 0; i < networkOptions2.length; i++) {
+      for (let j = 0; j < networkOptions2[i].options.length; j++) {
+        if (networkOptions2[i].options[j].selected) {
+          totalDust += networkOptions2[i].options[j].usdValue * networkOptions2[i].options[j].amountToDust / networkOptions2[i].options[j].tokenBalance;
+        }
       }
     }
-  }
+    setTotalDustInUsd(totalDust);
+  }, [walletConnectBalances.length, dustThresholdValue]);
 
   const [inputNetwork, setInputNetworkLocal] = useState();
 
@@ -341,32 +363,23 @@ const InputBox = () => {
             </div>
             <div className="flex gap-2">
               <div className="relative w-2/3">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
                 <input
-                  className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8 pl-7 w-full"
-                  placeholder={""}
-                  name={"dustThreshold"}
+                  className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8 pr-7 w-full appearance-none
+                  [&::-webkit-inner-spin-button]:appearance-none 
+                  [&::-webkit-outer-spin-button]:appearance-none 
+                  [&::-moz-appearance]:textfield"
+                  placeholder=""
+                  name="dustThreshold"
                   type="number"
                   value={dustThresholdValue}
                   onChange={handleChange}
                 />
+                <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">USD</span>
               </div>
-              <button className="px-4 rounded-lg hover:brightness-50 bg-[url('/button1.png')] bg-no-repeat bg-center bg-cover w-1/3 h-full text-xs font-black">
-                <p className="pb-2 pt-1 m-0 font-montserrat">Save</p>
-              </button>
             </div>
             <p className="font-bold m-0">Input</p>
 
-            <TokenSelector _options={updatedOptions2} _updateSpecificOption={updateSpecificOption} _comps={comps} />
-
-            {/* <div className="flex gap-2">
-              <CategorySelectInputBox
-                title="Select tokens"
-                options={updatedOptions2}
-                // onSelect={updateSpecificOption}
-                onChange={updateSpecificOption}
-              />
-            </div> */}
+            <TokenSelector _options={networkOptions2} _updateSpecificOption={updateSpecificOption} _comps={comps} />
 
             <div className="p-[0.4px] bg-[#FFFFFF] rounded my-3"></div>
             <div className="overflow-scroll h-40">
