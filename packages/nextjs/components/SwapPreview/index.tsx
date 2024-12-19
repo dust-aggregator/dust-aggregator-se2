@@ -2,26 +2,14 @@ import { RefObject, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import ConfirmButton from "./ConfirmButton";
 import InputToken from "./InputToken";
-import { QUOTER_ADDRESSES } from "@uniswap/sdk-core";
-import { keccak256, toUtf8Bytes } from "ethers";
-import { ethers } from "ethers";
-import { formatEther, parseUnits } from "viem";
-import chains from "viem/chains";
-import { useAccount, usePublicClient } from "wagmi";
-import { readContract, writeContract } from "wagmi/actions";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
-// import { useEthersProvider } from "~~/hooks/dust";
-import { truncateToDecimals } from "~~/lib/utils";
-import { getUniswapV3EstimatedAmountOut } from "~~/lib/zetachainUtils";
+import { Token } from "@uniswap/sdk-core";
+import { useAccount } from "wagmi";
 import infoSVG from "~~/public/assets/info.svg";
 import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
 import { useGlobalState } from "~~/services/store/store";
-import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 import { useApprovePermit2 } from "~~/hooks/dust/useApprovePermit2";
 import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
-
-const quoterAddressBaseSep = "0xC5290058841028F1614F3A6F0F5816cAd0df5E27";
-const wethBaseSep = "0x4200000000000000000000000000000000000006";
+import { SelectedToken } from "~~/lib/types";
 
 const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
   if (ref.current) {
@@ -34,25 +22,45 @@ const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
 };
 
 const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
+  const account = useAccount();
   const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
-  const [amountOut, setAmountOut] = useState<string | null>(null);
+  // const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
-  const [approvalCount, setApprovalCount] = useState(0);
   const previewModalRef = useRef<HTMLDialogElement>(null);
-  const isBitcoin = outputNetwork?.id === "bitcoin";
-
-  const client = usePublicClient({ config: wagmiConfig });
-
   const callApprovePermit2 = useApprovePermit2();
+  const [approvalCount, setApprovalCount] = useState(0);
   const [tokensApproveStates, setTokensApproveStates] = useState<{ [key: number]: string }>({});
+  const [tokensEstimatedQuotes, setTokensEstimatedQuotes] = useState<{ [key: number]: number | undefined }>({});
+  const [tokensMinAmountOut, setTokensMinAmountOut] = useState<{ [key: number]: number | undefined }>({});
+  const [totalOutputAmount, setTotalOutputAmount] = useState(0);
+
+  const callSetTokenHasApproval = (index: number) => {
+    setTokensApproveStates(prev => ({
+      ...prev,
+      [index]: "success",
+    }));
+  };
+
+  const callSetTokensMinAmountOut = (index: number, amount: number) => {
+    setTokensMinAmountOut(prev => ({
+      ...prev,
+      [index]: amount,
+    }));
+  };
 
   const handleApproveTokens = async () => {
     for (const token of inputTokens) {
+      const index = inputTokens.indexOf(token);
+
+      if (tokensApproveStates[index] === "success") {
+        console.log(`Token at index ${index} is already approved, skipping...`);
+        continue;
+      }
+
       setTokensApproveStates(prev => ({
         ...prev,
         [index]: "loading",
       }));
-      const index = inputTokens.indexOf(token);
       const result = await callApprovePermit2(token.address, PERMIT2_BASE_SEPOLIA);
       if (result.success)
         setTokensApproveStates(prev => ({
@@ -70,10 +78,6 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
     setApprovalCount(0);
   };
 
-  // useEffect(() => {
-  //   calculateOutputTokenAmount();
-  // },   const handleConfirm = async () => {
-
   useEffect(() => {
     const interval = setInterval(() => {
       if (readyForPreview) {
@@ -88,165 +92,76 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
     return () => clearInterval(interval);
   });
 
-  const publicClient = usePublicClient();
-
-  const account = useAccount();
-  console.log(account);
-  console.log(publicClient);
-
-  const [totalOutputAmount, setTotalOutputAmount] = useState(BigInt(0));
-
-  useEffect(() => {
-    async function fn() {
-      if (inputTokens.length <= 0) return;
-      if (publicClient === undefined) return;
-      if (outputToken?.address === undefined) return;
-      if (outputNetwork === undefined) return;
-
-      const abi = [
-        {
-          inputs: [
-            {
-              components: [
-                { internalType: "address", name: "tokenIn", type: "address" },
-                { internalType: "address", name: "tokenOut", type: "address" },
-                { internalType: "uint256", name: "amountIn", type: "uint256" },
-                { internalType: "uint24", name: "fee", type: "uint24" },
-                { internalType: "uint160", name: "sqrtPriceLimitX96", type: "uint160" },
-              ],
-              internalType: "struct IQuoterV2.QuoteExactInputSingleParams",
-              name: "params",
-              type: "tuple",
-            },
-          ],
-          name: "quoteExactInputSingle",
-          outputs: [
-            { internalType: "uint256", name: "amountOut", type: "uint256" },
-            { internalType: "uint160", name: "sqrtPriceX96After", type: "uint160" },
-            { internalType: "uint32", name: "initializedTicksCrossed", type: "uint32" },
-            { internalType: "uint256", name: "gasEstimate", type: "uint256" },
-          ],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-      ];
-
-      let total = BigInt(0);
-
-      for (const token of inputTokens) {
-        const { result } = await publicClient.simulateContract({
-          address: QUOTER_ADDRESSES[outputNetwork?.id || 1],
-          abi,
-          functionName: "quoteExactInputSingle",
-          args: [
-            {
-              tokenIn: token.address, // tokenIn
-              tokenOut: outputToken?.address, // tokenOut (base WETH)
-              amountIn: parseUnits(token.amount, token.decimals), // amountIn
-              fee: BigInt(500), // fee tier
-              sqrtPriceLimitX96: BigInt(0), // price limit
-            },
-          ],
-        });
-
-        console.log(result);
-
-        console.log("Amount out: ");
-
-        total += result[0];
-      }
-
-      setTotalOutputAmount(total);
-      // setAmountOut(total.toString());
-
-      // console.log(formatEther(result[0]));
-
-      // const slippageBPS = 50;
-
-      // const outputTokenAmount = await getUniswapV3EstimatedAmountOut(
-      //   client,
-      //   "", //quoter
-      //   "0x4200000000000000000000000000000000000006",
-      //   inputTokens[0].address,
-      //   10000,
-      //   slippageBPS,
-      // );
-
-      // console.log(outputTokenAmount);
-
-      // const result = await writeContract(wagmiConfig, {
-      //   abi,
-      //   address: "0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a", // base Quoter
-      //   functionName: "quoteExactInputSingle",
-      //   args: [
-      //     inputTokens[0].address, // tokenIn
-      //     "0x4200000000000000000000000000000000000006", // tokenOut (base WETH)
-      //     parseUnits(inputTokens[0].amount, inputTokens[0].decimals), // amountIn
-      //     550000,
-      //     0,
-      //   ],
-      // });
-
-      // console.log("HELLO!");
-      // console.log(result);
-    }
-    fn();
-  }, [inputTokens.length, publicClient?.chain?.id, outputToken?.address, outputNetwork?.id]);
-
-  const calculateOutputTokenAmount = async () => {
-    if (!outputToken || !outputNetwork || !inputTokens.length || !client || !provider) {
+  const getQuote = async (_token: SelectedToken, _index: number) => {
+    if (!inputNetwork || inputTokens.length <= 0 || !outputToken?.address || !outputNetwork || !account.address) {
+      alert("Missing params, make sure to select input tokens, otput token, output network");
       return;
     }
-    setAmountOut(null);
 
-    const slippageBPS = 50;
-    try {
-      let transportTokenAmount = BigInt(0);
+    setTokensEstimatedQuotes(prev => ({
+      ...prev,
+      [_index]: undefined,
+    }));
+    setTokensMinAmountOut(prev => ({
+      ...prev,
+      [_index]: undefined,
+    }));
 
-      for (const token of inputTokens) {
-        const parsedAmount = parseUnits(token.amount, token.decimals);
-        const swapTokenAmount = await getUniswapV3EstimatedAmountOut(
-          // wagmiConfig,
-          provider,
-          quoterAddressBaseSep,
-          token.address,
-          wethBaseSep,
-          parsedAmount,
-          slippageBPS,
-        );
+    const tokenIn = new Token(inputNetwork.id, _token.address, Number(_token.decimals), _token.symbol, _token.name);
+    const tokenOut = new Token(
+      inputNetwork.id,
+      outputToken.address,
+      Number(outputToken.decimals),
+      outputToken.symbol,
+      outputToken.name,
+    );
 
-        transportTokenAmount = transportTokenAmount.add(swapTokenAmount);
-      }
+    const reqBody = {
+      chainId: inputNetwork.id,
+      walletAddress: account.address,
+      tokenIn,
+      tokenOut,
+      amountIn: _token.amount,
+    };
 
-      const outputTokenAmount = await getUniswapV3EstimatedAmountOut(
-        client,
-        quoterAddressBaseSep,
-        wethBaseSep,
-        outputToken.address,
-        transportTokenAmount,
-        slippageBPS,
-      );
+    const res = await fetch("http://localhost:8000/quote", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(reqBody),
+    });
 
-      const parsedOutputTokenAmount = ethers.formatUnits(outputTokenAmount, outputToken.decimals);
+    const data = await res.json();
+    console.log(data);
 
-      // Truncate to 4 decimal places
-      const outputAmountWithFourDecimals = truncateToDecimals(parsedOutputTokenAmount, 4);
+    setTokensEstimatedQuotes(prev => ({
+      ...prev,
+      [_index]: data.readableAmount,
+    }));
+    setTokensMinAmountOut(prev => ({
+      ...prev,
+      [_index]: data.readableAmount,
+    }));
 
-      setAmountOut(outputAmountWithFourDecimals);
-    } catch (error) {
-      console.error("Error calculating output token amount:", error);
-    }
+    setTotalOutputAmount(prev => prev + Number(data.readableAmount));
   };
 
-  const readyForPreview =
-    !!inputNetwork && !!outputNetwork && inputTokens.length > 0 && (!isBitcoin ? !!outputToken : true);
+  const getQuotes: () => void = () => {
+    setTotalOutputAmount(0);
+    inputTokens.map((token, index) => {
+      getQuote(token, index);
+    });
+  };
+
+  const readyForPreview = !!inputNetwork && !!outputNetwork && inputTokens.length > 0;
 
   const togglePreviewModal = getToggleModal(previewModalRef);
-  const closePreviewModal = () => {
-    if (previewModalRef.current) {
-      previewModalRef.current.close();
-    }
-  };
+  // const closePreviewModal = () => {
+  //   if (previewModalRef.current) {
+  //     previewModalRef.current.close();
+  //   }
+  // };
 
   const networkFee = 0.43;
   const commission = 0.21;
@@ -254,13 +169,22 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   totalUsdValue -= networkFee;
   totalUsdValue -= commission;
 
+  useEffect(() => {
+    const count = Object.values(tokensApproveStates).filter((state: string) => state === "success").length;
+    setApprovalCount(count);
+  }, [tokensApproveStates]);
+
   return (
     <div>
       <button
         disabled={!readyForPreview || isDisabled}
         style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
         className="text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4"
-        onClick={togglePreviewModal}
+        // onClick={togglePreviewModal}
+        onClick={() => {
+          togglePreviewModal();
+          getQuotes();
+        }}
       >
         Preview Swap
       </button>
@@ -278,10 +202,18 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
 
           <div className="text-[#9D9D9D]">
             <span>{inputNetwork?.name}</span>
-            <ul>
+            <ul className="flex flex-col gap-3">
               {inputTokens.map((token, index) => (
                 <li key={token.symbol} className="flex justify-between">
-                  <InputToken token={token} _approveIndexState={tokensApproveStates[index]} />
+                  <InputToken
+                    _index={index}
+                    _token={token}
+                    _approveIndexState={tokensApproveStates[index]}
+                    _tokensEstimatedQuotes={tokensEstimatedQuotes[index]}
+                    _setTokenHasApproval={callSetTokenHasApproval}
+                    _setTokensMinAmountOut={callSetTokensMinAmountOut}
+                    _tokenMinOut={tokensMinAmountOut[index]}
+                  />
                 </li>
               ))}
             </ul>
@@ -295,7 +227,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 <span>{outputToken?.name}</span>
               </div>
               <span className="text-[#F0BF26] flex font-bold">
-                {Number(formatEther(totalOutputAmount)).toFixed(4)} {outputToken?.name}
+                {totalOutputAmount.toFixed(7)} {outputToken?.name}
               </span>
             </div>
           )}
@@ -336,7 +268,11 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
             <div className="text=[#FFFFF]"></div>
           </div>
           <form method="dialog" className="w-full flex justify-center mt-6">
-            <ConfirmButton togglePreviewModal={togglePreviewModal} _handleApproveTokens={handleApproveTokens} />
+            <ConfirmButton
+              togglePreviewModal={togglePreviewModal}
+              _handleApproveTokens={handleApproveTokens}
+              _tokensMinAmountOut={tokensMinAmountOut}
+            />
             <button
               style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
               className="flex-1 text-[#FFFFFF] my-0 text-sm bg-center btn  min-h-0 h-10 rounded-lg"

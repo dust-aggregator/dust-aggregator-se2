@@ -54,6 +54,7 @@ const InputBox = () => {
         const apiResponseJson = await apiResponse.json();
 
         setWalletConnectBalances(apiResponseJson.balances);
+        console.log(apiResponseJson.balances);
       }
 
       setIsLoadingTokens(false);

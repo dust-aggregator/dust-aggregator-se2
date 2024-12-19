@@ -21,9 +21,10 @@ import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 interface Props {
   togglePreviewModal: () => void;
   _handleApproveTokens: () => void;
+  _tokensMinAmountOut: { [key: number]: number | undefined };
 }
 
-const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens }: Props) => {
+const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmountOut }: Props) => {
   const [resultModalOpen, setResultModalOpen] = useState(false);
   const [waitingModalOpen, setWaitingModalOpen] = useState(false);
   const { address } = useAccount();
@@ -35,7 +36,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens }: Props) => {
   const handleConfirm = async (e?: any) => {
     e?.preventDefault();
 
-    const isBitcoin = outputNetwork.id === "bitcoin";
+    const isBitcoin = outputNetwork?.name === "bitcoin";
 
     if (!outputNetwork) return;
     if (!isBitcoin && (!outputToken || !inputTokens.length)) return;
@@ -44,22 +45,29 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens }: Props) => {
     await _handleApproveTokens();
     // ===================
 
+    console.log(_tokensMinAmountOut);
+    return;
+
     const signPermit = async (swaps: TokenSwap[]) => {
-      if (!inputNetwork) {
+      if (!inputNetwork || !chainId) {
         throw new Error("No input network");
       }
 
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = await provider.getSigner();
       const { domain, types, values, deadline, nonce } = await preparePermitData(
         chainId,
         swaps,
         inputNetwork?.contractAddress,
       );
-      const signature = await signer.signTypedData(domain, types, values);
+      const signature = await signer._signTypedData(domain, types, values);
 
       return { deadline, nonce, signature };
     };
+
+    if (!outputToken) {
+      throw new Error("No output token");
+    }
 
     const gasLimit = isBitcoin ? BigInt(130000) : getGasLimitByOutputToken(outputToken?.address);
     const recipientAddress = (recipient || address) as `0x${string}`;

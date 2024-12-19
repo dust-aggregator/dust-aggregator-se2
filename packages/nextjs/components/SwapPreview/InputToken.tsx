@@ -1,38 +1,42 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { erc20Abi, formatUnits, parseUnits } from "viem";
-// import { useWriteContract } from "wagmi";
+import { parseUnits } from "viem";
 import { useTokenHasPermit2Approval } from "~~/hooks/dust";
-// import { maxUint256 } from "~~/lib/constants";
-// import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
+import { useGlobalState } from "~~/services/store/store";
 
 interface Props {
-  token: SelectedToken;
+  _index: number;
+  _token: SelectedToken;
   _approveIndexState: string;
+  _tokensEstimatedQuotes: number | undefined;
+  _setTokenHasApproval: (index: number) => void;
+  _setTokensMinAmountOut: (index: number, amount: number) => void;
+  _tokenMinOut: number | undefined;
 }
 
-const InputToken = ({ token, _approveIndexState }: Props) => {
-  const parsedAmount = parseUnits(token.amount, token.decimals);
-  const { hasApproval, refresh } = useTokenHasPermit2Approval(token.address, parsedAmount);
-  // const { writeContract, isPending, isError, isSuccess, error } = useWriteContract();
-  const [slippage, setSlippage] = useState(0)
+const InputToken = ({ _index, _token, _approveIndexState, _tokensEstimatedQuotes, _setTokenHasApproval, _setTokensMinAmountOut, _tokenMinOut }: Props) => {
+  const parsedAmount = parseUnits(_token.amount, _token.decimals);
+  const { hasApproval } = useTokenHasPermit2Approval(_token.address, parsedAmount);
+  const [slippage, setSlippage] = useState(0);
+  const [tokenQuote, setTokenQuote] = useState("");
 
-  // useEffect(() => {
-  //   if (isSuccess) refresh();
-  //   if (error) console.error(error);
-  // }, [isSuccess, refresh, error]);
+  const { outputToken } = useGlobalState();
 
-  // const handleApprove = async () => {
-  //   writeContract({
-  //     abi: erc20Abi,
-  //     address: token.address,
-  //     functionName: "approve",
-  //     args: [PERMIT2_BASE_SEPOLIA, maxUint256],
-  //   });
-  // };
+  const handleSlippageChange = (e: string) => {
+    setSlippage(Number(e));
+  }
 
-  // const btnText = isSuccess ? "Approved!" : isError ? "Error" : isPending ? "Waiting for signature" : "Approve Token";
+  useEffect(() => {
+    if (hasApproval) _setTokenHasApproval(_index);
+  }, [hasApproval]);
+
+  useEffect(() => {
+    if (_tokensEstimatedQuotes) {
+      const value = Number(_tokensEstimatedQuotes).toFixed(7);
+      setTokenQuote(value);
+    }
+  }, [_tokensEstimatedQuotes]);
 
   return (
     <div className="w-full flex flex-col gap-2">
@@ -40,7 +44,7 @@ const InputToken = ({ token, _approveIndexState }: Props) => {
         <div className="flex items-center gap-3">
           <span className="">•</span>
           <span className="text-xs">
-            {token.name} ({token.symbol})
+            {_token.name} ({_token.symbol})
           </span>
           <div className="flex items-center gap-1">
             <div
@@ -52,22 +56,17 @@ const InputToken = ({ token, _approveIndexState }: Props) => {
               ${_approveIndexState === "loading" && "text-amber-500"}
               ${_approveIndexState === "success" && "text-[#75FF4A]"}
               ${_approveIndexState === "error" && "text-[#FF7171]"}
-              `}>
+              `}
+            >
               {!_approveIndexState && "Requires Approval"}
               {_approveIndexState === "loading" && "Loading"}
               {_approveIndexState === "success" && "Approved"}
               {_approveIndexState === "error" && "Error"}
-              {/* {hasApproval ? "Approbed" : "Requires Approval"} */}
             </span>
           </div>
         </div>
         <span className="text-[#2DC7FF] flex text-xs">
-          {/* {!hasApproval && (
-          <button onClick={handleApprove} className="mr-2 text-secondary">
-            {btnText}
-          </button>
-        )} */}
-          {Number(token.amount).toFixed(4)} {token.symbol}
+          {Number(_token.amount).toFixed(4)} {_token.symbol}
           <Image className="ml-1" src="/assets/particles.svg" alt="dust_particles" width={10} height={10} />
         </span>
       </div>
@@ -79,19 +78,64 @@ const InputToken = ({ token, _approveIndexState }: Props) => {
         </div>
         <div className="rounded-lg border flex items-center bg-[#3C3731]">
           <button
-            className={`px-2 p-1 text-sm rounded-lg ${slippage === 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)] text-black"}`}
+            className={`w-[55px] p-1 text-sm rounded-lg ${slippage === 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)] text-black"}`}
             onClick={() => setSlippage(0)}
           >
             Auto
           </button>
-          <button
+          {/* <button
             className={`px-2 p-1 text-sm rounded-lg ${slippage > 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)]  text-black"}`}
             onClick={() => setSlippage(2.5)}
           >
             2.50%
-          </button>
+          </button> */}
+
+          <div
+            className={`w-[55px] p-1 text-sm rounded-lg ${slippage > 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)]  text-black"}`}
+          >
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              max="100"
+              className="bg-transparent w-[40px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ring-0 focus:ring-0 shadow-none focus:shadow-none focus:outline-none border-none focus:border-none"
+              value={slippage}
+              onChange={e => handleSlippageChange(e.target.value)}
+              placeholder="0.5"
+            />
+            <span className="absolute right-2 text-sm text-gray-500">%</span>
+          </div>
+
         </div>
       </div>
+
+      <div className="flex justify-center">
+        <div className="flex items-center gap-2">
+          <span className="text-[#00ccff] text-xs font-bold">Estimated output:</span>
+          {_tokensEstimatedQuotes ? (
+            <span className="text-[#00ccff] text-xs">
+              {tokenQuote} {outputToken?.symbol}
+            </span>
+          ) : (
+            <svg
+              className="w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-[#00ff99]"
+              viewBox="0 0 100 101"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                fill="currentColor"
+              />
+              <path
+                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                fill="currentFill"
+              />
+            </svg>
+          )}
+        </div>
+      </div>
+      <span>{_tokenMinOut}</span>
     </div>
   );
 };
