@@ -363,15 +363,18 @@ const InputBox = () => {
             </div>
             <div className="flex gap-2">
               <div className="relative w-2/3">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
                 <input
-                  className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8 pl-7 w-full"
-                  placeholder={""}
-                  name={"dustThreshold"}
+                  className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8 pr-7 w-full appearance-none
+                  [&::-webkit-inner-spin-button]:appearance-none 
+                  [&::-webkit-outer-spin-button]:appearance-none 
+                  [&::-moz-appearance]:textfield"
+                  placeholder=""
+                  name="dustThreshold"
                   type="number"
                   value={dustThresholdValue}
                   onChange={handleChange}
-                />                
+                />
+                <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">USD</span>
               </div>
             </div>
             <p className="font-bold m-0">Input</p>
