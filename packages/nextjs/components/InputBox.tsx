@@ -74,46 +74,52 @@ const InputBox = () => {
 
   // Update disabled property function
   const updateSpecificOption = (sectionKey: string, optionValue: string, selected: boolean, amountToDust: number) => {
-    const updatedOptions: any[] = networkOptions2.map((section: any) =>
-      section.section === sectionKey
-        ? {
-          ...section,
-          options: section.options.map((option: any) =>
-            option.value === optionValue ? { ...option, selected, amountToDust: Math.min(amountToDust, option.tokenBalance) } : option,
-          ),
-        }
-        : section,
-    );
+    setNetworkOptions2(prevNetworkOptions2 => {
+      const updatedOptions: any[] = prevNetworkOptions2.map((section: any) =>
+        section.section === sectionKey
+          ? {
+            ...section,
+            options: section.options.map((option: any) =>
+              option.value === optionValue
+                ? { ...option, selected, amountToDust: Math.min(amountToDust, option.tokenBalance) }
+                : option,
+            ),
+          }
+          : section
+      );
 
-    const filteredTokens = updatedOptions
-      .flatMap((section: any) => section.options)
-      .filter((option: any) => option.selected);
+      const filteredTokens = updatedOptions
+        .flatMap((section: any) => section.options)
+        .filter((option: any) => option.selected);
 
-    const selectedInputTokens = filteredTokens.map((token: any) => ({
-      name: token.label,
-      decimals: token.decimals,
-      balance: token.tokenBalance,
-      amount: token.amountToDust.toString(),
-      address: token.address,
-      symbol: token.symbol,
-      usdValue: token.usdValue,
-      hasPermit2Allowance: false,
-    }));
+      const selectedInputTokens = filteredTokens.map((token: any) => ({
+        name: token.label,
+        decimals: token.decimals,
+        balance: token.tokenBalance,
+        amount: token.amountToDust.toString(),
+        address: token.address,
+        symbol: token.symbol,
+        usdValue: token.usdValue,
+        hasPermit2Allowance: false,
+      }));
 
-    setInputTokens(selectedInputTokens);
-    setNetworkOptions2(updatedOptions);
+      setInputTokens(selectedInputTokens);
 
-    // Update totalDustInUsd
-    let totalDust = 0;
-    for (let i = 0; i < updatedOptions.length; i++) {
-      for (let j = 0; j < updatedOptions[i].options.length; j++) {
-        if (updatedOptions[i].options[j].selected) {
-          totalDust += updatedOptions[i].options[j].usdValue * updatedOptions[i].options[j].amountToDust / updatedOptions[i].options[j].tokenBalance;
+      // Recalculate totalDustInUsd
+      let totalDust = 0;
+      for (const net of updatedOptions) {
+        for (const opt of net.options) {
+          if (opt.selected) {
+            totalDust += (opt.usdValue * opt.amountToDust) / opt.tokenBalance;
+          }
         }
       }
-    }
-    setTotalDustInUsd(totalDust);
+      setTotalDustInUsd(totalDust);
+
+      return updatedOptions;
+    });
   };
+
 
   const filteredNetworkOptions = networkOptions2
     .map(network => ({
@@ -385,8 +391,8 @@ const InputBox = () => {
             <div className="p-[0.4px] bg-[#FFFFFF] rounded my-4"></div>
             <div className="overflow-scroll h-40 mb-4">
               {compsShort}
-            {/* <AllTokensPrices /> */}
-            {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
+              {/* <AllTokensPrices /> */}
+              {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
             </div>
             <div className="flex items-center justify-center gap-2">
               <p>Total ≈ </p>

@@ -36,11 +36,23 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
     setIsOpen(!isOpen);
   };
 
+  const handleSelectAll = (section: string) => {
+    options?.forEach((network) => {
+      if (network.section === section) {
+        network.options.forEach((option) => {
+          if (!option.selected) {
+            handleClick(section, {
+              ...option,
+              selected: true,
+            });
+          }
+        });
+      }
+    });
+  };
+  
+
   const handleClick = (section: string, option: OptionInfo) => {
-    // const elem = document.activeElement;
-    // if (elem) {
-    //   elem?.blur();
-    // }
     onChange(section, option.value, option.selected, option.amountToDust);
   };
 
@@ -71,7 +83,15 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
           {options?.map(({ section, options }) => {
             return (
               <div key={section}>
-                <p className="text-sm font-bold my-1 px-2">{section}</p>
+                <div className="flex justify-between items-center">
+                  <p className="text-sm font-bold my-1 px-2">{section}</p>
+                  <button
+                    onClick={() => handleSelectAll(section)}
+                    className="text-xs text-[#f8cd4c] px-2 py-1"
+                  >
+                    Select All
+                  </button>
+                </div>
                 <div>
                   {options.map(({ value, label, disabled, tokenBalance, usdValue, decimals, selected, amountToDust }) => {
                     if (selected) return <div key={value}></div>;
