@@ -124,10 +124,15 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
       amountIn: _token.amount,
     };
 
-    const res = await fetch("http://localhost:8000/quote", {
+    if (!process.env.NEXT_PUBLIC_QUOTER_API_KEY) {
+      throw new Error("API key is not defined");
+    }
+
+    const res = await fetch("https://express-quoter-production.up.railway.app/quote", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-api-key": process.env.NEXT_PUBLIC_QUOTER_API_KEY,
       },
       body: JSON.stringify(reqBody),
     });
