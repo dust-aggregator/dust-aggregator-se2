@@ -25,13 +25,14 @@ contract EvmDustTokens is Ownable2Step {
     using TransferHelper for *;
 
     uint24 public constant swapFee = 3000; // Uniswap fee
-    uint256 public constant protocolFee = 100; // Our fee: 100 == 1%
     IGatewayEVM public immutable gateway;
     ISwapRouter public immutable swapRouter; // Uniswap router
     IPermit2 public immutable permit2;
     address public immutable universalDApp;
     address payable public immutable wNativeToken;
+    uint256 public protocolFee = 200; // Our fee: 200 == 2%
     uint256 public collectedFees;
+    uint256 public refunds;
 
     // Allowed tokens to receive
     mapping(address => bool) public isWhitelisted;
@@ -57,6 +58,7 @@ contract EvmDustTokens is Ownable2Step {
     event Swapped(address indexed executor, SwapOutput[] swaps, uint256 totalTokensReceived);
     event SwappedAndDeposited(address indexed executor, SwapOutput[] swaps, uint256 totalTokensReceived);
     event Withdrawn(address indexed recipient, address outputToken, uint256 totalTokensReceived);
+    event WithdrawFailed(address indexed recipient, uint256 totalTokensReceived);
     event Reverted(address indexed recipient, address asset, uint256 amount);
 
     error FeeWithdrawalFailed();
@@ -198,16 +200,23 @@ contract EvmDustTokens is Ownable2Step {
      * @dev To receive native tokens, set outputToken to address(0)
      */
     function ReceiveTokens(address outputToken, address recipient, uint256 minAmount) external payable {
-        if (msg.value == 0) revert InvalidMsgValue();
+        // Early exit
+        if (msg.value == 0) return;
         // Check if the output token is native or whitelisted
-        if (outputToken != address(0) && !isWhitelisted[outputToken]) revert TokenIsNotWhitelisted(outputToken);
+        if (outputToken != address(0) && !isWhitelisted[outputToken]) {
+            refunds = refunds + msg.value;
 
-        // If outputToken is 0x, send msg.value to the recipient
-        if (outputToken == address(0)) {
+            emit WithdrawFailed(recipient, msg.value);
+        } else if (outputToken == address(0)) {
+            // If outputToken is 0x, send msg.value to the recipient
             (bool s,) = recipient.call{value: msg.value}("");
-            if (!s) revert TransferFailed();
+            if (s) {
+                emit Withdrawn(recipient, outputToken, msg.value);
+            } else {
+                refunds = refunds + msg.value;
 
-            emit Withdrawn(recipient, outputToken, msg.value);
+                emit WithdrawFailed(recipient, msg.value);
+            }
         } else if (outputToken == wNativeToken) {
             // Wrap native token to the wrapped native token (i.e: WETH, WPOL, etc)
             IWTOKEN(wNativeToken).deposit{value: msg.value}();
@@ -296,6 +305,26 @@ contract EvmDustTokens is Ownable2Step {
             token.safeTransfer(msg.sender, amount);
             emit TokenFeesWithdrawn(token, amount);
         }
+    }
+
+    /**
+     * Send refunds to the original sender
+     * @param receiver - The address of the original sender
+     * @param amount - The amount of refunds
+     */
+    function sendRefunds(address receiver, uint256 amount) external onlyOwner {
+        // Reverts if the amount is greater than the refunds
+        refunds = refunds - amount;
+        (bool s,) = receiver.call{value: amount}("");
+        if (!s) revert TransferFailed();
+    }
+    
+    /**
+     * Update the protocol fee
+     * @param _newFee - The new protocol fee
+     */
+    function updateProtocolFee(uint256 _newFee) external onlyOwner {
+        protocolFee = _newFee;
     }
 
     /**

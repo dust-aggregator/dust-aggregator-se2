@@ -1,7 +1,9 @@
 import { GAS_LIMIT_BY_TOKEN_TYPE, WRAPPED_NATIVE_TOKENS } from "./constants";
-import { zeroAddress } from "viem";
+import { Network } from "./types";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { zeroAddress } from "viem";
+import chains from "viem/chains";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -22,4 +24,11 @@ export const getGasLimitByOutputToken = (address: string): bigint => {
   if (address === zeroAddress) return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.native);
   if (WRAPPED_NATIVE_TOKENS.includes(address)) return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.wNative);
   return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.erc20);
+};
+
+export const getBlockExplorerTxLink = (network: Network | null, txHash?: string) => {
+  if (txHash && network) {
+    const baseURL = network.blockExplorers?.default.url;
+    return `${baseURL}/tx/${txHash}`;
+  }
 };

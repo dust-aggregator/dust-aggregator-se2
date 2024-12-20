@@ -21,6 +21,9 @@ export type Network = Chain & {
   zrc20Address: string;
   alchemyName: string;
   wNativeAddress: string;
+  numBlocksForConfirmation: number;
+  blockTime: number;
+  logo: any;
 };
 
 export type TransactionState = "notStarted" | "sourcePending" | "zetaPending" | "destinationPending" | "completed";

@@ -1,12 +1,12 @@
 import { RefObject, useEffect, useRef, useState } from "react";
 import SwapResultModal from "../SwapResultModal";
 import WaitingModal from "../WaitingModal";
-import dustAbi from "./dustAbi.json";
 import { ethers } from "ethers";
 import { encode } from "punycode";
 import { parseUnits } from "viem";
-import { useAccount, useSignTypedData, useWriteContract } from "wagmi";
+import { useAccount, useWriteContract } from "wagmi";
 import { getAccount } from "wagmi/actions";
+import dustAbi from "~~/lib/abis/EvmDustTokens.json";
 import { TokenSwap } from "~~/lib/types";
 import { getGasLimitByOutputToken } from "~~/lib/utils";
 import {
@@ -29,8 +29,10 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
   const [waitingModalOpen, setWaitingModalOpen] = useState(false);
   const { address } = useAccount();
   const { outputNetwork, outputToken, inputTokens, inputNetwork, recipient } = useGlobalState();
+  const isSameNetwork = outputNetwork?.id === inputNetwork?.id;
+
   const { writeContract, data: swapHash, isError, ...rest } = useWriteContract();
-  // const { signTypedData } = useSignTypedData();
+
   const { chainId } = getAccount(wagmiConfig);
 
   const handleConfirm = async (e?: any) => {
@@ -92,12 +94,20 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
 
       const permit = await signPermit(tokenSwaps);
 
+      const functionName = isSameNetwork ? "SwapTokens" : "SwapAndBridgeTokens";
+      const args = [
+        tokenSwaps,
+        isSameNetwork ? outputToken?.address : encodedParameters,
+        permit.nonce,
+        permit.deadline,
+        permit.signature,
+      ];
+
       writeContract({
         address: inputNetwork?.contractAddress as string,
         abi: dustAbi,
-        functionName: "SwapAndBridgeTokens",
-        args: [tokenSwaps, encodedParameters, permit.nonce, permit.deadline, permit.signature],
-        // enabled: inputNetwork, ??
+        functionName,
+        args,
       });
     } catch (error) {
       console.error("WHOOOPS", error);
@@ -142,7 +152,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
         error={rest.error}
         amountCurency={"4005.3333 DAI"}
       />
-      <WaitingModal open={waitingModalOpen} />
+      {waitingModalOpen && <WaitingModal open={waitingModalOpen} swapHash={swapHash} />}
     </>
   );
 };
