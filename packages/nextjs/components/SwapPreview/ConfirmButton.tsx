@@ -31,7 +31,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
   const { outputNetwork, outputToken, inputTokens, inputNetwork, recipient } = useGlobalState();
   const isSameNetwork = outputNetwork?.id === inputNetwork?.id;
 
-  const { writeContract, data: swapHash, isError, ...rest } = useWriteContract();
+  const { writeContract, data: swapHash, isError, error, ...rest } = useWriteContract();
 
   const { chainId } = getAccount(wagmiConfig);
 
@@ -48,7 +48,6 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
     // ===================
 
     console.log(_tokensMinAmountOut);
-    return;
 
     const signPermit = async (swaps: TokenSwap[]) => {
       if (!inputNetwork || !chainId) {
@@ -86,10 +85,12 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
         isBitcoin,
       );
 
-      const tokenSwaps: TokenSwap[] = inputTokens.map(({ amount, decimals, address }) => ({
+      const tokenSwaps: TokenSwap[] = inputTokens.map(({ amount, decimals, address }, index) => ({
         amount: parseUnits(amount, decimals),
         token: address,
-        minAmountOut: BigInt(1), // TODO: Set a minimum amount out
+        minAmountOut: _tokensMinAmountOut[index]
+          ? ethers.utils.parseUnits(_tokensMinAmountOut[index].toFixed(18).toString(), decimals)
+          : BigInt(0),
       }));
 
       const permit = await signPermit(tokenSwaps);
@@ -115,12 +116,12 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
   };
 
   useEffect(() => {
-    if (rest.error) {
-      console.error("Error performing swap and bridge transaction:", rest.error);
+    if (isError) {
+      console.error("Error performing swap and bridge transaction:", error.message);
       togglePreviewModal();
       setResultModalOpen(true);
     }
-  }, [rest.error]);
+  }, [isError, error]);
 
   useEffect(() => {
     if (swapHash) setWaitingModalOpen(true);
@@ -149,7 +150,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
         retryOperation={retryOperation}
         open={resultModalOpen}
         isError={isError}
-        error={rest.error}
+        error={error}
         amountCurency={"4005.3333 DAI"}
       />
       {waitingModalOpen && <WaitingModal open={waitingModalOpen} swapHash={swapHash} />}
