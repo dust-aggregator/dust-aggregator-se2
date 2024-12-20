@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
+import { useEffect } from "react";
 import { formatEther, parseUnits } from "viem";
 
 interface OptionInfo {
@@ -36,10 +37,10 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
   };
 
   const handleClick = (section: string, option: OptionInfo) => {
-    const elem = document.activeElement;
-    if (elem) {
-      elem?.blur();
-    }
+    // const elem = document.activeElement;
+    // if (elem) {
+    //   elem?.blur();
+    // }
     onChange(section, option.value, option.selected, option.amountToDust);
   };
 
