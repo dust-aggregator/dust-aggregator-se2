@@ -17,7 +17,7 @@ import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import TokenSelector from "./TokenSelector";
 
 const InputBox = () => {
-  const [dustThresholdValue, setDustThresholdValue] = useState<number>(0);
+  const [dustThresholdValue, setDustThresholdValue] = useState<number>(50);
   const [isSaved, setIsSaved] = useState(false);
   const { inputTokens } = useGlobalState();
 
@@ -364,7 +364,7 @@ const InputBox = () => {
               <div className="relative group inline-block ml-2">
                 <InformationCircleIcon className="w-5 h-5" />
                 <div className="absolute bottom-full mb-2 hidden group-hover:block w-64 p-2 text-xs text-white bg-black rounded">
-                  Dust threshold is the value limit you set to define small token balances (dust). For example, with a $5 threshold, any tokens worth less than $5 are considered dust and can be swapped.
+                  Dust threshold is the value limit you set to define small token balances (dust). For example, with a $50 threshold, any tokens worth less than $50 are considered dust and can be swapped.
                 </div>
               </div>
             </div>
@@ -379,7 +379,7 @@ const InputBox = () => {
                   name="dustThreshold"
                   type="number"
                   value={dustThresholdValue}
-                  onChange={handleChange}
+                  onChange={handleChange}                 
                 />
                 <span className="absolute text-sm inset-y-0 right-0 pr-3 flex items-center text-gray-500">USD</span>
               </div>
