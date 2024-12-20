@@ -16,7 +16,8 @@ interface Props {
 }
 
 const InputToken = ({ _index, _token, _approveIndexState, _tokensEstimatedQuotes, _setTokenHasApproval, _setTokensMinAmountOut, _tokenMinOut }: Props) => {
-  const parsedAmount = parseUnits(_token.amount, _token.decimals);
+  const _fixedAmount = Number(_token.amount).toFixed(18);
+  const parsedAmount = parseUnits(_fixedAmount, _token.decimals);
   const { hasApproval } = useTokenHasPermit2Approval(_token.address, parsedAmount);
   const [slippage, setSlippage] = useState(0);
   const [tokenQuote, setTokenQuote] = useState("");
@@ -71,7 +72,7 @@ const InputToken = ({ _index, _token, _approveIndexState, _tokensEstimatedQuotes
           </div>
         </div>
         <span className="text-[#2DC7FF] flex text-xs">
-          {Number(_token.amount).toFixed(4)} {_token.symbol}
+          {Number(_token.amount).toFixed(8)} {_token.symbol}
           <Image className="ml-1" src="/assets/particles.svg" alt="dust_particles" width={10} height={10} />
         </span>
       </div>
