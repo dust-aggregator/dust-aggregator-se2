@@ -3,7 +3,7 @@ import Image from "next/image";
 import ConfirmButton from "./ConfirmButton";
 import InputToken from "./InputToken";
 import { Token } from "@uniswap/sdk-core";
-import { useAccount } from "wagmi";
+import { useAccount, useSwitchChain } from "wagmi";
 import infoSVG from "~~/public/assets/info.svg";
 import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
 import { useGlobalState } from "~~/services/store/store";
@@ -24,6 +24,7 @@ const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
 
 const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const account = useAccount();
+  const { switchChain } = useSwitchChain()
   const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   // const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
@@ -80,19 +81,16 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
     setApprovalCount(0);
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (readyForPreview) {
-        setQuoteTime(quoteTime => {
-          if (quoteTime === 1) {
-            return 30;
-          }
-          return quoteTime - 1;
-        });
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  });
+  const handlePreviewSwap = async () => {
+    if (account.chainId !== inputNetwork?.id) {
+      if (!inputNetwork) return;
+      await switchChain({ chainId: inputNetwork?.id });
+    }
+
+    togglePreviewModal();
+    getQuotes();
+    getGasPrice();
+  };
 
   const getQuote = async (_token: SelectedToken, _index: number) => {
     if (!inputNetwork || inputTokens.length <= 0 || !outputToken?.address || !outputNetwork || !account.address) {
@@ -172,7 +170,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const getGasPrice = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const gasPrice = await provider.getGasPrice();
-    console.log(ethers.utils.formatUnits(gasPrice, "gwei"));
+    console.log(`Gas price -> ${ethers.utils.formatUnits(gasPrice, "gwei")}`);
 
     const tx = {
       from: account.address,
@@ -183,7 +181,8 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
     const gasLimit = await provider.estimateGas(tx);
 
     const transactionFee = BigInt(gasLimit.toString()) * BigInt(gasPrice.toString());
-    setNetworkFee(ethers.utils.formatUnits(transactionFee * BigInt(inputTokens.length), "ether"));
+    setNetworkFee(ethers.utils.formatUnits(transactionFee * BigInt(inputTokens.length) * BigInt(2), "ether"));
+    console.log(`Network fee -> ${ethers.utils.formatUnits(transactionFee * BigInt(inputTokens.length), "ether")}`);
     // console.log(`Transaction Fee: ${ethers.utils.formatUnits(transactionFee, "ether")} ETH`);
   };
 
@@ -194,13 +193,23 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   // totalUsdValue -= commission;
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      if (readyForPreview) {
+        setQuoteTime(quoteTime => {
+          if (quoteTime === 1) {
+            return 30;
+          }
+          return quoteTime - 1;
+        });
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  });
+
+  useEffect(() => {
     const count = Object.values(tokensApproveStates).filter((state: string) => state === "success").length;
     setApprovalCount(count);
   }, [tokensApproveStates]);
-
-  useEffect(() => {
-    if (account) getGasPrice();
-  }, [account]);
 
   return (
     <div>
@@ -210,8 +219,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         className="text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4"
         // onClick={togglePreviewModal}
         onClick={() => {
-          togglePreviewModal();
-          getQuotes();
+          handlePreviewSwap();
         }}
       >
         Preview Swap
@@ -296,12 +304,12 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
             <div className="flex justify-between">
               <span className="font-bold">Estimated Return</span>
               <span className="text-[#FFFFFF]">
-                {estimatedReturn.toFixed(7)} {outputNetwork?.nativeCurrency.symbol}
+                {estimatedReturn.toFixed(7)} {outputToken?.symbol}
               </span>
             </div>
             <div className="text=[#FFFFF]"></div>
           </div>
-          <form method="dialog" className="w-full flex justify-center mt-6">
+          <div className="w-full flex justify-center mt-6">
             <ConfirmButton
               togglePreviewModal={togglePreviewModal}
               _handleApproveTokens={handleApproveTokens}
@@ -314,7 +322,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
             >
               Cancel
             </button>
-          </form>
+          </div>
         </div>
       </dialog>
     </div>
