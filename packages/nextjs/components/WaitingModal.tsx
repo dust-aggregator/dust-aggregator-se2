@@ -35,8 +35,7 @@ const WaitingModal = ({ open, swapHash }: Props) => {
     hash: swapHash,
   });
 
-  const txHash = swapReceipt?.transactionHash;
-  const inputTxLink = getBlockExplorerTxLink(inputNetwork, txHash);
+  const inputTxLink = getBlockExplorerTxLink(inputNetwork, swapHash);
 
   useEffect(() => {
     if (!swapReceipt) return;
@@ -122,9 +121,9 @@ const WaitingModal = ({ open, swapHash }: Props) => {
                 <span>Transaction on Zetachain</span>
                 <progress className="progress progress-success w-56" value={percentageComplete} max="100"></progress>
               </div>
-              <a href="">
+              {/* <a href="">
                 <Image src={linkSVG} alt="link" className={`w-4 ${!zetaNetworkSuccess && "opacity-20 cursor-wait"}`} />
-              </a>
+              </a> */}
             </div>
 
             <Image src={arrowSVG} alt="arrow" className="ml-1" />

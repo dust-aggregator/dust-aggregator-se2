@@ -2,7 +2,7 @@ import { useWatchContractEvent } from "wagmi";
 import abi from "~~/lib/abis/EvmDustTokens.json";
 import { useGlobalState } from "~~/services/store/store";
 
-export const useWaitForOutput = onComplete => {
+export const useWaitForOutput = (recipientAddress: `0x${string}`, onComplete: () => void) => {
   const { outputNetwork } = useGlobalState();
 
   useWatchContractEvent({
