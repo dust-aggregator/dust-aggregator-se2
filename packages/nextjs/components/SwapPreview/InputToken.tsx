@@ -24,8 +24,13 @@ const InputToken = ({ _index, _token, _approveIndexState, _tokensEstimatedQuotes
   const { outputToken } = useGlobalState();
 
   const handleSlippageChange = (e: string) => {
-    setSlippage(Number(e));
-  }
+    if(_tokensEstimatedQuotes) {
+      const slippageValue = Number(e);
+      setSlippage(slippageValue);
+      const minAmountWithSlippage = _tokensEstimatedQuotes - (_tokensEstimatedQuotes * slippageValue) / 100;
+      _setTokensMinAmountOut(_index, minAmountWithSlippage);
+    }
+  };
 
   useEffect(() => {
     if (hasApproval) _setTokenHasApproval(_index);
@@ -79,16 +84,10 @@ const InputToken = ({ _index, _token, _approveIndexState, _tokensEstimatedQuotes
         <div className="rounded-lg border flex items-center bg-[#3C3731]">
           <button
             className={`w-[55px] p-1 text-sm rounded-lg ${slippage === 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)] text-black"}`}
-            onClick={() => setSlippage(0)}
+            onClick={() => handleSlippageChange("0")}
           >
             Auto
           </button>
-          {/* <button
-            className={`px-2 p-1 text-sm rounded-lg ${slippage > 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)]  text-black"}`}
-            onClick={() => setSlippage(2.5)}
-          >
-            2.50%
-          </button> */}
 
           <div
             className={`w-[55px] p-1 text-sm rounded-lg ${slippage > 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)]  text-black"}`}

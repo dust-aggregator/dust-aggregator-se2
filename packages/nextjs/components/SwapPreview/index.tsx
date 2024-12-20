@@ -10,6 +10,7 @@ import { useGlobalState } from "~~/services/store/store";
 import { useApprovePermit2 } from "~~/hooks/dust/useApprovePermit2";
 import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
+import { ethers } from "ethers";
 
 const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
   if (ref.current) {
@@ -33,6 +34,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const [tokensEstimatedQuotes, setTokensEstimatedQuotes] = useState<{ [key: number]: number | undefined }>({});
   const [tokensMinAmountOut, setTokensMinAmountOut] = useState<{ [key: number]: number | undefined }>({});
   const [totalOutputAmount, setTotalOutputAmount] = useState(0);
+  const [networkFee, setNetworkFee] = useState<string>("0");
 
   const callSetTokenHasApproval = (index: number) => {
     setTokensApproveStates(prev => ({
@@ -140,16 +142,20 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
     const data = await res.json();
     console.log(data);
 
-    setTokensEstimatedQuotes(prev => ({
-      ...prev,
-      [_index]: data.readableAmount,
-    }));
-    setTokensMinAmountOut(prev => ({
-      ...prev,
-      [_index]: data.readableAmount,
-    }));
+    if (data.readableAmount) {
+      const onePercentLess = Number(data.readableAmount) * 0.99;
 
-    setTotalOutputAmount(prev => prev + Number(data.readableAmount));
+      setTokensEstimatedQuotes(prev => ({
+        ...prev,
+        [_index]: onePercentLess,
+      }));
+      setTokensMinAmountOut(prev => ({
+        ...prev,
+        [_index]: onePercentLess,
+      }));
+
+      setTotalOutputAmount(prev => prev + onePercentLess);
+    }
   };
 
   const getQuotes: () => void = () => {
@@ -162,22 +168,39 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const readyForPreview = !!inputNetwork && !!outputNetwork && inputTokens.length > 0;
 
   const togglePreviewModal = getToggleModal(previewModalRef);
-  // const closePreviewModal = () => {
-  //   if (previewModalRef.current) {
-  //     previewModalRef.current.close();
-  //   }
-  // };
 
-  const networkFee = 0.43;
-  const commission = 0.21;
-  let totalUsdValue = inputTokens.reduce((sum, item) => sum + (item.usdValue || 0), 0);
-  totalUsdValue -= networkFee;
-  totalUsdValue -= commission;
+  const getGasPrice = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const gasPrice = await provider.getGasPrice();
+    console.log(ethers.utils.formatUnits(gasPrice, "gwei"));
+
+    const tx = {
+      from: account.address,
+      to: inputNetwork?.contractAddress,
+      gasPrice: gasPrice,
+    };
+
+    const gasLimit = await provider.estimateGas(tx);
+
+    const transactionFee = BigInt(gasLimit.toString()) * BigInt(gasPrice.toString());
+    setNetworkFee(ethers.utils.formatUnits(transactionFee * BigInt(inputTokens.length), "ether"));
+    // console.log(`Transaction Fee: ${ethers.utils.formatUnits(transactionFee, "ether")} ETH`);
+  };
+
+  const commission = (totalOutputAmount * 1) / 100;
+  const estimatedReturn = totalOutputAmount - commission;
+  // let totalUsdValue = inputTokens.reduce((sum, item) => sum + (item.usdValue || 0), 0);
+  // totalUsdValue -= networkFee;
+  // totalUsdValue -= commission;
 
   useEffect(() => {
     const count = Object.values(tokensApproveStates).filter((state: string) => state === "success").length;
     setApprovalCount(count);
   }, [tokensApproveStates]);
+
+  useEffect(() => {
+    if (account) getGasPrice();
+  }, [account]);
 
   return (
     <div>
@@ -232,7 +255,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 <span>{outputToken?.name}</span>
               </div>
               <span className="text-[#F0BF26] flex font-bold">
-                {totalOutputAmount.toFixed(7)} {outputToken?.name}
+                {totalOutputAmount.toFixed(7)} {outputToken?.symbol}
               </span>
             </div>
           )}
@@ -252,11 +275,13 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 </div>
               </div>
 
-              <span className="text-[#FFFFFF]">${networkFee}</span>
+              <span className="text-[#FFFFFF]">
+                {networkFee} {inputNetwork?.nativeCurrency.symbol}
+              </span>
             </div>
             <div className="flex justify-between">
               <div className="flex gap-2 items-center relative">
-                <span className="font-bold">Commission (0.25%)</span>
+                <span className="font-bold">Commission (1%)</span>
                 <div className="relative group">
                   <Image src={infoSVG} alt="info" className="cursor-pointer" />
                   <span className="absolute hidden group-hover:block border rounded-lg bg-[#3C3731] text-xs px-2 py-1 w-[200px] top-0 -translate-x-[50%] -translate-y-[100%] font-montserrat">
@@ -264,11 +289,15 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                   </span>
                 </div>
               </div>
-              <span className="text-[#FFFFFF]">${commission}</span>
+              <span className="text-[#FFFFFF]">
+                {commission.toFixed(7)} {outputToken?.symbol}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="font-bold">Estimated Return</span>
-              <span className="text-[#FFFFFF]">${totalUsdValue.toFixed(2)}</span>
+              <span className="text-[#FFFFFF]">
+                {estimatedReturn.toFixed(7)} {outputNetwork?.nativeCurrency.symbol}
+              </span>
             </div>
             <div className="text=[#FFFFF]"></div>
           </div>
