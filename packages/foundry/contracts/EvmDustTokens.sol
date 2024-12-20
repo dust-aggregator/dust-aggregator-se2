@@ -25,12 +25,12 @@ contract EvmDustTokens is Ownable2Step {
     using TransferHelper for *;
 
     uint24 public constant swapFee = 3000; // Uniswap fee
-    uint256 public constant protocolFee = 100; // Our fee: 100 == 1%
     IGatewayEVM public immutable gateway;
     ISwapRouter public immutable swapRouter; // Uniswap router
     IPermit2 public immutable permit2;
     address public immutable universalDApp;
     address payable public immutable wNativeToken;
+    uint256 public protocolFee = 200; // Our fee: 200 == 2%
     uint256 public collectedFees;
     uint256 public refunds;
 
@@ -317,6 +317,14 @@ contract EvmDustTokens is Ownable2Step {
         refunds = refunds - amount;
         (bool s,) = receiver.call{value: amount}("");
         if (!s) revert TransferFailed();
+    }
+    
+    /**
+     * Update the protocol fee
+     * @param _newFee - The new protocol fee
+     */
+    function updateProtocolFee(uint256 _newFee) external onlyOwner {
+        protocolFee = _newFee;
     }
 
     /**
