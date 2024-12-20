@@ -27,6 +27,7 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
   const [waitingModalOpen, setWaitingModalOpen] = useState(false);
   const { address } = useAccount();
   const { outputNetwork, outputToken, inputTokens, inputNetwork, recipient } = useGlobalState();
+  const isSameNetwork = outputNetwork?.id === inputNetwork?.id;
 
   const { writeContract, data: swapHash, isError, ...rest } = useWriteContract();
 
@@ -80,12 +81,20 @@ const ConfirmButton = ({ togglePreviewModal }: Props) => {
 
       const permit = await signPermit(tokenSwaps);
 
+      const functionName = isSameNetwork ? "SwapTokens" : "SwapAndBridgeTokens";
+      const args = [
+        tokenSwaps,
+        isSameNetwork ? outputToken?.address : encodedParameters,
+        permit.nonce,
+        permit.deadline,
+        permit.signature,
+      ];
+
       writeContract({
         address: inputNetwork?.contractAddress as string,
         abi: dustAbi,
-        functionName: "SwapAndBridgeTokens",
-        args: [tokenSwaps, encodedParameters, permit.nonce, permit.deadline, permit.signature],
-        // enabled: inputNetwork, ??
+        functionName,
+        args,
       });
     } catch (error) {
       console.error("WHOOOPS", error);
