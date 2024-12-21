@@ -132,7 +132,7 @@ const InputBox = () => {
     const numberValue = parseFloat(input); // Convert the string to a number
     return numberValue % 1 === 0
       ? numberValue.toString() // Return as an integer if no decimal values
-      : numberValue.toFixed(4).replace(/\.?0+$/, ""); // Format to 4 decimals, remove trailing zeros
+      : numberValue.toFixed(2).replace(/\.?0+$/, ""); // Format to 4 decimals, remove trailing zeros
   }
 
   const comps = filteredNetworkOptions.map((e: any, index: number) => {
@@ -168,9 +168,12 @@ const InputBox = () => {
                   type="number"
                   min={0}
                   max={option.tokenBalance}
-                  value={option.amountToDust}
+                  value={Number(option.amountToDust).toFixed(2)} // Format to two decimals
                   onChange={(a: any) => {
-                    const value = Math.min(a.target.value, option.tokenBalance);
+                    // Parse the input value as a float
+                    const enteredValue = parseFloat(a.target.value);
+                    // Ensure it does not exceed tokenBalance
+                    const value = Math.min(isNaN(enteredValue) ? 0 : enteredValue, option.tokenBalance);
                     updateSpecificOption(e.section, option.value, option.selected, value);
                   }}
                   className="w-[70px] text-xs h-full px-1 rounded border bg-[#3C3731] shadow-inner shadow-[inset_0_1px_13px_rgba(0,0,0,0.7)]"
