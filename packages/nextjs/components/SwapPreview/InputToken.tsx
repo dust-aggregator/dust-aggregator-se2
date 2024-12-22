@@ -72,7 +72,7 @@ const InputToken = ({ _index, _token, _approveIndexState, _tokensEstimatedQuotes
           </div>
         </div>
         <span className="text-[#2DC7FF] flex text-xs">
-          {Number(_token.amount).toFixed(8)} {_token.symbol}
+          {Number(_token.amount).toFixed(2)} {_token.symbol}
           <Image className="ml-1" src="/assets/particles.svg" alt="dust_particles" width={10} height={10} />
         </span>
       </div>
