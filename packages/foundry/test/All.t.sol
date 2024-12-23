@@ -346,7 +346,7 @@ contract YourContractTest is Test, ZetachainUtils {
         EvmDustTokens.SwapInput memory permission
     ) internal pure {
         // Implement validation logic for token permissions
-        require(permission.token != address(0), "INVALID_TOKEN");
+        //require(permission.token != address(0), "INVALID_TOKEN");
         require(permission.amount > 0, "INVALID_AMOUNT");
     }
 
@@ -438,9 +438,10 @@ contract YourContractTest is Test, ZetachainUtils {
                 (10000 - slippageBPS)) / 10000;
 
             swaps[i] = EvmDustTokens.SwapInput({
+                isV3: true,
+                path: bytes.concat(bytes20(tokens[i]), bytes3(uint24(3000)), bytes20(address(WETH))),
                 amount: amount,
-                minAmountOut: minAmountOut,
-                token: tokens[i]
+                minAmountOut: minAmountOut
             });
         }
     }
