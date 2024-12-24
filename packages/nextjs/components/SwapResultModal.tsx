@@ -6,6 +6,7 @@ import instagramIcon from "~~/public/assets/instagram_icon.svg";
 import SuccessSVG from "~~/public/assets/success.svg";
 import tiktokIcon from "~~/public/assets/tiktok_icon.svg";
 import youtubeIcon from "~~/public/assets/youtube_icon.svg";
+import twitterIcon from "~~/public/assets/icons8-twitterx.svg";
 
 interface Props {
   isError: boolean;
@@ -16,7 +17,14 @@ interface Props {
   amountCurency?: string;
 }
 
-const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, amountCurency }: Props) => {
+const SwapResultModal = ({
+  isError,
+  error,
+  open,
+  retryOperation,
+  rebootMachine,
+  amountCurency,
+}: Props) => {
   const ref = useRef<HTMLDialogElement>(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
@@ -47,27 +55,42 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
     }
   };
 
+  const shareText = amountCurency
+    ? `I got ${amountCurency} by converting them on Dust.fun #DustFun #ZetaChain`
+    : "I used Dust.fun to convert my tokens easily! #DustFun";
+
   return (
     <dialog ref={ref} className="modal">
       <div
         className={`modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded-xl border-4
           ${isError ? "border-[#FF6161]" : "border-[#00BBFF]"}`}
       >
-        <div className={`${isError ? "my-32" : "gap-12 my-12"} items-center flex flex-col justify-center`}>
-          <h1 className="font-bold text-4xl">{isError ? "SWAP FAILED" : "SUCCESSFULLY"}</h1>
+        <div
+          className={`${isError ? "my-32" : "gap-12 my-12"
+            } items-center flex flex-col justify-center`}
+        >
+          <h1 className="font-bold text-4xl">
+            {isError ? "SWAP FAILED" : "SUCCESSFULLY"}
+          </h1>
           <div className="text-[#fffff] text-xl w-3/4 text-center leading-none mt-2 flex flex-col gap-3 items-center">
             {isError ? (
               <>
-                We regret to inform you that the operation was not successful, please check that you have the required
-                amount in commission and try again.
+                We regret to inform you that the operation was not successful,
+                please check that you have the required amount in commission and
+                try again.
               </>
             ) : (
               <>
                 <div className="flex gap-1 items-center drop-shadow-[0_3px_3px_rgba(0,_187,_255,_1)]">
                   <Image src={SuccessSVG} alt="success" />
-                  <span className="font-montserrat font-bold text-3xl">{amountCurency}</span>
+                  <span className="font-montserrat font-bold text-3xl">
+                    {amountCurency}
+                  </span>
                 </div>
-                <span>Thank you very much for using Dust.Fun, your dust has been transformed</span>
+                <span>
+                  Thank you very much for using Dust.Fun, your dust has been
+                  transformed
+                </span>
               </>
             )}
           </div>
@@ -100,7 +123,9 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
                   Copy Error
                 </button>
                 {copySuccess && (
-                  <span className="absolute right-[-20px]  top-[40%] transform -translate-y-1/2 text-success">&#10003;</span>
+                  <span className="absolute right-[-20px]  top-[40%] transform -translate-y-1/2 text-success">
+                    &#10003;
+                  </span>
                 )}
               </div>
 
@@ -108,29 +133,52 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
                 <span className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                   Contact Support
                 </span>
-                <Link href="https://discord.com/invite/FTSeFc9Yh4" target="_blank" rel="noopener noreferrer">
+                <Link
+                  href="https://discord.com/invite/FTSeFc9Yh4"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Image src={discordIcon} alt="discord" />
                 </Link>
               </div>
             </div>
           )}
+          {/* SUCCESS SECTION */}
           {!isError && (
-            <div className="flex justify-center items-center -mt-7 -mb-10">
-              <div className="flex gap-3 justify-center">
-                <Link href="https://discord.com/invite/zetachain">
-                  <Image src={discordIcon} alt="discord" />
-                </Link>
-                <Link href="https://discord.com/invite/zetachain">
-                  <Image src={instagramIcon} alt="instagram" />
-                </Link>
-                <Link href="https://discord.com/invite/zetachain">
-                  <Image src={tiktokIcon} alt="tiktok" />
-                </Link>
-                <Link href="https://www.youtube.com/@ZetaBlockchain">
-                  <Image src={youtubeIcon} alt="youtube" />
+            <>
+              {/* Social Icons */}
+              <div className="flex justify-center items-center -mt-7 -mb-10">
+                <div className="flex gap-3 justify-center">
+                  <Link href="https://discord.com/invite/zetachain">
+                    <Image src={discordIcon} alt="discord" />
+                  </Link>
+                  <Link href="https://discord.com/invite/zetachain">
+                    <Image src={instagramIcon} alt="instagram" />
+                  </Link>
+                  <Link href="https://discord.com/invite/zetachain">
+                    <Image src={tiktokIcon} alt="tiktok" />
+                  </Link>
+                  <Link href="https://www.youtube.com/@ZetaBlockchain">
+                    <Image src={youtubeIcon} alt="youtube" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* SHARE ON X BUTTON */}
+              <div className="flex justify-center items-center mt-8">
+                <Link
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  <div className="flex items-center">
+                    <span className="mr-2">Share on</span>
+                    <Image src={twitterIcon} alt="twitter" height={26} />
+                  </div>
                 </Link>
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>
