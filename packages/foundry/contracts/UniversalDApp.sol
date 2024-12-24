@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import {SystemContract} from "./helpers/SystemContract.sol";
 import "./interfaces/IZRC20.sol";
+import "./interfaces/IWZETA.sol";
 import {SwapHelperLib} from "./helpers/SwapHelperLib.sol";
 import {RevertContext, RevertOptions} from "./zetachain/Revert.sol";
 import {IUniversalContract, MessageContext} from "./interfaces/IUniversalContract.sol";
@@ -20,6 +21,7 @@ contract UniversalDApp is IUniversalContract {
     IGatewayZEVM public immutable gateway;
     address constant BITCOIN = 0x13A0c5930C028511Dc02665E7285134B6d11A5f4;
     uint256 constant BITCOIN_CHAIN_ID = 8332;
+    address constant ZETA = 0x5F0b1a82749cb4E2278EC87F8BF6B618dC71a8bf;
 
     event Reverted(bytes indexed recipient, address asset, uint256 amount);
     event SwappedAndWithdrawn(bytes indexed recipient, address asset, uint256 amount);
@@ -29,6 +31,8 @@ contract UniversalDApp is IUniversalContract {
     error NotEnoughBTC(uint256 amount);
     error NotGateway();
     error NotSupportedChainID();
+    error NotZetaToken(address sender);
+    error TransferFailed();
 
     modifier onlyGateway() {
         if (msg.sender != address(gateway)) revert NotGateway();
@@ -46,7 +50,7 @@ contract UniversalDApp is IUniversalContract {
         uint256 gasLimit;
         uint256 minAmount;
         address originalSender;
-        bytes targetChainCounterparty; // an address of the EVMDustTokens contract on the target chain
+        bytes targetChainCounterparty; // an address of the EVMDustTokens contract on the target chain or receiver's address on Bitcoin/Zetachain
         bytes destinationPayload; // e.g. abi.encodeCall(EvmDustTokens.ReceiveTokens, (...))
     }
 
@@ -73,6 +77,15 @@ contract UniversalDApp is IUniversalContract {
             revert InvalidChainToken();
         } else if (params.targetChainToken == BITCOIN) {
             swapAndWithdrawBTC(zrc20, amount, params);
+        } else if (params.targetChainToken == ZETA) {
+            // Swap to wZeta
+            uint256 amountOut = systemContract.swapExactTokensForTokens(zrc20, amount, ZETA, params.minAmount);
+            // Unwrap wZeta
+            IWETH9(ZETA).withdraw(amountOut);
+            (bool s,) = address(bytes20(params.targetChainCounterparty)).call{value: amountOut}("");
+            if (!s) revert TransferFailed();
+
+            emit SwappedAndWithdrawn(params.targetChainCounterparty, ZETA, amountOut);
         } else {
             swapAndWithdrawEVM(zrc20, amount, params);
         }
@@ -210,5 +223,10 @@ contract UniversalDApp is IUniversalContract {
             revertMessage: bytes.concat(bytes20(params.originalSender)),
             onRevertGasLimit: 0
         });
+    }
+
+    receive() external payable {
+        // Revert if the sender is not the zeta token
+        if (msg.sender != ZETA) revert NotZetaToken(msg.sender);
     }
 }
