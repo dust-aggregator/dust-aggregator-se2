@@ -17,7 +17,7 @@ import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import TokenSelector from "./TokenSelector";
 
 const InputBox = () => {
-  const [dustThresholdValue, setDustThresholdValue] = useState<number>(0);
+  const [dustThresholdValue, setDustThresholdValue] = useState<number>(50);
   const [isSaved, setIsSaved] = useState(false);
   const { inputTokens } = useGlobalState();
 
@@ -74,46 +74,52 @@ const InputBox = () => {
 
   // Update disabled property function
   const updateSpecificOption = (sectionKey: string, optionValue: string, selected: boolean, amountToDust: number) => {
-    const updatedOptions: any[] = networkOptions2.map((section: any) =>
-      section.section === sectionKey
-        ? {
-          ...section,
-          options: section.options.map((option: any) =>
-            option.value === optionValue ? { ...option, selected, amountToDust: Math.min(amountToDust, option.tokenBalance) } : option,
-          ),
-        }
-        : section,
-    );
+    setNetworkOptions2(prevNetworkOptions2 => {
+      const updatedOptions: any[] = prevNetworkOptions2.map((section: any) =>
+        section.section === sectionKey
+          ? {
+            ...section,
+            options: section.options.map((option: any) =>
+              option.value === optionValue
+                ? { ...option, selected, amountToDust: Math.min(amountToDust, option.tokenBalance) }
+                : option,
+            ),
+          }
+          : section
+      );
 
-    const filteredTokens = updatedOptions
-      .flatMap((section: any) => section.options)
-      .filter((option: any) => option.selected);
+      const filteredTokens = updatedOptions
+        .flatMap((section: any) => section.options)
+        .filter((option: any) => option.selected);
 
-    const selectedInputTokens = filteredTokens.map((token: any) => ({
-      name: token.label,
-      decimals: token.decimals,
-      balance: token.tokenBalance,
-      amount: token.amountToDust.toString(),
-      address: token.address,
-      symbol: token.symbol,
-      usdValue: token.usdValue,
-      hasPermit2Allowance: false,
-    }));
+      const selectedInputTokens = filteredTokens.map((token: any) => ({
+        name: token.label,
+        decimals: token.decimals,
+        balance: token.tokenBalance,
+        amount: token.amountToDust.toString(),
+        address: token.address,
+        symbol: token.symbol,
+        usdValue: token.usdValue,
+        hasPermit2Allowance: false,
+      }));
 
-    setInputTokens(selectedInputTokens);
-    setNetworkOptions2(updatedOptions);
+      setInputTokens(selectedInputTokens);
 
-    // Update totalDustInUsd
-    let totalDust = 0;
-    for (let i = 0; i < updatedOptions.length; i++) {
-      for (let j = 0; j < updatedOptions[i].options.length; j++) {
-        if (updatedOptions[i].options[j].selected) {
-          totalDust += updatedOptions[i].options[j].usdValue * updatedOptions[i].options[j].amountToDust / updatedOptions[i].options[j].tokenBalance;
+      // Recalculate totalDustInUsd
+      let totalDust = 0;
+      for (const net of updatedOptions) {
+        for (const opt of net.options) {
+          if (opt.selected) {
+            totalDust += (opt.usdValue * opt.amountToDust) / opt.tokenBalance;
+          }
         }
       }
-    }
-    setTotalDustInUsd(totalDust);
+      setTotalDustInUsd(totalDust);
+
+      return updatedOptions;
+    });
   };
+
 
   const filteredNetworkOptions = networkOptions2
     .map(network => ({
@@ -126,7 +132,7 @@ const InputBox = () => {
     const numberValue = parseFloat(input); // Convert the string to a number
     return numberValue % 1 === 0
       ? numberValue.toString() // Return as an integer if no decimal values
-      : numberValue.toFixed(4).replace(/\.?0+$/, ""); // Format to 4 decimals, remove trailing zeros
+      : numberValue.toFixed(2).replace(/\.?0+$/, ""); // Format to 4 decimals, remove trailing zeros
   }
 
   const comps = filteredNetworkOptions.map((e: any, index: number) => {
@@ -162,9 +168,12 @@ const InputBox = () => {
                   type="number"
                   min={0}
                   max={option.tokenBalance}
-                  value={option.amountToDust}
+                  value={Number(option.amountToDust).toFixed(2)} // Format to two decimals
                   onChange={(a: any) => {
-                    const value = Math.min(a.target.value, option.tokenBalance);
+                    // Parse the input value as a float
+                    const enteredValue = parseFloat(a.target.value);
+                    // Ensure it does not exceed tokenBalance
+                    const value = Math.min(isNaN(enteredValue) ? 0 : enteredValue, option.tokenBalance);
                     updateSpecificOption(e.section, option.value, option.selected, value);
                   }}
                   className="w-[70px] text-xs h-full px-1 rounded border bg-[#3C3731] shadow-inner shadow-[inset_0_1px_13px_rgba(0,0,0,0.7)]"
@@ -354,15 +363,15 @@ const InputBox = () => {
           <p>{"Loading Tokens..."}</p>
         ) : (
           <>
-            <div className="font-bold m-0 flex items-center">DUST Threshold
+            <div className="font-bold m-0 flex items-center mb-4">DUST Threshold
               <div className="relative group inline-block ml-2">
                 <InformationCircleIcon className="w-5 h-5" />
                 <div className="absolute bottom-full mb-2 hidden group-hover:block w-64 p-2 text-xs text-white bg-black rounded">
-                  Dust threshold is the value limit you set to define small token balances (dust). For example, with a $5 threshold, any tokens worth less than $5 are considered dust and can be swapped.
+                  Dust threshold is the value limit you set to define small token balances (dust). For example, with a $50 threshold, any tokens worth less than $50 are considered dust and can be swapped.
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-4 mb-4">
               <div className="relative w-2/3">
                 <input
                   className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8 pr-7 w-full appearance-none
@@ -373,22 +382,22 @@ const InputBox = () => {
                   name="dustThreshold"
                   type="number"
                   value={dustThresholdValue}
-                  onChange={handleChange}
+                  onChange={handleChange}                 
                 />
-                <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">USD</span>
+                <span className="absolute text-sm inset-y-0 right-0 pr-3 flex items-center text-gray-500">USD</span>
               </div>
             </div>
             <p className="font-bold m-0">Input</p>
 
-            <TokenSelector _options={networkOptions2} _updateSpecificOption={updateSpecificOption} _comps={comps} />
+            <TokenSelector _options={updatedOptions2} _updateSpecificOption={updateSpecificOption} _comps={comps} />
 
-            <div className="p-[0.4px] bg-[#FFFFFF] rounded my-3"></div>
-            <div className="overflow-scroll h-40">
+            <div className="p-[0.4px] bg-[#FFFFFF] rounded my-4"></div>
+            <div className="overflow-scroll h-40 mb-4">
               {compsShort}
-            {/* <AllTokensPrices /> */}
-            {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
+              {/* <AllTokensPrices /> */}
+              {/* <AllTokensBalances address="0xc0f0E1512D6A0A77ff7b9C172405D1B0d73565Bf" /> */}
             </div>
-            <div className="flex items-center justify-center gap-1">
+            <div className="flex items-center justify-center gap-2">
               <p>Total ≈ </p>
               <p>$</p>
               <p>{totalDustInUsd?.toFixed(2)}</p>

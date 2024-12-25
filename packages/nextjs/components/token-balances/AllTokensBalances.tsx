@@ -4,7 +4,7 @@ import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBal
 
 const networks = [
   { key: "Ethereum", alchemyEnum: Network.ETH_MAINNET },
-  { key: "Matic", alchemyEnum: Network.MATIC_MAINNET },
+  { key: "Polygon", alchemyEnum: Network.MATIC_MAINNET },
   { key: "Binance", alchemyEnum: Network.BNB_MAINNET },
   { key: "Base", alchemyEnum: Network.BASE_MAINNET },
 ];

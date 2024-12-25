@@ -56,6 +56,8 @@ const OutputBox = () => {
     if (copiedAdd) setReceiverWallet(copiedAdd);
   };
 
+  const isSwapDisabled = receiverWalletMode !== "connected" && (!understoodRisk || !receiverWallet);
+
   return (
     <UserActionBoxContainer>
       {address ? (
@@ -136,7 +138,10 @@ const OutputBox = () => {
                     // style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
                     className={`text-[#FFFFFF] p-0 bg-btn1 shadow-inner-xl w-7 min-w-7 h-7 rounded-lg font-normal transition-all duration-700`}
                   >
-                    {understoodRisk && "✔"}
+                    {understoodRisk && (
+                      <span className="text-white">&#10003;</span>
+                    )}
+
                   </button>
                   <span className="text-xs opacity-50">
                     This address is correct and not an exchange wallet. Any tokens sent to the wrong address will be
@@ -146,7 +151,7 @@ const OutputBox = () => {
               </div>
             )}
           </div>
-          <SwapPreview isDisabled={receiverWalletMode !== "connected" && !understoodRisk} />
+          <SwapPreview isDisabled={isSwapDisabled} />
         </>
       ) : (
         <></>

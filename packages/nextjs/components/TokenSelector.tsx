@@ -60,9 +60,10 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps }: Props) => {
       >
         {tokensSelected ? (hover ? "Update Selection" : "Tokens Selected") : "Select Tokens"}
       </button>
+      {/*  =============== Token Selection Modal  ==================== */}
       <dialog ref={previewModalRef} className="modal">
         <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded-lg">
-          <div className="w-full h-full h-[450px] flex flex-col justify-between">
+          <div className="w-full h-full h-[530px] flex flex-col justify-between">
             <div className="flex flex-col gap-2">
               <span className="font-bold text-lg">Token Selection</span>
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import discordIcon from "~~/public/assets/discord_icon.svg";
@@ -18,6 +18,7 @@ interface Props {
 
 const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, amountCurency }: Props) => {
   const ref = useRef<HTMLDialogElement>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -26,6 +27,25 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
       ref.current?.close();
     }
   }, [open]);
+
+  const parseErrorMessage = (error: any) => {
+    if (!error) return "An unexpected error occurred.";
+    return error.message.split(" (")[0]; // Extract the main error message
+  };
+
+  const getErrorDetails = (error: any) => {
+    if (!error) return null;
+    const details = error.message.split(" (")[1]?.split(")")[0];
+    return details; // Replace long bytecode with "0x..."
+  };
+
+  const copyErrorToClipboard = () => {
+    if (error) {
+      navigator.clipboard.writeText(error.message);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000); // Reset the copy success message after 2 seconds
+    }
+  };
 
   return (
     <dialog ref={ref} className="modal">
@@ -52,13 +72,6 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
             )}
           </div>
           <form method="dialog" className="w-full flex justify-center mt-6">
-            {/* <button
-              style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-              className="flex-1 text-[#FFFFFF] my-0 text-sm bg-center btn  min-h-0 h-10 rounded-lg"
-              onClick={() => document.getElementById("result_modal").showModal()}
-            >
-              Cancel
-            </button> */}
             <button
               onClick={isError ? retryOperation : rebootMachine}
               className="flex-1 px-6 hover:brightness-50 bg-[url('/button2.png')] bg-no-repeat bg-center bg-cover h-10"
@@ -66,7 +79,41 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
               {isError ? "Retry Operation" : "Reboot machine"}
             </button>
           </form>
+          {isError && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4 w-3/4 text-center">
+              <strong className="font-bold">Error: </strong>
+              <span className="block sm:inline">{parseErrorMessage(error)}</span>
+              {getErrorDetails(error) && (
+                <div className="text-xs mt-2">
+                  <span>{getErrorDetails(error)}</span>
+                </div>
+              )}
+            </div>
+          )}
+          {isError && (
+            <div className="mt-4 flex flex-col items-center">
+              <div className="relative">
+                <button
+                  onClick={copyErrorToClipboard}
+                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mb-2"
+                >
+                  Copy Error
+                </button>
+                {copySuccess && (
+                  <span className="absolute right-[-20px]  top-[40%] transform -translate-y-1/2 text-success">&#10003;</span>
+                )}
+              </div>
 
+              <div className="flex items-center space-x-4">
+                <span className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                  Contact Support
+                </span>
+                <Link href="https://discord.com/invite/FTSeFc9Yh4" target="_blank" rel="noopener noreferrer">
+                  <Image src={discordIcon} alt="discord" />
+                </Link>
+              </div>
+            </div>
+          )}
           {!isError && (
             <div className="flex justify-center items-center -mt-7 -mb-10">
               <div className="flex gap-3 justify-center">

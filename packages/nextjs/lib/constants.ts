@@ -10,7 +10,7 @@ import polSVG from "~~/public/pol.svg";
 
 export const networks = [
   { key: "Ethereum", alchemyEnum: AlchemyNetwork.ETH_MAINNET, chainId: 1 },
-  { key: "Matic", alchemyEnum: AlchemyNetwork.MATIC_MAINNET, chainId: 137 },
+  { key: "Polygon", alchemyEnum: AlchemyNetwork.MATIC_MAINNET, chainId: 137 },
   { key: "Binance", alchemyEnum: AlchemyNetwork.BNB_MAINNET, chainId: 56 },
   { key: "Base", alchemyEnum: AlchemyNetwork.BASE_MAINNET, chainId: 8453 },
   // { key: "Optimism", alchemyEnum: AlchemyNetwork.OPT_MAINNET, chainId: 10 },
