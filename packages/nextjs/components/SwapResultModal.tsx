@@ -148,18 +148,12 @@ const SwapResultModal = ({
             <>
               {/* Social Icons */}
               <div className="flex justify-center items-center -mt-7 -mb-10">
-                <div className="flex gap-3 justify-center">
+                <div className="flex gap-2 justify-center">
                   <Link href="https://discord.com/invite/zetachain">
                     <Image src={discordIcon} alt="discord" />
-                  </Link>
-                  <Link href="https://discord.com/invite/zetachain">
-                    <Image src={instagramIcon} alt="instagram" />
-                  </Link>
-                  <Link href="https://discord.com/invite/zetachain">
-                    <Image src={tiktokIcon} alt="tiktok" />
-                  </Link>
-                  <Link href="https://www.youtube.com/@ZetaBlockchain">
-                    <Image src={youtubeIcon} alt="youtube" />
+                  </Link>                
+                  <Link href="https://x.com/zetablockchain">
+                    <Image src={twitterIcon} alt="twitter" height={16} />
                   </Link>
                 </div>
               </div>
