@@ -139,13 +139,14 @@ contract EvmDustTokens is Ownable2Step {
     ) external {
         if (swaps.length == 0) revert NoSwaps();
         // The output token has to be the wrapped native token
-        if (_getOutputToken(swaps[0].path) != wNativeToken) revert InvalidPath(0);
+        address outputToken = _getOutputToken(swaps[0].path);
+        if (outputToken != wNativeToken) revert InvalidPath(0);
 
         // Batch transfer all input tokens using Permit2
         _signatureBatchTransfer(swaps, nonce, deadline, signature);
 
         // Perform the swaps
-        (SwapOutput[] memory performedSwaps, uint256 totalTokensReceived) = _performSwaps(swaps);
+        (SwapOutput[] memory performedSwaps, uint256 totalTokensReceived) = _performSwaps(swaps, outputToken);
 
         // Unwrap the native token and subtract the protocol fee
         IWTOKEN(wNativeToken).withdraw(totalTokensReceived);
@@ -189,7 +190,7 @@ contract EvmDustTokens is Ownable2Step {
         _signatureBatchTransfer(swaps, nonce, deadline, signature);
 
         // Perform the swaps
-        (SwapOutput[] memory performedSwaps, uint256 totalTokensReceived) = _performSwaps(swaps);
+        (SwapOutput[] memory performedSwaps, uint256 totalTokensReceived) = _performSwaps(swaps, outputToken);
 
         uint256 feeAmount = totalTokensReceived * protocolFee / 10000;
         if (isNativeOutput) {
@@ -461,14 +462,14 @@ contract EvmDustTokens is Ownable2Step {
     /**
      * Perform the swaps via Uniswap
      * @param swaps - Swaps to perform
+     * @param outputToken - The output token
      * @return performedSwaps - The performed swaps
      * @return totalTokensReceived - The total amount of the output token received
      */
-    function _performSwaps(SwapInput[] calldata swaps)
+    function _performSwaps(SwapInput[] calldata swaps, address outputToken)
         internal
         returns (SwapOutput[] memory performedSwaps, uint256 totalTokensReceived)
     {
-        address outputToken = _getOutputToken(swaps[0].path);
         if (!isWhitelisted[outputToken]) revert TokenIsNotWhitelisted(outputToken);
 
         uint256 swapsAmount = swaps.length;
@@ -483,10 +484,12 @@ contract EvmDustTokens is Ownable2Step {
             // Approve the swap router to spend the token
             inputToken.safeApprove(address(swapRouter), amount);
 
-            (uint256 amountOut, SwapOutput memory performedSwap) = swap.isV3 ? _performV3(swap, inputToken, outputToken) : _performV2(swap, inputToken, outputToken);
-
+            uint256 amountOut = swap.isV3 ? _performV3(swap) : _performV2(swap);
             totalTokensReceived += amountOut;
-            performedSwaps[i] = performedSwap;
+
+            // Store performed swap details
+            performedSwaps[i] =
+                SwapOutput({tokenIn: inputToken, tokenOut: outputToken, amountIn: amount, amountOut: amountOut});
         }
     }
 
@@ -514,12 +517,8 @@ contract EvmDustTokens is Ownable2Step {
      * Perform a V3 swap
      * @param swap - The swap to perform
      * @return amountOut - The amount of the output token
-     * @return performedSwap - The performed swap
      */
-    function _performV3(SwapInput calldata swap, address inputToken, address outputToken)
-        internal
-        returns (uint256 amountOut, SwapOutput memory performedSwap)
-    {
+    function _performV3(SwapInput calldata swap) internal returns (uint256 amountOut) {
         // Build Uniswap Swap to convert the input token to the output token
         ISwapRouter.ExactInputParams memory params = IV3SwapRouter.ExactInputParams({
             path: swap.path,
@@ -530,14 +529,7 @@ contract EvmDustTokens is Ownable2Step {
 
         // Try to perform the swap
         try swapRouter.exactInput(params) returns (uint256 amount) {
-            amountOut = amount;
-            // Store performed swap details
-            performedSwap = SwapOutput({
-                tokenIn: inputToken,
-                tokenOut: outputToken,
-                amountIn: swap.amount,
-                amountOut: amountOut
-            });
+            return amount;
         } catch (bytes memory revertData) {
             revert SwapFailed(swap.path, revertData);
         }
@@ -547,24 +539,13 @@ contract EvmDustTokens is Ownable2Step {
      * Perform a V2 swap
      * @param swap - The swap to perform
      * @return amountOut - The amount of the output token
-     * @return performedSwap - The performed swap
      */
-    function _performV2(SwapInput calldata swap, address inputToken, address outputToken)
-        internal
-        returns (uint256 amountOut, SwapOutput memory performedSwap)
-    {
+    function _performV2(SwapInput calldata swap) internal returns (uint256 amountOut) {
         // Try to perform the swap
         try swapRouter.swapExactTokensForTokens(
             swap.amount, swap.minAmountOut, abi.decode(swap.path, (address[])), address(this)
         ) returns (uint256 amount) {
-            amountOut = amount;
-            // Store performed swap details
-            performedSwap = SwapOutput({
-                tokenIn: inputToken,
-                tokenOut: outputToken,
-                amountIn: swap.amount,
-                amountOut: amountOut
-            });
+            return amount;
         } catch (bytes memory revertData) {
             revert SwapFailed(swap.path, revertData);
         }
