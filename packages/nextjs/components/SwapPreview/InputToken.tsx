@@ -4,6 +4,7 @@ import { parseUnits } from "viem";
 import { useTokenHasPermit2Approval } from "~~/hooks/dust";
 import { SelectedToken } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
+// import { checkUniswapV3Pool } from "~~/utils/getPoolVersion";
 
 interface Props {
   _index: number;
@@ -25,7 +26,7 @@ const InputToken = ({ _index, _token, _approveIndexState, _tokensEstimatedQuotes
   const { outputToken } = useGlobalState();
 
   const handleSlippageChange = (e: string) => {
-    if(_tokensEstimatedQuotes) {
+    if (_tokensEstimatedQuotes) {
       const slippageValue = Number(e);
       setSlippage(slippageValue);
       const minAmountWithSlippage = _tokensEstimatedQuotes - (_tokensEstimatedQuotes * slippageValue) / 100;
@@ -43,6 +44,15 @@ const InputToken = ({ _index, _token, _approveIndexState, _tokensEstimatedQuotes
       setTokenQuote(value);
     }
   }, [_tokensEstimatedQuotes]);
+
+  // const callCheckPool = async () => {
+  //   const pool = await checkUniswapV3Pool(_token.address, "0x4200000000000000000000000000000000000006");
+  //   console.log(pool);
+  // };
+
+  // useEffect(() => {
+  //   callCheckPool();
+  // }, []);
 
   return (
     <div className="w-full flex flex-col gap-2">

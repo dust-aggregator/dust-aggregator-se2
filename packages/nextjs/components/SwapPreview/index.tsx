@@ -170,7 +170,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const getGasPrice = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const gasPrice = await provider.getGasPrice();
-    console.log(`Gas price -> ${ethers.utils.formatUnits(gasPrice, "gwei")}`);
+    // console.log(`Gas price -> ${ethers.utils.formatUnits(gasPrice, "gwei")}`);
 
     const tx = {
       from: account.address,
@@ -182,7 +182,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
 
     const transactionFee = BigInt(gasLimit.toString()) * BigInt(gasPrice.toString());
     setNetworkFee(ethers.utils.formatUnits(transactionFee * BigInt(inputTokens.length) * BigInt(2), "ether"));
-    console.log(`Network fee -> ${ethers.utils.formatUnits(transactionFee * BigInt(inputTokens.length), "ether")}`);
+    // console.log(`Network fee -> ${ethers.utils.formatUnits(transactionFee * BigInt(inputTokens.length), "ether")}`);
     // console.log(`Transaction Fee: ${ethers.utils.formatUnits(transactionFee, "ether")} ETH`);
   };
 
