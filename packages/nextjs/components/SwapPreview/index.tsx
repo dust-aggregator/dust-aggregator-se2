@@ -3,14 +3,14 @@ import Image from "next/image";
 import ConfirmButton from "./ConfirmButton";
 import InputToken from "./InputToken";
 import { Token } from "@uniswap/sdk-core";
+import { ethers } from "ethers";
 import { useAccount, useSwitchChain } from "wagmi";
-import infoSVG from "~~/public/assets/info.svg";
-import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
-import { useGlobalState } from "~~/services/store/store";
 import { useApprovePermit2 } from "~~/hooks/dust/useApprovePermit2";
 import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
-import { ethers } from "ethers";
+import infoSVG from "~~/public/assets/info.svg";
+import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
+import { useGlobalState } from "~~/services/store/store";
 
 const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
   if (ref.current) {
@@ -24,7 +24,7 @@ const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
 
 const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const account = useAccount();
-  const { switchChain } = useSwitchChain()
+  const { switchChain } = useSwitchChain();
   const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   // const [amountOut, setAmountOut] = useState<string | null>(null);
   const [quoteTime, setQuoteTime] = useState(30);
