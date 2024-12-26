@@ -1,3 +1,4 @@
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "@rainbow-me/rainbowkit/styles.css";
 import { ScaffoldEthAppWithProviders } from "~~/components/ScaffoldEthAppWithProviders";
 import "~~/styles/globals.css";
@@ -14,6 +15,7 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
       <body className="text-[#FFFFFF]">
         <ScaffoldEthAppWithProviders>{children}</ScaffoldEthAppWithProviders>
       </body>
+      {process.env.VERCEL_ENV === "production" && <GoogleAnalytics gaId="G-1ZHGSF1P55" />}
     </html>
   );
 };

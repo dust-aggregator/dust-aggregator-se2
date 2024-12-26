@@ -2,19 +2,20 @@ import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import CategorySelect from "./CategorySelect";
 import CategorySelectInputBox from "./CategorySelectInputBox";
+import TokenSelector from "./TokenSelector";
 import UserActionBoxContainer from "./UserActionBoxContainer";
 import UserActionBoxContainer2 from "./UserActionBoxContainer2";
 import { RainbowKitCustomConnectButton } from "./scaffold-eth/RainbowKitCustomConnectButton";
 import { AllTokensBalances } from "./token-balances/AllTokensBalances";
 import { AllTokensPrices } from "./token-prices/AllTokensPrices";
+import { sendGAEvent } from "@next/third-parties/google";
 import { useAccount } from "wagmi";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
 import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
-import { SUPPORTED_INPUT_NETWORKS, networks } from "~~/lib/constants";
+import { GA_EVENTS, SUPPORTED_INPUT_NETWORKS, networks } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
 import { useGlobalState } from "~~/services/store/store";
-import { InformationCircleIcon } from '@heroicons/react/24/outline';
-import TokenSelector from "./TokenSelector";
 
 const InputBox = () => {
   const [dustThresholdValue, setDustThresholdValue] = useState<number>(50);
@@ -78,14 +79,14 @@ const InputBox = () => {
       const updatedOptions: any[] = prevNetworkOptions2.map((section: any) =>
         section.section === sectionKey
           ? {
-            ...section,
-            options: section.options.map((option: any) =>
-              option.value === optionValue
-                ? { ...option, selected, amountToDust: Math.min(amountToDust, option.tokenBalance) }
-                : option,
-            ),
-          }
-          : section
+              ...section,
+              options: section.options.map((option: any) =>
+                option.value === optionValue
+                  ? { ...option, selected, amountToDust: Math.min(amountToDust, option.tokenBalance) }
+                  : option,
+              ),
+            }
+          : section,
       );
 
       const filteredTokens = updatedOptions
@@ -119,7 +120,6 @@ const InputBox = () => {
       return updatedOptions;
     });
   };
-
 
   const filteredNetworkOptions = networkOptions2
     .map(network => ({
@@ -327,7 +327,9 @@ const InputBox = () => {
     for (let i = 0; i < networkOptions2.length; i++) {
       for (let j = 0; j < networkOptions2[i].options.length; j++) {
         if (networkOptions2[i].options[j].selected) {
-          totalDust += networkOptions2[i].options[j].usdValue * networkOptions2[i].options[j].amountToDust / networkOptions2[i].options[j].tokenBalance;
+          totalDust +=
+            (networkOptions2[i].options[j].usdValue * networkOptions2[i].options[j].amountToDust) /
+            networkOptions2[i].options[j].tokenBalance;
         }
       }
     }
@@ -363,11 +365,13 @@ const InputBox = () => {
           <p>{"Loading Tokens..."}</p>
         ) : (
           <>
-            <div className="font-bold m-0 flex items-center mb-4">DUST Threshold
+            <div className="font-bold m-0 flex items-center mb-4">
+              DUST Threshold
               <div className="relative group inline-block ml-2">
                 <InformationCircleIcon className="w-5 h-5" />
                 <div className="absolute bottom-full mb-2 hidden group-hover:block w-64 p-2 text-xs text-white bg-black rounded">
-                  Dust threshold is the value limit you set to define small token balances (dust). For example, with a $50 threshold, any tokens worth less than $50 are considered dust and can be swapped.
+                  Dust threshold is the value limit you set to define small token balances (dust). For example, with a
+                  $50 threshold, any tokens worth less than $50 are considered dust and can be swapped.
                 </div>
               </div>
             </div>
@@ -382,7 +386,7 @@ const InputBox = () => {
                   name="dustThreshold"
                   type="number"
                   value={dustThresholdValue}
-                  onChange={handleChange}                 
+                  onChange={handleChange}
                 />
                 <span className="absolute text-sm inset-y-0 right-0 pr-3 flex items-center text-gray-500">USD</span>
               </div>
@@ -405,7 +409,10 @@ const InputBox = () => {
           </>
         )
       ) : (
-        <div className="flex flex-col justify-center items-center">
+        <div
+          onClick={() => sendGAEvent({ name: GA_EVENTS.walletConnect })}
+          className="flex flex-col justify-center items-center"
+        >
           <RainbowKitCustomConnectButton />
         </div>
       )}

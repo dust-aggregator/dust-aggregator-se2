@@ -1,4 +1,6 @@
+import { sendGAEvent } from "@next/third-parties/google";
 import { create } from "zustand";
+import { GA_EVENTS } from "~~/lib/constants";
 import { Network, OutputToken, SelectedToken, Token } from "~~/lib/types";
 import scaffoldConfig from "~~/scaffold.config";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
@@ -49,7 +51,14 @@ export const useGlobalState = create<GlobalState>(set => ({
   outputNetwork: null,
   setOutputNetwork: (newOutputNetwork: Network) => set(() => ({ outputNetwork: newOutputNetwork })),
   outputToken: null,
-  setOutputToken: (newOutputToken: Token) => set(() => ({ outputToken: newOutputToken })),
+  setOutputToken: (newOutputToken: Token) => {
+    sendGAEvent({
+      name: GA_EVENTS.selectOutputToken,
+      tokenName: newOutputToken.name,
+      address: newOutputToken.address,
+    });
+    return set(() => ({ outputToken: newOutputToken }));
+  },
   inputTokens: [],
   setInputTokens: (newInputTokens: SelectedToken[]) => set(() => ({ inputTokens: newInputTokens })),
 

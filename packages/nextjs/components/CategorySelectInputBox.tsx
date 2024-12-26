@@ -1,7 +1,9 @@
 import { useState } from "react";
-import Image from "next/image";
 import { useEffect } from "react";
+import Image from "next/image";
+import { sendGAEvent } from "@next/third-parties/google";
 import { formatEther, parseUnits } from "viem";
+import { GA_EVENTS } from "~~/lib/constants";
 
 interface OptionInfo {
   value: string;
@@ -37,9 +39,9 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
   };
 
   const handleSelectAll = (section: string) => {
-    options?.forEach((network) => {
+    options?.forEach(network => {
       if (network.section === section) {
-        network.options.forEach((option) => {
+        network.options.forEach(option => {
           if (!option.selected) {
             handleClick(section, {
               ...option,
@@ -50,7 +52,6 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
       }
     });
   };
-  
 
   const handleClick = (section: string, option: OptionInfo) => {
     onChange(section, option.value, option.selected, option.amountToDust);
@@ -81,52 +82,60 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
           className="w-full dropdown-content menu rounded-box z-[1] shadow-inner-xl mt-1 bg-[#3C3731] flex flex-col overflow-y-scroll h-80 flex-nowrap"
         >
           {options?.map(({ section, options }) => {
+            console.log("options", options);
+            console.log("section", section);
             return (
               <div key={section}>
                 <div className="flex justify-between items-center">
                   <p className="text-sm font-bold my-1 px-2">{section}</p>
-                  <button
-                    onClick={() => handleSelectAll(section)}
-                    className="text-xs text-[#f8cd4c] px-2 py-1"
-                  >
+                  <button onClick={() => handleSelectAll(section)} className="text-xs text-[#f8cd4c] px-2 py-1">
                     Select All
                   </button>
                 </div>
                 <div>
-                  {options.map(({ value, label, disabled, tokenBalance, usdValue, decimals, selected, amountToDust }) => {
-                    if (selected) return <div key={value}></div>;
+                  {options.map(
+                    ({ value, label, disabled, tokenBalance, usdValue, decimals, selected, amountToDust, address }) => {
+                      if (selected) return <div key={value}></div>;
 
-                    return (
-                      <li key={value} className={disabled ? "disabled" : ""}>
-                        <a
-                          onClick={() => {
-                            handleClick(section, {
-                              label,
-                              value,
-                              disabled,
-                              tokenBalance,
-                              usdValue,
-                              decimals,
-                              selected: !selected,
-                              amountToDust: amountToDust,
-                            });
-                            disabled = !disabled;
-                          }}
-                          className="text-xs text-[#9D9D9D] py-1 grid grid-cols-3 gap-2 w-full"
-                        >
-                          <p className="truncate">{label}</p>
-                          <div className="flex items-center gap-1">
-                            <p>{formatDecimal(tokenBalance)}</p>
-                            <Image src={"/particles.png"} alt="" width={"12"} height={"12"} className="h-4" />
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <p>$</p>
-                            <p>{usdValue?.toFixed(2)}</p>
-                          </div>
-                        </a>
-                      </li>
-                    );
-                  })}
+                      return (
+                        <li key={value} className={disabled ? "disabled" : ""}>
+                          <a
+                            onClick={() => {
+                              sendGAEvent({
+                                name: GA_EVENTS.selectInputToken,
+                                tokenName: label,
+                                address,
+                                network: section,
+                                tokenBalance,
+                              });
+                              handleClick(section, {
+                                label,
+                                value,
+                                disabled,
+                                tokenBalance,
+                                usdValue,
+                                decimals,
+                                selected: !selected,
+                                amountToDust: amountToDust,
+                              });
+                              disabled = !disabled;
+                            }}
+                            className="text-xs text-[#9D9D9D] py-1 grid grid-cols-3 gap-2 w-full"
+                          >
+                            <p className="truncate">{label}</p>
+                            <div className="flex items-center gap-1">
+                              <p>{formatDecimal(tokenBalance)}</p>
+                              <Image src={"/particles.png"} alt="" width={"12"} height={"12"} className="h-4" />
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <p>$</p>
+                              <p>{usdValue?.toFixed(2)}</p>
+                            </div>
+                          </a>
+                        </li>
+                      );
+                    },
+                  )}
                 </div>
               </div>
             );

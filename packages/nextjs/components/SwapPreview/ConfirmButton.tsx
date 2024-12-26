@@ -1,12 +1,14 @@
 import { RefObject, useEffect, useRef, useState } from "react";
 import SwapResultModal from "../SwapResultModal";
 import WaitingModal from "../WaitingModal";
+import { sendGAEvent } from "@next/third-parties/google";
 import { ethers } from "ethers";
 import { encode } from "punycode";
 import { parseUnits } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
 import { getAccount } from "wagmi/actions";
 import dustAbi from "~~/lib/abis/EvmDustTokens.json";
+import { GA_EVENTS } from "~~/lib/constants";
 import { TokenSwap } from "~~/lib/types";
 import { getGasLimitByOutputToken } from "~~/lib/utils";
 import {
@@ -37,6 +39,9 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
 
   const handleConfirm = async (e?: any) => {
     e?.preventDefault();
+    sendGAEvent({
+      name: GA_EVENTS.approveSwap,
+    });
 
     const isBitcoin = outputNetwork?.name === "bitcoin";
 
@@ -111,6 +116,10 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
         args,
       });
     } catch (error) {
+      sendGAEvent({
+        name: GA_EVENTS.swapError,
+        error: JSON.stringify(error),
+      });
       console.error("WHOOOPS", error);
     }
   };

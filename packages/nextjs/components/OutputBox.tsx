@@ -5,10 +5,11 @@ import Select from "./Select";
 import SwapPreview from "./SwapPreview";
 import ConfirmButton from "./SwapPreview/ConfirmButton";
 import UserActionBoxContainer from "./UserActionBoxContainer";
+import { sendGAEvent } from "@next/third-parties/google";
 import { useAccount } from "wagmi";
 import { useTokenWhitelist } from "~~/hooks/dust";
 import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
-import { BitcoinNetwork, SUPPORTED_INPUT_NETWORKS } from "~~/lib/constants";
+import { BitcoinNetwork, GA_EVENTS, SUPPORTED_INPUT_NETWORKS } from "~~/lib/constants";
 import pasteSVG from "~~/public/assets/paste.svg";
 import { useGlobalState } from "~~/services/store/store";
 
@@ -36,6 +37,10 @@ const OutputBox = () => {
   const { tokens: whitelistedTokens } = useTokenWhitelist();
 
   const handleSelectNetwork = network => {
+    sendGAEvent({
+      name: GA_EVENTS.selectOutputNetwork,
+      network: network.label,
+    });
     if (network.value === "bitcoin") {
       setOutputNetwork(BitcoinNetwork);
       setOutputToken(null);
@@ -90,7 +95,12 @@ const OutputBox = () => {
                 disabled={isBitcoin}
                 style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
                 className={`${receiverWalletMode === "connected" && "drop-shadow-[0_0_3px_rgba(0,_187,_255,_1)]"} text-[#FFFFFF] text-sm p-0 bg-center btn w-1/2 min-h-0 h-8 rounded-lg font-normal text-xs transition-all duration-700`}
-                onClick={() => setReceiverWalletMode("connected")}
+                onClick={() => {
+                  sendGAEvent({
+                    name: GA_EVENTS.sendToConnectedWallet,
+                  });
+                  setReceiverWalletMode("connected");
+                }}
               >
                 <span
                   className={`${receiverWalletMode === "connected" && "drop-shadow-[0_0_3px_rgba(0,_187,_255,_1)]"}`}
@@ -101,7 +111,12 @@ const OutputBox = () => {
               <button
                 style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
                 className={`${receiverWalletMode === "recipient" && "drop-shadow-[0_0_3px_rgba(0,_187,_255,_1)]"} text-[#FFFFFF] text-sm p-0 bg-center btn w-1/2 min-h-0 h-8 rounded-lg font-normal text-xs transition-all duration-700`}
-                onClick={() => setReceiverWalletMode("recipient")}
+                onClick={() => {
+                  sendGAEvent({
+                    name: GA_EVENTS.sendToCustomWallet,
+                  });
+                  setReceiverWalletMode("recipient");
+                }}
               >
                 <span
                   className={`${receiverWalletMode === "recipient" && "drop-shadow-[0_0_3px_rgba(0,_187,_255,_1)]"}`}
@@ -138,10 +153,7 @@ const OutputBox = () => {
                     // style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
                     className={`text-[#FFFFFF] p-0 bg-btn1 shadow-inner-xl w-7 min-w-7 h-7 rounded-lg font-normal transition-all duration-700`}
                   >
-                    {understoodRisk && (
-                      <span className="text-white">&#10003;</span>
-                    )}
-
+                    {understoodRisk && <span className="text-white">&#10003;</span>}
                   </button>
                   <span className="text-xs opacity-50">
                     This address is correct and not an exchange wallet. Any tokens sent to the wrong address will be
