@@ -11,6 +11,8 @@ import { useApprovePermit2 } from "~~/hooks/dust/useApprovePermit2";
 import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
 import { ethers } from "ethers";
+import { getExpressQuote } from "~~/utils/express-quoter/expressQuoter";
+import { QuoteSwapData } from "~~/types/quote-swap-data";
 
 const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
   if (ref.current) {
@@ -24,18 +26,17 @@ const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
 
 const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const account = useAccount();
-  const { switchChain } = useSwitchChain()
+  const { switchChain } = useSwitchChain();
   const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
-  // const [amountOut, setAmountOut] = useState<string | null>(null);
-  const [quoteTime, setQuoteTime] = useState(30);
   const previewModalRef = useRef<HTMLDialogElement>(null);
   const callApprovePermit2 = useApprovePermit2();
+  const [quoteTime, setQuoteTime] = useState(30);
   const [approvalCount, setApprovalCount] = useState(0);
   const [tokensApproveStates, setTokensApproveStates] = useState<{ [key: number]: string }>({});
-  const [tokensEstimatedQuotes, setTokensEstimatedQuotes] = useState<{ [key: number]: number | undefined }>({});
-  const [tokensMinAmountOut, setTokensMinAmountOut] = useState<{ [key: number]: number | undefined }>({});
   const [totalOutputAmount, setTotalOutputAmount] = useState(0);
   const [networkFee, setNetworkFee] = useState<string>("0");
+
+  const [quoteSwapData, setQuoteSwapData] = useState<{ [key: number]: QuoteSwapData }>({});
 
   const callSetTokenHasApproval = (index: number) => {
     setTokensApproveStates(prev => ({
@@ -45,9 +46,15 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   };
 
   const callSetTokensMinAmountOut = (index: number, amount: number) => {
-    setTokensMinAmountOut(prev => ({
-      ...prev,
-      [index]: amount,
+    setQuoteSwapData(prevData => ({
+      ...prevData,
+      [index]: {
+        ...prevData[index],
+        swapInput: {
+          ...prevData[index].swapInput,
+          minAmountOut: amount,
+        },
+      },
     }));
   };
 
@@ -98,13 +105,19 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
       return;
     }
 
-    setTokensEstimatedQuotes(prev => ({
-      ...prev,
-      [_index]: undefined,
-    }));
-    setTokensMinAmountOut(prev => ({
-      ...prev,
-      [_index]: undefined,
+    setQuoteSwapData(prevData => ({
+      ...prevData,
+      [_index]: {
+        ...prevData[_index],
+        quoteError: false,
+        estimatedOutput: 0,
+        swapInput: {
+          isV3: false,
+          path: "",
+          amount: BigInt(0),
+          minAmountOut: 0,
+        },
+      },
     }));
 
     const tokenIn = new Token(inputNetwork.id, _token.address, Number(_token.decimals), _token.symbol, _token.name);
@@ -116,44 +129,31 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
       outputToken.name,
     );
 
-    const reqBody = {
-      chainId: inputNetwork.id,
-      walletAddress: account.address,
-      tokenIn,
-      tokenOut,
-      amountIn: _token.amount,
-    };
+    const _quoteSwapData = await getExpressQuote(inputNetwork.id, account.address, tokenIn, tokenOut, _token.amount);
 
-    if (!process.env.NEXT_PUBLIC_QUOTER_API_KEY) {
-      throw new Error("API key is not defined");
-    }
+    console.log(_quoteSwapData.estimatedGasUsedUSD);
 
-    const res = await fetch("https://express-quoter-production.up.railway.app/quote", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.NEXT_PUBLIC_QUOTER_API_KEY,
+    setQuoteSwapData(prevData => ({
+      ...prevData,
+      [_index]: {
+        ...prevData[_index],
+        estimatedOutput: _quoteSwapData.estimatedOutput,
+        quoteError: _quoteSwapData.quoteError,
+        estimatedGasUsedUSD: _quoteSwapData.estimatedGasUsedUSD,
+        swapInput: _quoteSwapData.swapInput,
       },
-      body: JSON.stringify(reqBody),
-    });
+    }));
 
-    const data = await res.json();
-    console.log(data);
+    // setTokensEstimatedQuotes(prev => ({
+    //   ...prev,
+    //   [_index]: _quoteSwapData.estimatedOutput,
+    // }));
+    // setTokensMinAmountOut(prev => ({
+    //   ...prev,
+    //   [_index]: _quoteSwapData.estimatedOutput,
+    // }));
 
-    if (data.readableAmount) {
-      const onePercentLess = Number(data.readableAmount) * 0.99;
-
-      setTokensEstimatedQuotes(prev => ({
-        ...prev,
-        [_index]: onePercentLess,
-      }));
-      setTokensMinAmountOut(prev => ({
-        ...prev,
-        [_index]: onePercentLess,
-      }));
-
-      setTotalOutputAmount(prev => prev + onePercentLess);
-    }
+    setTotalOutputAmount(prev => prev + _quoteSwapData.estimatedOutput);
   };
 
   const getQuotes: () => void = () => {
@@ -197,6 +197,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
       if (readyForPreview) {
         setQuoteTime(quoteTime => {
           if (quoteTime === 1) {
+            getQuotes();
             return 30;
           }
           return quoteTime - 1;
@@ -225,8 +226,8 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         Preview Swap
       </button>
       <dialog ref={previewModalRef} className="modal">
-        <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded">
-          <div className="flex justify-between items-center bg-auto">
+        <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-cover rounded">
+          <div className="flex justify-between items-center bg-cover">
             <h3 className="font-bold text-xl">Input Tokens</h3>
             <div className="relative">
               <Image src={requiredApprovalsSVG} alt="required" className="w-[220px]" />
@@ -245,10 +246,10 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                     _index={index}
                     _token={token}
                     _approveIndexState={tokensApproveStates[index]}
-                    _tokensEstimatedQuotes={tokensEstimatedQuotes[index]}
                     _setTokenHasApproval={callSetTokenHasApproval}
                     _setTokensMinAmountOut={callSetTokensMinAmountOut}
-                    _tokenMinOut={tokensMinAmountOut[index]}
+
+                    _quoteSwapData={quoteSwapData[index]}
                   />
                 </li>
               ))}
@@ -313,7 +314,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
             <ConfirmButton
               togglePreviewModal={togglePreviewModal}
               _handleApproveTokens={handleApproveTokens}
-              _tokensMinAmountOut={tokensMinAmountOut}
+              _quoteSwapData={quoteSwapData}
             />
             <button
               style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}

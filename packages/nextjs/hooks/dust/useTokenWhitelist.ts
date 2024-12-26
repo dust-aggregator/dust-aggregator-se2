@@ -26,7 +26,7 @@ export const useTokenWhitelist = () => {
   const alchemy = new Alchemy(config);
 
   useEffect(() => {
-    const nativeCurrencyWithAddress = { address: zeroAddress, ...outputNetwork?.nativeCurrency };
+    // const nativeCurrencyWithAddress = { address: zeroAddress, ...outputNetwork?.nativeCurrency };
     const getAllTokenMetadata = async addresses => {
       const allTokenData = await Promise.all(
         addresses.map(async address => {
@@ -34,7 +34,9 @@ export const useTokenWhitelist = () => {
           return { address, ...tokenMetadata };
         }),
       );
-      setTokens([nativeCurrencyWithAddress, ...allTokenData]);
+      // setTokens([nativeCurrencyWithAddress, ...allTokenData]);
+      const filteredTokens = allTokenData.filter(token => token.symbol !== "ETH");
+      setTokens([...filteredTokens]);
     };
 
     if (tokenAddresses) {
