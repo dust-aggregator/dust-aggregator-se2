@@ -78,7 +78,7 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
       {isOpen && (
         <ul
           tabIndex={0}
-          className="w-full dropdown-content menu rounded-box z-[1] p-2 shadow-inner-xl mt-1 bg-[#3C3731] flex flex-col overflow-y-scroll h-80 flex-nowrap"
+          className="w-full dropdown-content menu rounded-box z-[1] shadow-inner-xl mt-1 bg-[#3C3731] flex flex-col overflow-y-scroll h-80 flex-nowrap"
         >
           {options?.map(({ section, options }) => {
             return (
@@ -112,9 +112,9 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
                             });
                             disabled = !disabled;
                           }}
-                          className="text-xs text-[#9D9D9D] px-2 py-1 flex justify-between items-center"
+                          className="text-xs text-[#9D9D9D] py-1 grid grid-cols-3 gap-2 w-full"
                         >
-                          <p>{label}</p>
+                          <p className="truncate">{label}</p>
                           <div className="flex items-center gap-1">
                             <p>{formatDecimal(tokenBalance)}</p>
                             <Image src={"/particles.png"} alt="" width={"12"} height={"12"} className="h-4" />

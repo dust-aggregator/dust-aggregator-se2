@@ -263,7 +263,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 <span>{outputToken?.name}</span>
               </div>
               <span className="text-[#F0BF26] flex font-bold">
-                {totalOutputAmount.toFixed(7)} {outputToken?.symbol}
+                {totalOutputAmount.toFixed(5)} {outputToken?.symbol}
               </span>
             </div>
           )}
@@ -278,7 +278,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 <div className="relative group">
                   <Image src={infoSVG} alt="info" className="cursor-pointer" />
                   <span className="absolute hidden group-hover:block border rounded-lg bg-[#3C3731] text-xs px-2 py-1 w-[200px] top-0 -translate-x-[50%] -translate-y-[100%] font-montserrat">
-                    Lorem ipsum dolor sit amet, consectetur Lor em ipsum dolor sit amet.
+                    The estimated fees for processing the swap represent the combined gas costs across all the blockchain networks involved in the transaction.
                   </span>
                 </div>
               </div>
@@ -293,18 +293,26 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 <div className="relative group">
                   <Image src={infoSVG} alt="info" className="cursor-pointer" />
                   <span className="absolute hidden group-hover:block border rounded-lg bg-[#3C3731] text-xs px-2 py-1 w-[200px] top-0 -translate-x-[50%] -translate-y-[100%] font-montserrat">
-                    Lorem ipsum dolor sit amet, consectetur Lor em ipsum dolor sit amet.
+                    Protocol fees are deducted from the output token after the conversion, in addition to the blockchain fees incurred during the transaction.
                   </span>
                 </div>
               </div>
               <span className="text-[#FFFFFF]">
-                {commission.toFixed(7)} {outputToken?.symbol}
+                {commission.toFixed(5)} {outputToken?.symbol}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="font-bold">Estimated Return</span>
+              <div className="flex gap-2 items-center relative">
+                <span className="font-bold">Estimated Return</span>
+                <div className="relative group">
+                  <Image src={infoSVG} alt="info" className="cursor-pointer" />
+                  <span className="absolute hidden group-hover:block border rounded-lg bg-[#3C3731] text-xs px-2 py-1 w-[200px] top-0 -translate-x-[50%] -translate-y-[100%] font-montserrat">
+                    The estimated return is calculated considering slippage and protocol fees. It is an approximation, and the final output may vary.
+                  </span>
+                </div>
+              </div>
               <span className="text-[#FFFFFF]">
-                {estimatedReturn.toFixed(7)} {outputToken?.symbol}
+                {estimatedReturn.toFixed(5)} {outputToken?.symbol}
               </span>
             </div>
             <div className="text=[#FFFFF]"></div>
