@@ -1,22 +1,16 @@
-import { RefObject, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import SwapResultModal from "../SwapResultModal";
 import WaitingModal from "../WaitingModal";
 import { sendGAEvent } from "@next/third-parties/google";
 import { ethers } from "ethers";
-import { encode } from "punycode";
 import { parseUnits } from "viem";
-import { useAccount, useWriteContract } from "wagmi";
+import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { getAccount } from "wagmi/actions";
 import dustAbi from "~~/lib/abis/EvmDustTokens.json";
 import { GA_EVENTS } from "~~/lib/constants";
 import { TokenSwap } from "~~/lib/types";
 import { getGasLimitByOutputToken } from "~~/lib/utils";
-import {
-  encodeDestinationPayload,
-  encodeZetachainPayload,
-  preparePermitData,
-  readLocalnetAddresses,
-} from "~~/lib/zetachainUtils";
+import { encodeZetachainPayload, preparePermitData } from "~~/lib/zetachainUtils";
 import { useGlobalState } from "~~/services/store/store";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
@@ -30,10 +24,24 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
   const [resultModalOpen, setResultModalOpen] = useState(false);
   const [waitingModalOpen, setWaitingModalOpen] = useState(false);
   const { address } = useAccount();
-  const { outputNetwork, outputToken, inputTokens, inputNetwork, recipient } = useGlobalState();
+  const {
+    outputNetwork,
+    outputToken,
+    inputTokens,
+    inputNetwork,
+    recipient,
+    setInputNetwork,
+    setInputTokens,
+    setOutputNetwork,
+    setOutputToken,
+  } = useGlobalState();
   const isSameNetwork = outputNetwork?.id === inputNetwork?.id;
 
-  const { writeContract, data: swapHash, isError, error, ...rest } = useWriteContract();
+  const { writeContract, data: swapHash, isError, error, isPending: swapTxPending } = useWriteContract();
+
+  const { data: swapReceipt, isPending: sameChainSwapPending } = useWaitForTransactionReceipt({
+    hash: swapHash,
+  });
 
   const { chainId } = getAccount(wagmiConfig);
 
@@ -120,7 +128,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
         name: GA_EVENTS.swapError,
         error: JSON.stringify(error),
       });
-      console.error("WHOOOPS", error);
+      console.error(error);
     }
   };
 
@@ -133,8 +141,14 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
   }, [isError, error]);
 
   useEffect(() => {
-    if (swapHash) setWaitingModalOpen(true);
-  }, [swapHash]);
+    // cross chain swap started
+    if (swapHash && !isSameNetwork) setWaitingModalOpen(true);
+  }, [swapHash, isSameNetwork]);
+
+  useEffect(() => {
+    // same chain swap ~finished
+    if (swapReceipt && isSameNetwork) setResultModalOpen(true);
+  }, [swapReceipt, isSameNetwork]);
 
   const retryOperation = () => {
     setResultModalOpen(false);
@@ -142,20 +156,29 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
     handleConfirm();
   };
 
+  const rebootMachine = () => {
+    togglePreviewModal();
+    setInputNetwork(null);
+    setInputTokens([]);
+    setOutputNetwork(null);
+    setOutputToken(null);
+  };
+
+  const showSpinner = swapTxPending || (!!swapHash && sameChainSwapPending);
+
   return (
     <>
       <button
         onClick={handleConfirm}
-        className="flex-1 px-6 hover:brightness-50 bg-[url('/button2.png')] bg-no-repeat bg-center bg-cover h-10"
+        style={{ backgroundImage: "url('/button2.png')" }}
+        className="flex-1 px-6 hover:brightness-50 bg-no-repeat bg-center bg-cover min-h-0 h-10 btn rounded-lg bg-transparent hover:bg-transparent border-0"
+        disabled={showSpinner}
       >
-        Approve
+        {showSpinner ? <span className="loading loading-spinner loading-md"></span> : "Approve"}
       </button>
       <SwapResultModal
         // togglePreviewModal={togglePreviewModal}
-        rebootMachine={() => {
-          {
-          }
-        }}
+        rebootMachine={rebootMachine}
         retryOperation={retryOperation}
         open={resultModalOpen}
         isError={isError}

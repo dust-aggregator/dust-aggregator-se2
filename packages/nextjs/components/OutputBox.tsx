@@ -3,7 +3,6 @@ import Image from "next/image";
 import CategorySelect from "./CategorySelect";
 import Select from "./Select";
 import SwapPreview from "./SwapPreview";
-import ConfirmButton from "./SwapPreview/ConfirmButton";
 import UserActionBoxContainer from "./UserActionBoxContainer";
 import { sendGAEvent } from "@next/third-parties/google";
 import { useAccount } from "wagmi";

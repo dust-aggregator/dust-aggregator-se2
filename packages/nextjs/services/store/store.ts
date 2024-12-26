@@ -49,7 +49,7 @@ export const useGlobalState = create<GlobalState>(set => ({
   targetNetwork: scaffoldConfig.targetNetworks[0],
   setTargetNetwork: (newTargetNetwork: ChainWithAttributes) => set(() => ({ targetNetwork: newTargetNetwork })),
   outputNetwork: null,
-  setOutputNetwork: (newOutputNetwork: Network) => set(() => ({ outputNetwork: newOutputNetwork })),
+  setOutputNetwork: (newOutputNetwork: Network | null) => set(() => ({ outputNetwork: newOutputNetwork })),
   outputToken: null,
   setOutputToken: (newOutputToken: Token) => {
     sendGAEvent({
