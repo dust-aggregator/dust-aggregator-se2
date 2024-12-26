@@ -1,7 +1,9 @@
 import { readLocalnetAddresses } from "./zetachainUtils";
+import { sendGAEvent } from "@next/third-parties/google";
 import { Network as AlchemyNetwork } from "alchemy-sdk";
 import { zeroAddress } from "viem";
 import { base, bsc, polygon } from "viem/chains";
+import { walletConnect } from "wagmi/connectors";
 import { Network } from "~~/lib/types";
 import baseSVG from "~~/public/base.svg";
 import bnbSVG from "~~/public/bnb.svg";
@@ -80,3 +82,20 @@ export const GAS_LIMIT_BY_TOKEN_TYPE = {
 };
 
 export const WRAPPED_NATIVE_TOKENS = SUPPORTED_INPUT_NETWORKS.map(network => network.wNativeAddress);
+
+export const GA_EVENTS = {
+  walletConnect: "wallet-connect",
+  selectInputTokensMenu: "select-input-tokens-menu",
+  selectInputToken: "select-input-token",
+  selectOutputNetwork: "select-output-network",
+  selectOutputToken: "select-output-token",
+  sendToConnectedWallet: "send-to-connected-wallet",
+  sendToCustomWallet: "send-to-custom-wallet",
+  approveSwap: "approve-swap",
+  swapError: "swap-error",
+  swapSuccess: "swap-success",
+};
+
+export const sendEvent = (name: (typeof GA_EVENTS)[keyof typeof GA_EVENTS]) => {
+  sendGAEvent({ name });
+};

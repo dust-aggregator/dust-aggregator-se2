@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ConnectButton } from "./ui/connect-button";
+import { RainbowKitCustomConnectButton } from "./scaffold-eth";
+import { sendGAEvent } from "@next/third-parties/google";
+import { GA_EVENTS, sendEvent } from "~~/lib/constants";
 import closeSVG from "~~/public/assets/close.svg";
 import navBottomSVG from "~~/public/assets/nav-bottom.svg";
 import navbarMobileSVG from "~~/public/assets/navbar-mobile.svg";
 import navbarSVG from "~~/public/assets/navbar.svg";
 import openSVG from "~~/public/assets/open.svg";
-import { RainbowKitCustomConnectButton } from "./scaffold-eth";
 
 /**
  * Site navbar
@@ -30,7 +31,6 @@ export const Navbar = () => {
           </div>
 
           <div className="w-1/4 flex justify-evenly text-xs lg:text-sm 2xl:text-base">
-           
             <Link href="https://fingerpump.gitbook.io/dust.fun" className="" target="_blank" rel="noopener noreferrer">
               <span className="text-white font-bold">HOW IT WORKS</span>
             </Link>
@@ -42,7 +42,7 @@ export const Navbar = () => {
             </Link>
           </div>
 
-          <div className="w-1/4 flex justify-around">           
+          <div onClick={() => sendGAEvent({ name: GA_EVENTS.walletConnect })} className="w-1/4 flex justify-around">
             {/* <ConnectButton _chain="sol" /> */}
             {/* <ConnectButton _chain="eth" /> */}
             <RainbowKitCustomConnectButton />

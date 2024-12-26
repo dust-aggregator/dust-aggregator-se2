@@ -1,5 +1,7 @@
 import { RefObject, useRef, useState } from "react";
 import CategorySelectInputBox from "./CategorySelectInputBox";
+import { sendGAEvent } from "@next/third-parties/google";
+import { GA_EVENTS } from "~~/lib/constants";
 
 interface OptionInfo {
   value: string;
@@ -67,7 +69,7 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps }: Props) => {
             <div className="flex flex-col gap-2">
               <span className="font-bold text-lg">Token Selection</span>
 
-              <div className="flex gap-2">
+              <div onClick={() => sendGAEvent({ name: GA_EVENTS.selectInputTokensMenu })} className="flex gap-2">
                 <CategorySelectInputBox
                   title="Select tokens"
                   options={_options}
