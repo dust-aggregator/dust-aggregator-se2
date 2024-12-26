@@ -75,7 +75,7 @@ contract SimpleSwap {
             );
 
             // Build Uniswap Swap to convert the token to WETH
-            ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
+            ISwapRouter.ExactInputSingleParams memory params = IV3SwapRouter
                 .ExactInputSingleParams({
                     tokenIn: inputToken,
                     tokenOut: token,
