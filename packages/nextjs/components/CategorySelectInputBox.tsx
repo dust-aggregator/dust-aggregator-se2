@@ -82,8 +82,6 @@ const CategorySelectInputBox = ({ className, title, options, selectedOption, onC
           className="w-full dropdown-content menu rounded-box z-[1] shadow-inner-xl mt-1 bg-[#3C3731] flex flex-col overflow-y-scroll h-80 flex-nowrap"
         >
           {options?.map(({ section, options }) => {
-            console.log("options", options);
-            console.log("section", section);
             return (
               <div key={section}>
                 <div className="flex justify-between items-center">

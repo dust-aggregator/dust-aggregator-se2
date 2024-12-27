@@ -32,3 +32,10 @@ export const getBlockExplorerTxLink = (network: Network | null, txHash?: string)
     return `${baseURL}/tx/${txHash}`;
   }
 };
+
+export function formatDecimal(input: string): string {
+  const numberValue = parseFloat(input); // Convert the string to a number
+  return numberValue % 1 === 0
+    ? numberValue.toString() // Return as an integer if no decimal values
+    : numberValue.toFixed(2).replace(/\.?0+$/, ""); // Format to 4 decimals, remove trailing zeros
+}
