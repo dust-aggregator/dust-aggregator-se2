@@ -1,26 +1,18 @@
-import { use, useEffect, useState } from "react";
-import Image from "next/image";
-import CategorySelect from "./CategorySelect";
-import CategorySelectInputBox from "./CategorySelectInputBox";
+import { useEffect, useState } from "react";
+import { TokenRow } from "./TokenRow";
 import TokenSelector from "./TokenSelector";
 import UserActionBoxContainer from "./UserActionBoxContainer";
-import UserActionBoxContainer2 from "./UserActionBoxContainer2";
 import { RainbowKitCustomConnectButton } from "./scaffold-eth/RainbowKitCustomConnectButton";
-import { AllTokensBalances } from "./token-balances/AllTokensBalances";
-import { AllTokensPrices } from "./token-prices/AllTokensPrices";
 import { sendGAEvent } from "@next/third-parties/google";
 import { useAccount } from "wagmi";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
-import { useTokenPricesUniswap } from "~~/hooks/dust/useTokenPricesUniswap";
 import { GA_EVENTS, SUPPORTED_INPUT_NETWORKS, networks } from "~~/lib/constants";
-import { SelectedToken } from "~~/lib/types";
+import { formatDecimal } from "~~/lib/utils";
 import { useGlobalState } from "~~/services/store/store";
 
 const InputBox = () => {
   const [dustThresholdValue, setDustThresholdValue] = useState<number>(50);
   const [isSaved, setIsSaved] = useState(false);
-  const { inputTokens } = useGlobalState();
 
   function handleChange(e: any) {
     setDustThresholdValue(e.target.value);
@@ -128,73 +120,12 @@ const InputBox = () => {
     }))
     .filter(network => network.options.length > 0);
 
-  function formatDecimal(input: string): string {
-    const numberValue = parseFloat(input); // Convert the string to a number
-    return numberValue % 1 === 0
-      ? numberValue.toString() // Return as an integer if no decimal values
-      : numberValue.toFixed(2).replace(/\.?0+$/, ""); // Format to 4 decimals, remove trailing zeros
-  }
-
   const comps = filteredNetworkOptions.map((e: any, index: number) => {
     return (
       <div key={"sjf" + index} className="flex flex-col gap-2">
         {/* <p className="m-0 text-xl text-bold">{e.section}</p> */}
         {e.options.map((option: any, index: number) => {
-          return (
-            <div
-              className={`px-4 h-10 leading-tight shadow-inner-xl flex items-center w-full text-xs justify-between rounded-lg border bg-[#514B44] shadow-inner shadow-[inset_0_1px_30px_rgba(0,0,0,1)]`}
-              key={"sndn" + index}
-            >
-              <div className="flex gap-2">
-                <button
-                  className="m-0"
-                  onClick={() => {
-                    updateSpecificOption(e.section, option.value, !option.selected, option.amountToDust);
-                  }}
-                >
-                  <Image src={"/Vector.png"} alt="" width={"8"} height={"8"} />
-                </button>
-                <p className="m-0 text-xs opacity-70">
-                  {e.section} / {option.label}
-                </p>
-              </div>
-
-              <div className="flex gap-2 h-full items-center py-1">
-                <p className="text-xs opacity-70">
-                  Balance: {formatDecimal(option.tokenBalance)} {option.symbol}
-                </p>
-
-                <input
-                  type="number"
-                  min={0}
-                  max={option.tokenBalance}
-                  value={Number(option.amountToDust).toFixed(2)} // Format to two decimals
-                  onChange={(a: any) => {
-                    // Parse the input value as a float
-                    const enteredValue = parseFloat(a.target.value);
-                    // Ensure it does not exceed tokenBalance
-                    const value = Math.min(isNaN(enteredValue) ? 0 : enteredValue, option.tokenBalance);
-                    updateSpecificOption(e.section, option.value, option.selected, value);
-                  }}
-                  className="w-[70px] text-xs h-full px-1 rounded border bg-[#3C3731] shadow-inner shadow-[inset_0_1px_13px_rgba(0,0,0,0.7)]"
-                />
-
-                <button
-                  className="h-full px-2 text-xs rounded-lg border bg-[#4C463F]"
-                  onClick={() => {
-                    updateSpecificOption(e.section, option.value, option.selected, option.tokenBalance);
-                  }}
-                >
-                  Max
-                </button>
-              </div>
-
-              {/* <div className="flex items-center justify-center gap-1 text-xs">
-                <p>$</p>
-                <p>{option.usdValue?.toFixed(2)}</p>
-              </div> */}
-            </div>
-          );
+          return <TokenRow token={option} updateSpecificOption={updateSpecificOption} networkName={e.section} />;
         })}
       </div>
     );
