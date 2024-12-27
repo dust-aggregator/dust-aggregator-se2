@@ -35,6 +35,8 @@ export const useTokenWhitelist = () => {
         }),
       );
       setTokens([nativeCurrencyWithAddress, ...allTokenData]);
+      // const filteredTokens = allTokenData.filter(token => token.symbol !== "ETH");
+      // setTokens([...filteredTokens]);
     };
 
     if (tokenAddresses) {

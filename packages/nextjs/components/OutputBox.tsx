@@ -62,6 +62,8 @@ const OutputBox = () => {
 
   const isSwapDisabled = receiverWalletMode !== "connected" && (!understoodRisk || !receiverWallet);
 
+
+
   return (
     <UserActionBoxContainer>
       {address ? (

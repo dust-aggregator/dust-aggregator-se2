@@ -3,7 +3,7 @@ import SwapResultModal from "../SwapResultModal";
 import WaitingModal from "../WaitingModal";
 import { sendGAEvent } from "@next/third-parties/google";
 import { ethers } from "ethers";
-import { parseUnits } from "viem";
+import { parseUnits, zeroAddress } from "viem";
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { getAccount } from "wagmi/actions";
 import dustAbi from "~~/lib/abis/EvmDustTokens.json";
@@ -13,14 +13,15 @@ import { getGasLimitByOutputToken } from "~~/lib/utils";
 import { encodeZetachainPayload, preparePermitData } from "~~/lib/zetachainUtils";
 import { useGlobalState } from "~~/services/store/store";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
+import { QuoteSwapData } from "~~/types/quote-swap-data";
 
 interface Props {
   togglePreviewModal: () => void;
   _handleApproveTokens: () => void;
-  _tokensMinAmountOut: { [key: number]: number | undefined };
+  _quoteSwapData: { [key: number]: QuoteSwapData };
 }
 
-const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmountOut }: Props) => {
+const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapData }: Props) => {
   const [resultModalOpen, setResultModalOpen] = useState(false);
   const [waitingModalOpen, setWaitingModalOpen] = useState(false);
   const { address } = useAccount();
@@ -60,7 +61,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
     await _handleApproveTokens();
     // ===================
 
-    console.log(_tokensMinAmountOut);
+    console.log(_quoteSwapData);
 
     const signPermit = async (swaps: TokenSwap[]) => {
       if (!inputNetwork || !chainId) {
@@ -101,17 +102,33 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _tokensMinAmo
       const tokenSwaps: TokenSwap[] = inputTokens.map(({ amount, decimals, address }, index) => ({
         amount: parseUnits(amount, decimals),
         token: address,
-        minAmountOut: _tokensMinAmountOut[index]
-          ? ethers.utils.parseUnits(_tokensMinAmountOut[index].toFixed(18).toString(), decimals)
+        minAmountOut: _quoteSwapData[index].swapInput.minAmountOut
+          ? ethers.utils.parseUnits(_quoteSwapData[index].swapInput.minAmountOut.toFixed(18).toString(), decimals)
           : BigInt(0),
       }));
 
       const permit = await signPermit(tokenSwaps);
 
+      // function SwapTokens(
+      //   SwapInput[] calldata swaps,
+      //   bool isNativeOutput,
+      //   uint256 nonce,
+      //   uint256 deadline,
+      //   bytes calldata signature
+
+      // function SwapAndBridgeTokens(
+      //   SwapInput[] calldata swaps,
+      //   bytes calldata message,
+      //   uint256 nonce,
+      //   uint256 deadline,
+      //   bytes calldata signature
+
+      const isNative = outputToken.address === zeroAddress;
+
       const functionName = isSameNetwork ? "SwapTokens" : "SwapAndBridgeTokens";
       const args = [
         tokenSwaps,
-        isSameNetwork ? outputToken?.address : encodedParameters,
+        isSameNetwork ? isNative : encodedParameters,
         permit.nonce,
         permit.deadline,
         permit.signature,
