@@ -225,7 +225,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         Preview Swap
       </button>
       <dialog ref={previewModalRef} className="modal">
-        <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded">
+        <div className="modal-box bg-[url('/assets/preview_bg2.svg')] bg-no-repeat bg-center bg-auto rounded">
           <div className="flex justify-between items-center bg-auto">
             <h3 className="font-bold text-xl">Input Tokens</h3>
             <div className="relative">
@@ -278,7 +278,8 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 <div className="relative group">
                   <Image src={infoSVG} alt="info" className="cursor-pointer" />
                   <span className="absolute hidden group-hover:block border rounded-lg bg-[#3C3731] text-xs px-2 py-1 w-[200px] top-0 -translate-x-[50%] -translate-y-[100%] font-montserrat">
-                    The estimated fees for processing the swap represent the combined gas costs across all the blockchain networks involved in the transaction.
+                    The estimated fees for processing the swap represent the combined gas costs across all the
+                    blockchain networks involved in the transaction.
                   </span>
                 </div>
               </div>
@@ -293,7 +294,8 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 <div className="relative group">
                   <Image src={infoSVG} alt="info" className="cursor-pointer" />
                   <span className="absolute hidden group-hover:block border rounded-lg bg-[#3C3731] text-xs px-2 py-1 w-[200px] top-0 -translate-x-[50%] -translate-y-[100%] font-montserrat">
-                    Protocol fees are deducted from the output token after the conversion, in addition to the blockchain fees incurred during the transaction.
+                    Protocol fees are deducted from the output token after the conversion, in addition to the blockchain
+                    fees incurred during the transaction.
                   </span>
                 </div>
               </div>
@@ -307,7 +309,8 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 <div className="relative group">
                   <Image src={infoSVG} alt="info" className="cursor-pointer" />
                   <span className="absolute hidden group-hover:block border rounded-lg bg-[#3C3731] text-xs px-2 py-1 w-[200px] top-0 -translate-x-[50%] -translate-y-[100%] font-montserrat">
-                    The estimated return is calculated considering slippage and protocol fees. It is an approximation, and the final output may vary.
+                    The estimated return is calculated considering slippage and protocol fees. It is an approximation,
+                    and the final output may vary.
                   </span>
                 </div>
               </div>
