@@ -8,8 +8,9 @@ interface SwapInput {
 }
 
 export interface QuoteSwapData {
+  displayOutput: number;
   estimatedOutput: number;
   quoteError: boolean;
-  estimatedGasUsedUSD: bigint | BigNumber;
+  estimatedGasUsedUSD: string;
   swapInput: SwapInput;
 }

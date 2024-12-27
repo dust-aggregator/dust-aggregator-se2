@@ -13,6 +13,7 @@ import { QuoteSwapData } from "~~/types/quote-swap-data";
 import infoSVG from "~~/public/assets/info.svg";
 import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
 import { useGlobalState } from "~~/services/store/store";
+import { zeroAddress } from "viem";
 
 const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
   if (ref.current) {
@@ -30,11 +31,11 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   const previewModalRef = useRef<HTMLDialogElement>(null);
   const callApprovePermit2 = useApprovePermit2();
-  const [quoteTime, setQuoteTime] = useState(30);
+  const [quoteTime, setQuoteTime] = useState(90);
   const [approvalCount, setApprovalCount] = useState(0);
   const [tokensApproveStates, setTokensApproveStates] = useState<{ [key: number]: string }>({});
   const [totalOutputAmount, setTotalOutputAmount] = useState(0);
-  const [networkFee, setNetworkFee] = useState<string>("0");
+  const [networkFee, setNetworkFee] = useState(0);
 
   const [quoteSwapData, setQuoteSwapData] = useState<{ [key: number]: QuoteSwapData }>({});
 
@@ -96,7 +97,6 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
 
     togglePreviewModal();
     getQuotes();
-    getGasPrice();
   };
 
   const getQuote = async (_token: SelectedToken, _index: number) => {
@@ -110,6 +110,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
       [_index]: {
         ...prevData[_index],
         quoteError: false,
+        displayOutput: 0,
         estimatedOutput: 0,
         swapInput: {
           isV3: false,
@@ -120,44 +121,103 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
       },
     }));
 
-    const tokenIn = new Token(inputNetwork.id, _token.address, Number(_token.decimals), _token.symbol, _token.name);
-    const tokenOut = new Token(
-      inputNetwork.id,
-      outputToken.address,
-      Number(outputToken.decimals),
-      outputToken.symbol,
-      outputToken.name,
-    );
+    if (inputNetwork.id === outputNetwork.id) {
+      // ================ we call smart-order-router normally ================
+      // If output is native token, send wrapped as output to get route
+      let tokenOutAddress = outputToken.address;
+      if (tokenOutAddress === zeroAddress) {
+        if (outputNetwork.id === 137) tokenOutAddress = "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
+        else if (outputNetwork.id === 8453) tokenOutAddress = "0x4200000000000000000000000000000000000006";
+        else tokenOutAddress = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+      }
 
-    const _quoteSwapData = await getExpressQuote(inputNetwork.id, account.address, tokenIn, tokenOut, _token.amount);
+      const tokenIn = new Token(inputNetwork.id, _token.address, Number(_token.decimals), _token.symbol, _token.name);
+      const tokenOut = new Token(
+        inputNetwork.id,
+        tokenOutAddress,
+        Number(outputToken.decimals),
+        outputToken.symbol,
+        outputToken.name,
+      );
 
-    console.log(_quoteSwapData.estimatedGasUsedUSD);
+      const _quoteSwapData = await getExpressQuote(inputNetwork.id, account.address, tokenIn, tokenOut, _token.amount);
 
-    setQuoteSwapData(prevData => ({
-      ...prevData,
-      [_index]: {
-        ...prevData[_index],
-        estimatedOutput: _quoteSwapData.estimatedOutput,
-        quoteError: _quoteSwapData.quoteError,
-        estimatedGasUsedUSD: _quoteSwapData.estimatedGasUsedUSD,
-        swapInput: _quoteSwapData.swapInput,
-      },
-    }));
+      console.log(_quoteSwapData.estimatedGasUsedUSD);
 
-    // setTokensEstimatedQuotes(prev => ({
-    //   ...prev,
-    //   [_index]: _quoteSwapData.estimatedOutput,
-    // }));
-    // setTokensMinAmountOut(prev => ({
-    //   ...prev,
-    //   [_index]: _quoteSwapData.estimatedOutput,
-    // }));
+      setQuoteSwapData(prevData => ({
+        ...prevData,
+        [_index]: {
+          ...prevData[_index],
+          displayOutput: _quoteSwapData.displayOutput,
+          estimatedOutput: _quoteSwapData.estimatedOutput,
+          quoteError: _quoteSwapData.quoteError,
+          estimatedGasUsedUSD: _quoteSwapData.estimatedGasUsedUSD,
+          swapInput: _quoteSwapData.swapInput,
+        },
+      }));
 
-    setTotalOutputAmount(prev => prev + _quoteSwapData.estimatedOutput);
+      setTotalOutputAmount(prev => prev + _quoteSwapData.estimatedOutput);
+      setNetworkFee(prev => prev + Number(_quoteSwapData.estimatedGasUsedUSD));
+    } else {
+      // =========== we call smart-order-router always with wrapped eth as output ===========
+
+      let wrappedInputAddress;
+      let wrappedInputSymbol;
+      let wrappedInputName;
+      let nativeInputSymbol;
+      if (inputNetwork.id === 137) {
+        wrappedInputAddress = "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
+        wrappedInputSymbol = "WPOL";
+        wrappedInputName = "Wrapped POL";
+        nativeInputSymbol = "POL";
+      } else if (inputNetwork.id === 8453) {
+        wrappedInputAddress = "0x4200000000000000000000000000000000000006";
+        wrappedInputSymbol = "WETH";
+        wrappedInputName = "Wrapped ETH";
+        nativeInputSymbol = "ETH";
+      } else {
+        wrappedInputAddress = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+        wrappedInputSymbol = "WBNB";
+        wrappedInputName = "Wrapped BNB";
+        nativeInputSymbol = "BNB";
+      }
+
+      const tokenIn = new Token(inputNetwork.id, _token.address, Number(_token.decimals), _token.symbol, _token.name);
+      const tokenOut = new Token(inputNetwork.id, wrappedInputAddress, 18, wrappedInputSymbol, wrappedInputName);
+
+      const _quoteSwapData = await getExpressQuote(inputNetwork.id, account.address, tokenIn, tokenOut, _token.amount);
+
+      const result = await fetch(`/api/cmc/quotesLatest?symbols=${nativeInputSymbol},${outputToken.symbol}`);
+      const resultJson = await result.json();
+
+      const wrappedInputPrice = resultJson[nativeInputSymbol].quote.USD.price;
+      const tokenOutputPrice = resultJson[outputToken.symbol].quote.USD.price;
+      const wrappedInputUsdValue = _quoteSwapData.estimatedOutput * wrappedInputPrice;
+      const finalOutputAmount = wrappedInputUsdValue / tokenOutputPrice;
+      // console.log(`FINAL OUTPUT ${finalOutputAmount} ${outputToken.symbol}`);
+
+      console.log(_quoteSwapData.estimatedGasUsedUSD);
+
+      setQuoteSwapData(prevData => ({
+        ...prevData,
+        [_index]: {
+          ...prevData[_index],
+          displayOutput: finalOutputAmount,
+          estimatedOutput: _quoteSwapData.estimatedOutput,
+          quoteError: _quoteSwapData.quoteError,
+          estimatedGasUsedUSD: _quoteSwapData.estimatedGasUsedUSD,
+          swapInput: _quoteSwapData.swapInput,
+        },
+      }));
+
+      setTotalOutputAmount(prev => prev + finalOutputAmount);
+      setNetworkFee(prev => prev + Number(_quoteSwapData.estimatedGasUsedUSD));
+    }
   };
 
   const getQuotes: () => void = () => {
     setTotalOutputAmount(0);
+    setNetworkFee(0);
     inputTokens.map((token, index) => {
       getQuote(token, index);
     });
@@ -166,25 +226,6 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const readyForPreview = !!inputNetwork && !!outputNetwork && inputTokens.length > 0;
 
   const togglePreviewModal = getToggleModal(previewModalRef);
-
-  const getGasPrice = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const gasPrice = await provider.getGasPrice();
-    // console.log(`Gas price -> ${ethers.utils.formatUnits(gasPrice, "gwei")}`);
-
-    const tx = {
-      from: account.address,
-      to: inputNetwork?.contractAddress,
-      gasPrice: gasPrice,
-    };
-
-    const gasLimit = await provider.estimateGas(tx);
-
-    const transactionFee = BigInt(gasLimit.toString()) * BigInt(gasPrice.toString());
-    setNetworkFee(ethers.utils.formatUnits(transactionFee * BigInt(inputTokens.length) * BigInt(2), "ether"));
-    // console.log(`Network fee -> ${ethers.utils.formatUnits(transactionFee * BigInt(inputTokens.length), "ether")}`);
-    // console.log(`Transaction Fee: ${ethers.utils.formatUnits(transactionFee, "ether")} ETH`);
-  };
 
   const commission = (totalOutputAmount * 1) / 100;
   const estimatedReturn = totalOutputAmount - commission;
@@ -198,7 +239,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         setQuoteTime(quoteTime => {
           if (quoteTime === 1) {
             getQuotes();
-            return 30;
+            return 90;
           }
           return quoteTime - 1;
         });
@@ -284,9 +325,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 </div>
               </div>
 
-              <span className="text-[#FFFFFF]">
-                {networkFee} {inputNetwork?.nativeCurrency.symbol}
-              </span>
+              <span className="text-[#FFFFFF]">{networkFee.toFixed(3)} USD</span>
             </div>
             <div className="flex justify-between">
               <div className="flex gap-2 items-center relative">

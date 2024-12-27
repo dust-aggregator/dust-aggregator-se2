@@ -51,9 +51,10 @@ export const getExpressQuote = async (
   };
 
   const quoteSwapData: QuoteSwapData = {
+    displayOutput: 0,
     estimatedOutput: 0,
     quoteError: false,
-    estimatedGasUsedUSD: BigInt(0),
+    estimatedGasUsedUSD: "0",
     swapInput: {
       isV3: false,
       path: "0x",
@@ -62,8 +63,8 @@ export const getExpressQuote = async (
     },
   };
 
-  const res = await fetch("http://localhost:8000/quote", {
-    // const res = await fetch("https://express-quoter-production.up.railway.app/quote", {
+  // const res = await fetch("http://localhost:8000/quote", {
+  const res = await fetch("https://express-quoter-production.up.railway.app/quote", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -74,10 +75,14 @@ export const getExpressQuote = async (
 
   if (res.ok) {
     const data = await res.json();
-    console.log(data);
+    // console.log(data);
 
     quoteSwapData.estimatedOutput = Number(data.readableAmount) * 0.99;
-    quoteSwapData.estimatedGasUsedUSD = data.route.estimatedGasUsedUSD;
+    const gasValue = ethers.utils.formatUnits(
+      data.route.estimatedGasUsedUSD.numerator[0].toString(),
+      data.route.estimatedGasUsedUSD.currency.decimals,
+    );
+    quoteSwapData.estimatedGasUsedUSD = gasValue;
 
     const firstRoute = data.route.route[0];
     const encodedPath = encodePath(firstRoute.tokenPath, firstRoute.route.pools, firstRoute.protocol);

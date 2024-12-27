@@ -46,11 +46,11 @@ const InputToken = ({
   }, [hasApproval]);
 
   useEffect(() => {
-    if (_quoteSwapData?.estimatedOutput) {
-      const value = Number(_quoteSwapData?.estimatedOutput).toFixed(7);
+    if (_quoteSwapData?.displayOutput) {
+      const value = Number(_quoteSwapData?.displayOutput).toFixed(7);
       setTokenQuote(value);
     }
-  }, [_quoteSwapData?.estimatedOutput]);
+  }, [_quoteSwapData?.displayOutput]);
 
   return (
     <div className="w-full flex flex-col gap-2">

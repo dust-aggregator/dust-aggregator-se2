@@ -3,7 +3,7 @@ import SwapResultModal from "../SwapResultModal";
 import WaitingModal from "../WaitingModal";
 import { sendGAEvent } from "@next/third-parties/google";
 import { ethers } from "ethers";
-import { parseUnits } from "viem";
+import { parseUnits, zeroAddress } from "viem";
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { getAccount } from "wagmi/actions";
 import dustAbi from "~~/lib/abis/EvmDustTokens.json";
@@ -109,10 +109,26 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
 
       const permit = await signPermit(tokenSwaps);
 
+      // function SwapTokens(
+      //   SwapInput[] calldata swaps,
+      //   bool isNativeOutput,
+      //   uint256 nonce,
+      //   uint256 deadline,
+      //   bytes calldata signature
+
+      // function SwapAndBridgeTokens(
+      //   SwapInput[] calldata swaps,
+      //   bytes calldata message,
+      //   uint256 nonce,
+      //   uint256 deadline,
+      //   bytes calldata signature
+
+      const isNative = outputToken.address === zeroAddress;
+
       const functionName = isSameNetwork ? "SwapTokens" : "SwapAndBridgeTokens";
       const args = [
         tokenSwaps,
-        isSameNetwork ? outputToken?.address : encodedParameters,
+        isSameNetwork ? isNative : encodedParameters,
         permit.nonce,
         permit.deadline,
         permit.signature,

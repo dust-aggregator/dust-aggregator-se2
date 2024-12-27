@@ -4,7 +4,8 @@ import axios from "axios";
 //@params - req: Request
 export const GET = async (request: Request) => {
   const url = new URL(request.url);
-  const ids = url.searchParams.get("ids"); // Extract the 'ids' parameter from the query string
+  // const ids = url.searchParams.get("ids"); // Extract the 'ids' parameter from the query string
+  const symbols = url.searchParams.get("symbols");
 
   let response: any;
 
@@ -14,7 +15,8 @@ export const GET = async (request: Request) => {
         "X-CMC_PRO_API_KEY": "95ac92c8-a96f-4c62-aec4-1dcc0d313134",
       },
       params: {
-        id: ids, // Add the 'ids' parameter to the query
+        // id: ids, // Add the 'ids' parameter to the query
+        symbol: symbols,
       },
     });
   } catch (ex) {
