@@ -25,7 +25,8 @@ export const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffff
 export const SUPPORTED_INPUT_NETWORKS: Network[] = [
   {
     ...polygon,
-    contractAddress: "0xC4b1221701ED9EeCbA01d5f52D60Cb95a9d492a2",
+    contractAddress: "0xA1eB3a8e2E84528DB3391b2A4AB39cc4Dd073185",
+    // contractAddress: "0xC4b1221701ED9EeCbA01d5f52D60Cb95a9d492a2", => old
     zrc20Address: "0xADF73ebA3Ebaa7254E859549A44c74eF7cff7501",
     alchemyName: "polygon-mainnet",
     wNativeAddress: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",

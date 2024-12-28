@@ -28,9 +28,16 @@ export type Network = Chain & {
 
 export type TransactionState = "notStarted" | "sourcePending" | "zetaPending" | "destinationPending" | "completed";
 
+// export type TokenSwap = {
+//   amount: BigNumberish;
+//   token: string;
+//   minAmountOut: BigNumberish;
+// };
+
 export type TokenSwap = {
+  isV3: boolean;
+  path: string;
   amount: BigNumberish;
-  token: string;
   minAmountOut: BigNumberish;
 };
 
