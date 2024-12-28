@@ -36,7 +36,8 @@ const InputToken = ({
     if (_quoteSwapData?.estimatedOutput) {
       const slippageValue = Number(e);
       setSlippage(slippageValue);
-      const minAmountWithSlippage = _quoteSwapData?.estimatedOutput - (_quoteSwapData?.estimatedOutput * slippageValue) / 100;
+      const minAmountWithSlippage =
+        _quoteSwapData?.estimatedOutput - (_quoteSwapData?.estimatedOutput * slippageValue) / 100;
       _setTokensMinAmountOut(_index, minAmountWithSlippage);
     }
   };
@@ -49,6 +50,7 @@ const InputToken = ({
     if (_quoteSwapData?.displayOutput) {
       const value = Number(_quoteSwapData?.displayOutput).toFixed(7);
       setTokenQuote(value);
+      console.log(value);
     }
   }, [_quoteSwapData?.displayOutput]);
 

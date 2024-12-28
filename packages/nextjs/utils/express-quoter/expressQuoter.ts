@@ -78,6 +78,7 @@ export const getExpressQuote = async (
     // console.log(data);
 
     quoteSwapData.estimatedOutput = Number(data.readableAmount) * 0.99;
+    quoteSwapData.displayOutput = Number(data.readableAmount) * 0.99;
     const gasValue = ethers.utils.formatUnits(
       data.route.estimatedGasUsedUSD.numerator[0].toString(),
       data.route.estimatedGasUsedUSD.currency.decimals,

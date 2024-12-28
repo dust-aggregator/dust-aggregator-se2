@@ -140,9 +140,15 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         outputToken.name,
       );
 
-      const _quoteSwapData = await getExpressQuote(inputNetwork.id, account.address, tokenIn, tokenOut, _token.amount);
+      const _quoteSwapData = await getExpressQuote(
+        inputNetwork.id,
+        account.address,
+        tokenIn,
+        tokenOut,
+        _token.balance.toString(),
+      );
 
-      console.log(_quoteSwapData.estimatedGasUsedUSD);
+      console.log(_quoteSwapData.displayOutput);
 
       setQuoteSwapData(prevData => ({
         ...prevData,
@@ -185,7 +191,13 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
       const tokenIn = new Token(inputNetwork.id, _token.address, Number(_token.decimals), _token.symbol, _token.name);
       const tokenOut = new Token(inputNetwork.id, wrappedInputAddress, 18, wrappedInputSymbol, wrappedInputName);
 
-      const _quoteSwapData = await getExpressQuote(inputNetwork.id, account.address, tokenIn, tokenOut, _token.amount);
+      const _quoteSwapData = await getExpressQuote(
+        inputNetwork.id,
+        account.address,
+        tokenIn,
+        tokenOut,
+        _token.balance.toString(),
+      );
 
       const result = await fetch(`/api/cmc/quotesLatest?symbols=${nativeInputSymbol},${outputToken.symbol}`);
       const resultJson = await result.json();
@@ -196,7 +208,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
       const finalOutputAmount = wrappedInputUsdValue / tokenOutputPrice;
       // console.log(`FINAL OUTPUT ${finalOutputAmount} ${outputToken.symbol}`);
 
-      console.log(_quoteSwapData.estimatedGasUsedUSD);
+      console.log(finalOutputAmount);
 
       setQuoteSwapData(prevData => ({
         ...prevData,

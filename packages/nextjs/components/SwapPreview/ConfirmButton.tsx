@@ -61,9 +61,9 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
     await _handleApproveTokens();
     // ===================
 
-    console.log(_quoteSwapData);
-
     const signPermit = async (swaps: TokenSwap[]) => {
+      console.log(swaps);
+
       if (!inputNetwork || !chainId) {
         throw new Error("No input network");
       }
@@ -75,6 +75,9 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         swaps,
         inputNetwork?.contractAddress,
       );
+      console.log(domain);
+      console.log(types);
+      console.log(values);
       const signature = await signer._signTypedData(domain, types, values);
 
       return { deadline, nonce, signature };
@@ -99,12 +102,14 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         isBitcoin,
       );
 
-      const tokenSwaps: TokenSwap[] = inputTokens.map(({ amount, decimals, address }, index) => ({
-        amount: parseUnits(amount, decimals),
+      console.log(inputTokens);
+
+      const tokenSwaps: TokenSwap[] = inputTokens.map(({ address, balance, decimals }, index) => ({
+        isV3: _quoteSwapData[index].swapInput.isV3,
+        path: ethers.utils.hexlify(_quoteSwapData[index].swapInput.path),
+        amount: parseUnits(balance.toString(), decimals),
+        minAmountOut: parseUnits(_quoteSwapData[index].swapInput.minAmountOut.toString(), decimals),
         token: address,
-        minAmountOut: _quoteSwapData[index].swapInput.minAmountOut
-          ? ethers.utils.parseUnits(_quoteSwapData[index].swapInput.minAmountOut.toFixed(18).toString(), decimals)
-          : BigInt(0),
       }));
 
       const permit = await signPermit(tokenSwaps);
