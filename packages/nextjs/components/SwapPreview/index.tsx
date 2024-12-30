@@ -376,6 +376,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
               togglePreviewModal={togglePreviewModal}
               _handleApproveTokens={handleApproveTokens}
               _quoteSwapData={quoteSwapData}
+              estimatedReturn={estimatedReturn}
             />
             <button
               style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}

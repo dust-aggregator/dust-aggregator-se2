@@ -15,9 +15,10 @@ import { useGlobalState } from "~~/services/store/store";
 interface Props {
   open: boolean;
   swapHash?: `0x${string}`;
+  estimatedReturn: number;
 }
 
-const WaitingModal = ({ open, swapHash }: Props) => {
+const WaitingModal = ({ open, swapHash, estimatedReturn }: Props) => {
   const ref = useRef<HTMLDialogElement>(null);
   const [pending, setPending] = useState(true);
   const [inputNetworkSuccess, setInputNetworkSuccess] = useState(false);
@@ -133,7 +134,9 @@ const WaitingModal = ({ open, swapHash }: Props) => {
               <div className="opacity-50">
                 <span>Swapping via {outputNetwork?.name}</span>
                 <div>
-                  <span>{`[ESTIMATED AMOUNT PLACEHOLDER] ${outputToken?.name}`}</span>
+                  <span>
+                    {estimatedReturn.toFixed(5)} {outputToken?.name}
+                  </span>
                 </div>
               </div>
               <a href="">

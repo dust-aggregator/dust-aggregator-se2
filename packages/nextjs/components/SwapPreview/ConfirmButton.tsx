@@ -20,9 +20,10 @@ interface Props {
   togglePreviewModal: () => void;
   _handleApproveTokens: () => void;
   _quoteSwapData: { [key: number]: QuoteSwapData };
+  estimatedReturn: number;
 }
 
-const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapData }: Props) => {
+const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapData, estimatedReturn }: Props) => {
   const [resultModalOpen, setResultModalOpen] = useState(false);
   const [waitingModalOpen, setWaitingModalOpen] = useState(false);
   const [sameChainSwapPending, setSameChainSwapPending] = useState(false);
@@ -226,7 +227,9 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         error={error}
         amountReceived={amountReceived}
       />
-      {waitingModalOpen && <WaitingModal open={waitingModalOpen} swapHash={swapHash} />}
+      {waitingModalOpen && (
+        <WaitingModal open={waitingModalOpen} swapHash={swapHash} estimatedReturn={estimatedReturn} />
+      )}
     </>
   );
 };
