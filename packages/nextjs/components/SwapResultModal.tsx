@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { formatUnits } from "viem";
 import discordIcon from "~~/public/assets/discord_icon.svg";
+import twitterIcon from "~~/public/assets/icons8-twitterx.svg";
 import instagramIcon from "~~/public/assets/instagram_icon.svg";
 import SuccessSVG from "~~/public/assets/success.svg";
 import tiktokIcon from "~~/public/assets/tiktok_icon.svg";
 import youtubeIcon from "~~/public/assets/youtube_icon.svg";
-import twitterIcon from "~~/public/assets/icons8-twitterx.svg";
+import { useGlobalState } from "~~/services/store/store";
 
 interface Props {
   isError: boolean;
@@ -14,19 +16,22 @@ interface Props {
   open: boolean;
   retryOperation: () => void;
   rebootMachine: () => void;
-  amountCurency?: string;
+  amountReceived?: bigint;
 }
 
-const SwapResultModal = ({
-  isError,
-  error,
-  open,
-  retryOperation,
-  rebootMachine,
-  amountCurency,
-}: Props) => {
+const truncateDecimals = (value, decimals) => {
+  const factor = Math.pow(10, decimals);
+  return Math.floor(value * factor) / factor;
+};
+
+const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, amountReceived }: Props) => {
   const ref = useRef<HTMLDialogElement>(null);
   const [copySuccess, setCopySuccess] = useState(false);
+  const { outputToken } = useGlobalState();
+
+  const amount = amountReceived
+    ? truncateDecimals(parseFloat(formatUnits(amountReceived.toString(), outputToken?.decimals)), 5).toString()
+    : "0";
 
   useEffect(() => {
     if (open) {
@@ -55,8 +60,8 @@ const SwapResultModal = ({
     }
   };
 
-  const shareText = amountCurency
-    ? `I got ${amountCurency} by converting them on Dust.fun #DustFun #ZetaChain`
+  const shareText = amount
+    ? `I got ${amount} ${outputToken?.symbol} by converting them on Dust.fun #DustFun #ZetaChain`
     : "I used Dust.fun to convert my tokens easily! #DustFun";
 
   return (
@@ -65,32 +70,23 @@ const SwapResultModal = ({
         className={`modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded-xl border-4
           ${isError ? "border-[#FF6161]" : "border-[#00BBFF]"}`}
       >
-        <div
-          className={`${isError ? "my-32" : "gap-12 my-12"
-            } items-center flex flex-col justify-center`}
-        >
-          <h1 className="font-bold text-4xl">
-            {isError ? "SWAP FAILED" : "SUCCESSFULLY"}
-          </h1>
+        <div className={`${isError ? "my-32" : "gap-12 my-12"} items-center flex flex-col justify-center`}>
+          <h1 className="font-bold text-4xl">{isError ? "SWAP FAILED" : "SUCCESSFULLY"}</h1>
           <div className="text-[#fffff] text-xl w-3/4 text-center leading-none mt-2 flex flex-col gap-3 items-center">
             {isError ? (
               <>
-                We regret to inform you that the operation was not successful,
-                please check that you have the required amount in commission and
-                try again.
+                We regret to inform you that the operation was not successful, please check that you have the required
+                amount in commission and try again.
               </>
             ) : (
               <>
                 <div className="flex gap-1 items-center drop-shadow-[0_3px_3px_rgba(0,_187,_255,_1)]">
                   <Image src={SuccessSVG} alt="success" />
                   <span className="font-montserrat font-bold text-3xl">
-                    {amountCurency}
+                    {amount} {outputToken?.symbol}
                   </span>
                 </div>
-                <span>
-                  Thank you very much for using Dust.Fun, your dust has been
-                  transformed
-                </span>
+                <span>Thank you very much for using Dust.Fun, your dust has been transformed</span>
               </>
             )}
           </div>
@@ -133,11 +129,7 @@ const SwapResultModal = ({
                 <span className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                   Contact Support
                 </span>
-                <Link
-                  href="https://discord.com/invite/FTSeFc9Yh4"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <Link href="https://discord.com/invite/FTSeFc9Yh4" target="_blank" rel="noopener noreferrer">
                   <Image src={discordIcon} alt="discord" />
                 </Link>
               </div>
@@ -151,7 +143,7 @@ const SwapResultModal = ({
                 <div className="flex gap-2 justify-center">
                   <Link href="https://discord.com/invite/zetachain">
                     <Image src={discordIcon} alt="discord" />
-                  </Link>                
+                  </Link>
                   <Link href="https://x.com/zetablockchain">
                     <Image src={twitterIcon} alt="twitter" height={16} />
                   </Link>

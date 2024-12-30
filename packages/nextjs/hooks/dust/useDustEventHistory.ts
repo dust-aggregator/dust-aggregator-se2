@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import { useTargetNetwork } from "./useTargetNetwork";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Abi, AbiEvent, ExtractAbiEventNames } from "abitype";
 import { BlockNumber, GetLogsParameters } from "viem";
 import { Config, UsePublicClientReturnType, useBlockNumber, usePublicClient } from "wagmi";
-import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 import dustAbi from "~~/lib/abis/EvmDustTokens.json";
 import { useGlobalState } from "~~/services/store/store";
 import { replacer } from "~~/utils/scaffold-eth/common";
@@ -66,7 +64,7 @@ const getEvents = async (
  * @param config.watch - if set to true, the events will be updated every pollingInterval milliseconds set at scaffoldConfig (default: false)
  * @param config.enabled - set this to false to disable the hook from running (default: true)
  */
-export const useScaffoldEventHistory = <
+export const useDustEventHistory = <
   TContractName extends ContractName,
   TEventName extends ExtractAbiEventNames<ContractAbi<TContractName>>,
   TBlockData extends boolean = false,

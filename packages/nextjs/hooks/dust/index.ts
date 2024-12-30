@@ -4,3 +4,4 @@ export * from "./useTokenWhitelist";
 export * from "./useListenToUniversalDapp";
 export * from "./useWaitForOutput";
 export * from "./useTimeUntilZetaFinalization";
+export * from "./useDustEventHistory";

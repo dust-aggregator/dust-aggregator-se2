@@ -5,7 +5,8 @@ import { sendGAEvent } from "@next/third-parties/google";
 import { ethers } from "ethers";
 import { parseUnits, zeroAddress } from "viem";
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { getAccount } from "wagmi/actions";
+import { getAccount, getBlockNumber } from "wagmi/actions";
+import { useDustEventHistory } from "~~/hooks/dust";
 import dustAbi from "~~/lib/abis/EvmDustTokens.json";
 import { GA_EVENTS } from "~~/lib/constants";
 import { TokenSwap } from "~~/lib/types";
@@ -24,6 +25,9 @@ interface Props {
 const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapData }: Props) => {
   const [resultModalOpen, setResultModalOpen] = useState(false);
   const [waitingModalOpen, setWaitingModalOpen] = useState(false);
+  const [sameChainSwapPending, setSameChainSwapPending] = useState(false);
+  const [amountReceived, setAmountReceived] = useState<bigint>();
+  const [blockNumBeforeSwap, setBlockNumBeforeSwap] = useState<bigint>(0n);
   const { address } = useAccount();
   const {
     outputNetwork,
@@ -40,9 +44,28 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
 
   const { writeContract, data: swapHash, isError, error, isPending: swapTxPending } = useWriteContract();
 
-  const { data: swapReceipt, isPending: sameChainSwapPending } = useWaitForTransactionReceipt({
-    hash: swapHash,
+  useEffect(() => {
+    if (!outputNetwork) return;
+    getBlockNumber(wagmiConfig, { chainId: outputNetwork?.id }).then(blockNum => setBlockNumBeforeSwap(blockNum));
+  }, [outputNetwork]);
+
+  const successEventName = isSameNetwork ? "Swapped" : "Withdrawn";
+
+  const { data: successEvents } = useDustEventHistory({
+    eventName: successEventName,
+    fromBlock: BigInt(blockNumBeforeSwap),
+    enabled: !!blockNumBeforeSwap,
   });
+
+  useEffect(() => {
+    const event = successEvents?.find((event: any) => event.args["0"] === (recipient || address));
+    if (event) {
+      setSameChainSwapPending(false);
+      setWaitingModalOpen(false);
+      setAmountReceived(event.args["2"]);
+      setResultModalOpen(true);
+    }
+  }, [successEvents, recipient, address]);
 
   const { chainId } = getAccount(wagmiConfig);
 
@@ -145,6 +168,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         functionName,
         args,
       });
+      if (isSameNetwork) setSameChainSwapPending(true);
     } catch (error) {
       sendGAEvent({
         name: GA_EVENTS.swapError,
@@ -166,11 +190,6 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
     // cross chain swap started
     if (swapHash && !isSameNetwork) setWaitingModalOpen(true);
   }, [swapHash, isSameNetwork]);
-
-  useEffect(() => {
-    // same chain swap ~finished
-    if (swapReceipt && isSameNetwork) setResultModalOpen(true);
-  }, [swapReceipt, isSameNetwork]);
 
   const retryOperation = () => {
     setResultModalOpen(false);
@@ -205,7 +224,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         open={resultModalOpen}
         isError={isError}
         error={error}
-        amountCurency={"4005.3333 DAI"}
+        amountReceived={amountReceived}
       />
       {waitingModalOpen && <WaitingModal open={waitingModalOpen} swapHash={swapHash} />}
     </>
