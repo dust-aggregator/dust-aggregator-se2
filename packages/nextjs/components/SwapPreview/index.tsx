@@ -4,16 +4,16 @@ import ConfirmButton from "./ConfirmButton";
 import InputToken from "./InputToken";
 import { Token } from "@uniswap/sdk-core";
 import { ethers } from "ethers";
+import { zeroAddress } from "viem";
 import { useAccount, useSwitchChain } from "wagmi";
 import { useApprovePermit2 } from "~~/hooks/dust/useApprovePermit2";
 import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
-import { getExpressQuote } from "~~/utils/express-quoter/expressQuoter";
-import { QuoteSwapData } from "~~/types/quote-swap-data";
 import infoSVG from "~~/public/assets/info.svg";
 import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
 import { useGlobalState } from "~~/services/store/store";
-import { zeroAddress } from "viem";
+import { QuoteSwapData } from "~~/types/quote-swap-data";
+import { getExpressQuote } from "~~/utils/express-quoter/expressQuoter";
 
 const getToggleModal = (ref: RefObject<HTMLDialogElement>) => () => {
   if (ref.current) {
@@ -145,7 +145,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         account.address,
         tokenIn,
         tokenOut,
-        _token.balance.toString(),
+        _token.amount.toString(),
       );
 
       console.log(_quoteSwapData.displayOutput);
@@ -301,7 +301,6 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                     _approveIndexState={tokensApproveStates[index]}
                     _setTokenHasApproval={callSetTokenHasApproval}
                     _setTokensMinAmountOut={callSetTokensMinAmountOut}
-
                     _quoteSwapData={quoteSwapData[index]}
                   />
                 </li>

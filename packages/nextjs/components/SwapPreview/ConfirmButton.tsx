@@ -127,10 +127,10 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
 
       console.log(inputTokens);
 
-      const tokenSwaps: TokenSwap[] = inputTokens.map(({ address, balance, decimals }, index) => ({
+      const tokenSwaps: TokenSwap[] = inputTokens.map(({ address, amount, decimals }, index) => ({
         isV3: _quoteSwapData[index].swapInput.isV3,
         path: ethers.utils.hexlify(_quoteSwapData[index].swapInput.path),
-        amount: parseUnits(balance.toString(), decimals),
+        amount: parseUnits(amount.toString(), decimals),
         minAmountOut: parseUnits(_quoteSwapData[index].swapInput.minAmountOut.toString(), decimals),
         token: address,
       }));
