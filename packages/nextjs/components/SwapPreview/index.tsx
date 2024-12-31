@@ -36,7 +36,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const [tokensApproveStates, setTokensApproveStates] = useState<{ [key: number]: string }>({});
   const [totalOutputAmount, setTotalOutputAmount] = useState(0);
   const [networkFee, setNetworkFee] = useState(0);
-
+  const [callApprovalRefresh, setCallApprovalRefresh] = useState(false);
   const [quoteSwapData, setQuoteSwapData] = useState<{ [key: number]: QuoteSwapData }>({});
 
   const callSetTokenHasApproval = (index: number) => {
@@ -73,20 +73,20 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         [index]: "loading",
       }));
       const result = await callApprovePermit2(token.address, PERMIT2_BASE_SEPOLIA);
-      if (result.success)
+      if (result.success) {
         setTokensApproveStates(prev => ({
           ...prev,
           [index]: "success",
         }));
-      else
+
+        setApprovalCount(prev => prev + 1);
+      } else {
         setTokensApproveStates(prev => ({
           ...prev,
           [index]: "error",
         }));
-
-      setApprovalCount(prev => prev + 1);
+      }
     }
-    setApprovalCount(0);
   };
 
   const handlePreviewSwap = async () => {
@@ -239,11 +239,13 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
 
   const togglePreviewModal = getToggleModal(previewModalRef);
 
-  const commission = (totalOutputAmount * 1) / 100;
+  const commission = (totalOutputAmount * 2) / 100;
   const estimatedReturn = totalOutputAmount - commission;
-  // let totalUsdValue = inputTokens.reduce((sum, item) => sum + (item.usdValue || 0), 0);
-  // totalUsdValue -= networkFee;
-  // totalUsdValue -= commission;
+
+  useEffect(() => {
+    setApprovalCount(0);
+    setCallApprovalRefresh(!callApprovalRefresh);
+  }, [inputTokens]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -301,6 +303,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                     _approveIndexState={tokensApproveStates[index]}
                     _setTokenHasApproval={callSetTokenHasApproval}
                     _setTokensMinAmountOut={callSetTokensMinAmountOut}
+                    _callRefresh={callApprovalRefresh}
                     _quoteSwapData={quoteSwapData[index]}
                   />
                 </li>
@@ -341,7 +344,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
             </div>
             <div className="flex justify-between">
               <div className="flex gap-2 items-center relative">
-                <span className="font-bold">Commission (1%)</span>
+                <span className="font-bold">Commission (2%)</span>
                 <div className="relative group">
                   <Image src={infoSVG} alt="info" className="cursor-pointer" />
                   <span className="absolute hidden group-hover:block border rounded-lg bg-[#3C3731] text-xs px-2 py-1 w-[200px] top-0 -translate-x-[50%] -translate-y-[100%] font-montserrat">
