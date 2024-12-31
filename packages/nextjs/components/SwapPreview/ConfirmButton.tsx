@@ -4,6 +4,7 @@ import WaitingModal from "../WaitingModal";
 import { sendGAEvent } from "@next/third-parties/google";
 import { ethers } from "ethers";
 import { parseUnits, zeroAddress } from "viem";
+import { zetachain } from "viem/chains";
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { getAccount, getBlockNumber } from "wagmi/actions";
 import { useDustEventHistory } from "~~/hooks/dust";
@@ -76,10 +77,12 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
       name: GA_EVENTS.approveSwap,
     });
 
-    const isBitcoin = outputNetwork?.name === "bitcoin";
+    const isBitcoin = outputNetwork?.id === "bitcoin";
+    const isZetaChain = outputNetwork?.id === zetachain.id;
+    const isNonEthereumNetwork = isBitcoin || isZetaChain;
 
     if (!outputNetwork) return;
-    if (!isBitcoin && (!outputToken || !inputTokens.length)) return;
+    if (!isNonEthereumNetwork && (!outputToken || !inputTokens.length)) return;
 
     // ===================
     await _handleApproveTokens();
@@ -107,13 +110,13 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
       return { deadline, nonce, signature };
     };
 
-    if (!outputToken) {
+    if (!outputToken && !isNonEthereumNetwork) {
       throw new Error("No output token");
     }
 
-    const gasLimit = isBitcoin ? BigInt(130000) : getGasLimitByOutputToken(outputToken?.address);
+    const gasLimit = isNonEthereumNetwork ? BigInt(130000) : getGasLimitByOutputToken(outputToken?.address);
     const recipientAddress = (recipient || address) as `0x${string}`;
-    const targetChainCounterparty = isBitcoin ? recipientAddress : outputNetwork.contractAddress;
+    const targetChainCounterparty = isNonEthereumNetwork ? recipientAddress : outputNetwork.contractAddress;
 
     try {
       const encodedParameters = encodeZetachainPayload(
@@ -123,15 +126,15 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         recipientAddress,
         outputToken?.address as `0x${string}`,
         BigInt(1),
-        isBitcoin,
+        isNonEthereumNetwork,
       );
 
       console.log(inputTokens);
 
-      const tokenSwaps: TokenSwap[] = inputTokens.map(({ address, balance, decimals }, index) => ({
+      const tokenSwaps: TokenSwap[] = inputTokens.map(({ address, amount, decimals }, index) => ({
         isV3: _quoteSwapData[index].swapInput.isV3,
         path: ethers.utils.hexlify(_quoteSwapData[index].swapInput.path),
-        amount: parseUnits(balance.toString(), decimals),
+        amount: parseUnits(amount.toString(), decimals),
         minAmountOut: parseUnits(_quoteSwapData[index].swapInput.minAmountOut.toString(), decimals),
         token: address,
       }));

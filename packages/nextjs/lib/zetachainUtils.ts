@@ -63,9 +63,9 @@ const encodeZetachainPayload = (
   recipient: `0x${string}`,
   outputToken: `0x${string}`,
   minAmount: bigint,
-  isBitcoin: boolean,
+  isNonEthereumNetwork: boolean,
 ) => {
-  const destinationPayload = isBitcoin ? "0x" : encodeDestinationPayload(recipient, outputToken, minAmount);
+  const destinationPayload = isNonEthereumNetwork ? "0x" : encodeDestinationPayload(recipient, outputToken, minAmount);
 
   const params = {
     targetChainToken,

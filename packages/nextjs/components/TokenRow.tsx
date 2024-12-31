@@ -57,6 +57,7 @@ export const TokenRow = ({ token, updateSpecificOption, networkName }) => {
           className="h-full px-2 text-xs rounded-lg border bg-[#4C463F]"
           onClick={() => {
             updateSpecificOption(networkName, token.value, token.selected, token.tokenBalance);
+            setRawVal(token.tokenBalance);
           }}
         >
           Max
