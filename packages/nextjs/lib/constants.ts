@@ -2,7 +2,7 @@ import { readLocalnetAddresses } from "./zetachainUtils";
 import { sendGAEvent } from "@next/third-parties/google";
 import { Network as AlchemyNetwork } from "alchemy-sdk";
 import { zeroAddress } from "viem";
-import { base, bsc, polygon } from "viem/chains";
+import { base, bsc, polygon, zetachain } from "viem/chains";
 import { walletConnect } from "wagmi/connectors";
 import { Network } from "~~/lib/types";
 import baseSVG from "~~/public/base.svg";
@@ -56,6 +56,12 @@ export const SUPPORTED_INPUT_NETWORKS: Network[] = [
   },
 ];
 
+export const ZetaChainNetwork = {
+  ...zetachain,
+  zrc20Address: "0x5F0b1a82749cb4E2278EC87F8BF6B618dC71a8bf",
+  numBlocksForConfirmation: 0,
+};
+
 export const BitcoinNetwork = {
   name: "Bitcoin",
   id: "bitcoin",
@@ -67,6 +73,10 @@ export const SUPPORTED_OUTPUT_NETWORKS_BY_ECOSYSTEM = [
   {
     ecosystem: "Ethereum",
     networks: SUPPORTED_INPUT_NETWORKS,
+  },
+  {
+    ecosystem: "ZetaChain",
+    networks: [ZetaChainNetwork],
   },
   {
     ecosystem: "Bitcoin",
@@ -99,4 +109,12 @@ export const GA_EVENTS = {
 
 export const sendEvent = (name: (typeof GA_EVENTS)[keyof typeof GA_EVENTS]) => {
   sendGAEvent({ name });
+};
+
+export const WrappedZetaToken = {
+  decimals: 18,
+  logo: "zetachain-icon.svg",
+  name: "Zeta",
+  symbol: "ZETA",
+  address: "0x5F0b1a82749cb4E2278EC87F8BF6B618dC71a8bf",
 };

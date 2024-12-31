@@ -5,32 +5,36 @@ import Select from "./Select";
 import SwapPreview from "./SwapPreview";
 import UserActionBoxContainer from "./UserActionBoxContainer";
 import { sendGAEvent } from "@next/third-parties/google";
+import { zetachain } from "viem/chains";
 import { useAccount } from "wagmi";
 import { useTokenWhitelist } from "~~/hooks/dust";
-import { useTokenBalancesWithMetadataByNetwork } from "~~/hooks/dust/useTokenBalancesWithMetadataByNetwork";
-import { BitcoinNetwork, GA_EVENTS, SUPPORTED_INPUT_NETWORKS } from "~~/lib/constants";
+import {
+  BitcoinNetwork,
+  GA_EVENTS,
+  SUPPORTED_INPUT_NETWORKS,
+  WrappedZetaToken,
+  ZetaChainNetwork,
+} from "~~/lib/constants";
 import pasteSVG from "~~/public/assets/paste.svg";
 import { useGlobalState } from "~~/services/store/store";
 
 const evmNetworkOptions = SUPPORTED_INPUT_NETWORKS.map(({ id, name }) => ({ label: name, value: id }));
 
 const networkOptions = [
+  { ecosystem: "ZetaChain", options: [{ label: "ZetaChain", value: zetachain.id }] },
   { ecosystem: "Bitcoin", options: [{ label: "Bitcoin", value: "bitcoin" }] },
   { ecosystem: "Ethereum", options: evmNetworkOptions },
 ];
 
 const OutputBox = () => {
-  const outputTokensByNetwork = useGlobalState(({ outputTokensByNetwork }) => outputTokensByNetwork);
-
-  // console.log(outputTokensByNetwork);
-
   const { outputNetwork, setOutputNetwork, outputToken, setOutputToken } = useGlobalState();
-  const [outputBalances, setOutputBalances] = useState<Token[]>([]);
   const [receiverWalletMode, setReceiverWalletMode] = useState<string>("");
   const [receiverWallet, setReceiverWallet] = useState("");
   const [understoodRisk, setUnderstoodRisk] = useState(false);
 
   const isBitcoin = outputNetwork?.id === "bitcoin";
+  const isZetaChain = outputNetwork?.id === zetachain.id;
+  const isNonEthereumNetwork = isBitcoin || isZetaChain;
 
   const { address } = useAccount();
   const { tokens: whitelistedTokens } = useTokenWhitelist();
@@ -44,6 +48,9 @@ const OutputBox = () => {
       setOutputNetwork(BitcoinNetwork);
       setOutputToken(null);
       setReceiverWalletMode("");
+    } else if (network.value === zetachain.id) {
+      setOutputNetwork(ZetaChainNetwork);
+      setOutputToken(WrappedZetaToken);
     } else {
       const newInputNetwork = SUPPORTED_INPUT_NETWORKS.find(({ id }) => id === network.value);
       setOutputNetwork(newInputNetwork);
@@ -62,8 +69,6 @@ const OutputBox = () => {
 
   const isSwapDisabled = receiverWalletMode !== "connected" && (!understoodRisk || !receiverWallet);
 
-
-
   return (
     <UserActionBoxContainer>
       {address ? (
@@ -79,7 +84,7 @@ const OutputBox = () => {
             <p className="text-[#9D9D9D] text-xs my-1">And</p>
           </div>
           <Select
-            disabled={isBitcoin || !outputNetwork}
+            disabled={isNonEthereumNetwork || !outputNetwork}
             title="Select Token"
             options={whitelistedTokens}
             onChange={setOutputToken}

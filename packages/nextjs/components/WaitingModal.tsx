@@ -26,6 +26,8 @@ const WaitingModal = ({ open, swapHash, estimatedReturn }: Props) => {
   const [outputNetworkSuccess, setOutputNetworkSuccess] = useState(false);
   const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
 
+  const isZetaChain = outputNetwork?.id === zetachain.id;
+
   const { data: currZetaBlockNum } = useBlockNumber({
     chainId: zetachain.id,
   });
@@ -114,18 +116,23 @@ const WaitingModal = ({ open, swapHash, estimatedReturn }: Props) => {
               </a>
             </div>
 
-            <Image src={arrowSVG} alt="arrow" className="ml-1" />
+            {isZetaChain && (
+              <>
+                <Image src={arrowSVG} alt="arrow" className="ml-1" />
 
-            <div className="flex items-center gap-3">
-              <Image src={zetaNetworkSuccess ? successSVG : dustSVG} alt={"network"} />
-              <div className="opacity-80">
-                <span>Transaction on Zetachain</span>
-                <progress className="progress progress-success w-56" value={percentageComplete} max="100"></progress>
-              </div>
-              {/* <a href="">
-                <Image src={linkSVG} alt="link" className={`w-4 ${!zetaNetworkSuccess && "opacity-20 cursor-wait"}`} />
-              </a> */}
-            </div>
+                <div className="flex items-center gap-3">
+                  <Image src={zetaNetworkSuccess ? successSVG : dustSVG} alt={"network"} />
+                  <div className="opacity-80">
+                    <span>Transaction on Zetachain</span>
+                    <progress
+                      className="progress progress-success w-56"
+                      value={percentageComplete}
+                      max="100"
+                    ></progress>
+                  </div>
+                </div>
+              </>
+            )}
 
             <Image src={arrowSVG} alt="arrow" className="ml-1" />
 
@@ -138,6 +145,7 @@ const WaitingModal = ({ open, swapHash, estimatedReturn }: Props) => {
                     {estimatedReturn.toFixed(5)} {outputToken?.name}
                   </span>
                 </div>
+                <progress className="progress progress-success w-56" value={percentageComplete} max="100"></progress>
               </div>
               <a href="">
                 <Image
