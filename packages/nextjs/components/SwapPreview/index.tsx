@@ -228,11 +228,14 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   };
 
   const getQuotes: () => void = () => {
-    setTotalOutputAmount(0);
-    setNetworkFee(0);
-    inputTokens.map((token, index) => {
-      getQuote(token, index);
-    });
+    if (previewModalRef.current?.open) {
+      setQuoteTime(90);
+      setTotalOutputAmount(0);
+      setNetworkFee(0);
+      inputTokens.map((token, index) => {
+        getQuote(token, index);
+      });
+    }
   };
 
   const readyForPreview = !!inputNetwork && !!outputNetwork && inputTokens.length > 0;
