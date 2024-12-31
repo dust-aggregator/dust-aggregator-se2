@@ -12,7 +12,7 @@ interface Props {
   _approveIndexState: string;
   _setTokenHasApproval: (index: number) => void;
   _setTokensMinAmountOut: (index: number, amount: number) => void;
-
+  _callRefresh: boolean;
   _quoteSwapData: QuoteSwapData;
 }
 
@@ -22,11 +22,12 @@ const InputToken = ({
   _approveIndexState,
   _setTokenHasApproval,
   _setTokensMinAmountOut,
+  _callRefresh,
   _quoteSwapData,
 }: Props) => {
   const _fixedAmount = Number(_token.amount).toFixed(18);
   const parsedAmount = parseUnits(_fixedAmount, _token.decimals);
-  const { hasApproval } = useTokenHasPermit2Approval(_token.address, parsedAmount);
+  const { hasApproval, refresh } = useTokenHasPermit2Approval(_token.address, parsedAmount);
   const [slippage, setSlippage] = useState(0);
   const [tokenQuote, setTokenQuote] = useState("");
 
@@ -41,6 +42,11 @@ const InputToken = ({
       _setTokensMinAmountOut(_index, minAmountWithSlippage);
     }
   };
+
+  useEffect(() => {
+    // forcing refresh cause sometimes it shows incrrctl
+    refresh();
+  }, [_callRefresh]);
 
   useEffect(() => {
     if (hasApproval) _setTokenHasApproval(_index);
