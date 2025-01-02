@@ -343,7 +343,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 </div>
               </div>
 
-              <span className="text-[#FFFFFF]">{networkFee.toFixed(3)} USD</span>
+              <span className="text-[#FFFFFF]">{Number(networkFee.toFixed(3)) * 3} USD</span>
             </div>
             <div className="flex justify-between">
               <div className="flex gap-2 items-center relative">

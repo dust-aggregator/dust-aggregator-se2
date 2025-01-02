@@ -25,7 +25,7 @@ type GlobalState = {
   setTargetNetwork: (newTargetNetwork: ChainWithAttributes) => void;
   outputNetwork: Network | null;
   setOutputNetwork: (newOutputNetwork: Network | null) => void;
-  outputToken: OutputToken | null;
+  outputToken: Token | null;
   setOutputToken: (newOutputToken: Token | null) => void;
   inputTokens: SelectedToken[];
   setInputTokens: (newInputTokens: SelectedToken[]) => void;
@@ -51,12 +51,13 @@ export const useGlobalState = create<GlobalState>(set => ({
   outputNetwork: null,
   setOutputNetwork: (newOutputNetwork: Network | null) => set(() => ({ outputNetwork: newOutputNetwork })),
   outputToken: null,
-  setOutputToken: (newOutputToken: Token) => {
-    sendGAEvent({
-      name: GA_EVENTS.selectOutputToken,
-      tokenName: newOutputToken.name,
-      address: newOutputToken.address,
-    });
+  setOutputToken: (newOutputToken: Token | null) => {
+    if (newOutputToken)
+      sendGAEvent({
+        name: GA_EVENTS.selectOutputToken,
+        tokenName: newOutputToken.name,
+        address: newOutputToken.address,
+      });
     return set(() => ({ outputToken: newOutputToken }));
   },
   inputTokens: [],
