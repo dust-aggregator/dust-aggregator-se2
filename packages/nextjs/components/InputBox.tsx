@@ -9,6 +9,7 @@ import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { GA_EVENTS, SUPPORTED_INPUT_NETWORKS, networks } from "~~/lib/constants";
 import { formatDecimal } from "~~/lib/utils";
 import { useGlobalState } from "~~/services/store/store";
+import { formatUnits } from "ethers/lib/utils";
 
 const InputBox = () => {
   const [dustThresholdValue, setDustThresholdValue] = useState<number>(50);
@@ -73,9 +74,7 @@ const InputBox = () => {
           ? {
               ...section,
               options: section.options.map((option: any) =>
-                option.value === optionValue
-                  ? { ...option, selected, amountToDust: Math.min(amountToDust, option.tokenBalance) }
-                  : option,
+                option.value === optionValue ? { ...option, selected, amountToDust: amountToDust } : option,
               ),
             }
           : section,
@@ -89,7 +88,7 @@ const InputBox = () => {
         name: token.label,
         decimals: token.decimals,
         balance: token.tokenBalance,
-        amount: token.amountToDust.toString(),
+        amount: Number(token.amountToDust).toFixed(token.decimals),
         address: token.address,
         symbol: token.symbol,
         usdValue: token.usdValue,
@@ -125,7 +124,9 @@ const InputBox = () => {
       <div key={"sjf" + index} className="flex flex-col gap-2">
         {/* <p className="m-0 text-xl text-bold">{e.section}</p> */}
         {e.options.map((option: any, index: number) => {
-          return <TokenRow token={option} updateSpecificOption={updateSpecificOption} networkName={e.section} />;
+          return (
+            <TokenRow key={index} token={option} updateSpecificOption={updateSpecificOption} networkName={e.section} />
+          );
         })}
       </div>
     );

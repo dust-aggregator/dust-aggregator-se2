@@ -3,7 +3,7 @@ import SwapResultModal from "../SwapResultModal";
 import WaitingModal from "../WaitingModal";
 import { sendGAEvent } from "@next/third-parties/google";
 import { ethers } from "ethers";
-import { parseUnits, zeroAddress } from "viem";
+import { encodeFunctionData, parseUnits, zeroAddress } from "viem";
 import { zetachain } from "viem/chains";
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { estimateFeesPerGas, estimateGas, getAccount, getBlockNumber } from "wagmi/actions";
@@ -134,13 +134,19 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
 
       console.log(inputTokens);
 
-      const tokenSwaps: TokenSwap[] = inputTokens.map(({ address, amount, decimals }, index) => ({
-        isV3: _quoteSwapData[index].swapInput.isV3,
-        path: ethers.utils.hexlify(_quoteSwapData[index].swapInput.path),
-        amount: parseUnits(amount, decimals),
-        minAmountOut: parseUnits(_quoteSwapData[index].swapInput.minAmountOut.toString(), decimals),
-        token: address,
-      }));
+      const tokenSwaps: TokenSwap[] = inputTokens.map(({ address, amount, balance, decimals }, index) => {
+        const amountInWei = parseUnits(amount, decimals);
+        const balanceInWei = parseUnits(balance.toString(), decimals);
+        return {
+          isV3: _quoteSwapData[index].swapInput.isV3,
+          path: ethers.utils.hexlify(_quoteSwapData[index].swapInput.path),
+          amount: amountInWei > balanceInWei ? balanceInWei : amountInWei,
+          minAmountOut: parseUnits(_quoteSwapData[index].swapInput.minAmountOut.toString(), decimals),
+          token: address,
+        };
+      });
+
+      console.log(tokenSwaps);
 
       const permit = await signPermit(tokenSwaps);
 
@@ -155,12 +161,25 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         permit.signature,
       ];
 
-      const result = await estimateFeesPerGas(wagmiConfig, {
-        chainId: inputNetwork?.id as 1 | 8453 | 137 | 7000 | 56 | undefined,
-        formatUnits: "wei",
-      });
+      // IT GOES TO VALHALLA
+      // const result = await estimateFeesPerGas(wagmiConfig, {
+      //   chainId: inputNetwork?.id as 1 | 8453 | 137 | 7000 | 56 | undefined,
+      //   formatUnits: "wei",
+      // });
 
-      console.log(result);
+      // console.log(result);
+
+      // THROWS ERROR
+      // const estimatedGas = await estimateGas(wagmiConfig, {
+      //   to: inputNetwork?.contractAddress,
+      //   data: encodeFunctionData({
+      //     abi: dustAbi,
+      //     functionName,
+      //     args,
+      //   }),
+      // });
+
+      // console.log(estimatedGas);
 
       writeContract({
         address: inputNetwork?.contractAddress as string,
@@ -168,9 +187,13 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         functionName,
         args,
 
+        // gasPrice: BigInt(14000000000),
+
         // Throwing veeeery high D:
         // maxFeePerGas: result.maxFeePerGas,
         // maxPriorityFeePerGas: result.maxPriorityFeePerGas,
+        // maxFeePerGas: BigInt(5000000000),
+        // maxPriorityFeePerGas: BigInt(5000000000),
       });
       if (isSameNetwork) setSameChainSwapPending(true);
     } catch (error) {
