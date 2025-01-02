@@ -6,7 +6,7 @@ import { ethers } from "ethers";
 import { parseUnits, zeroAddress } from "viem";
 import { zetachain } from "viem/chains";
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { getAccount, getBlockNumber } from "wagmi/actions";
+import { estimateFeesPerGas, estimateGas, getAccount, getBlockNumber } from "wagmi/actions";
 import { useDustEventHistory } from "~~/hooks/dust";
 import dustAbi from "~~/lib/abis/EvmDustTokens.json";
 import { GA_EVENTS } from "~~/lib/constants";
@@ -48,7 +48,9 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
 
   useEffect(() => {
     if (!outputNetwork) return;
-    getBlockNumber(wagmiConfig, { chainId: outputNetwork?.id }).then(blockNum => setBlockNumBeforeSwap(blockNum));
+    getBlockNumber(wagmiConfig, { chainId: outputNetwork?.id as 1 | 8453 | 137 | 7000 | 56 | undefined }).then(
+      blockNum => setBlockNumBeforeSwap(blockNum),
+    );
   }, [outputNetwork]);
 
   const successEventName = isSameNetwork ? "Swapped" : "Withdrawn";
@@ -110,7 +112,8 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
       return { deadline, nonce, signature };
     };
 
-    if (!outputToken && !isNonEthereumNetwork) {
+    // if (!outputToken && !isNonEthereumNetwork) {
+    if (!outputToken) {
       throw new Error("No output token");
     }
 
@@ -131,29 +134,15 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
 
       console.log(inputTokens);
 
-      const tokenSwaps: TokenSwap[] = inputTokens.map(({ address, amount, decimals, balance }, index) => ({
+      const tokenSwaps: TokenSwap[] = inputTokens.map(({ address, amount, decimals }, index) => ({
         isV3: _quoteSwapData[index].swapInput.isV3,
         path: ethers.utils.hexlify(_quoteSwapData[index].swapInput.path),
-        amount: parseUnits(Math.min(Number(amount), balance).toString(), decimals),
+        amount: parseUnits(amount, decimals),
         minAmountOut: parseUnits(_quoteSwapData[index].swapInput.minAmountOut.toString(), decimals),
         token: address,
       }));
 
       const permit = await signPermit(tokenSwaps);
-
-      // function SwapTokens(
-      //   SwapInput[] calldata swaps,
-      //   bool isNativeOutput,
-      //   uint256 nonce,
-      //   uint256 deadline,
-      //   bytes calldata signature
-
-      // function SwapAndBridgeTokens(
-      //   SwapInput[] calldata swaps,
-      //   bytes calldata message,
-      //   uint256 nonce,
-      //   uint256 deadline,
-      //   bytes calldata signature
 
       const isNative = outputToken.address === zeroAddress;
 
@@ -166,11 +155,22 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         permit.signature,
       ];
 
+      const result = await estimateFeesPerGas(wagmiConfig, {
+        chainId: inputNetwork?.id as 1 | 8453 | 137 | 7000 | 56 | undefined,
+        formatUnits: "wei",
+      });
+
+      console.log(result);
+
       writeContract({
         address: inputNetwork?.contractAddress as string,
         abi: dustAbi,
         functionName,
         args,
+
+        // Throwing veeeery high D:
+        // maxFeePerGas: result.maxFeePerGas,
+        // maxPriorityFeePerGas: result.maxPriorityFeePerGas,
       });
       if (isSameNetwork) setSameChainSwapPending(true);
     } catch (error) {

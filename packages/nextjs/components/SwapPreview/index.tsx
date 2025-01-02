@@ -196,7 +196,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         account.address,
         tokenIn,
         tokenOut,
-        _token.balance.toString(),
+        _token.amount.toString(),
       );
 
       const result = await fetch(`/api/cmc/quotesLatest?symbols=${nativeInputSymbol},${outputToken.symbol}`);
@@ -228,11 +228,14 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   };
 
   const getQuotes: () => void = () => {
-    setTotalOutputAmount(0);
-    setNetworkFee(0);
-    inputTokens.map((token, index) => {
-      getQuote(token, index);
-    });
+    if (previewModalRef.current?.open) {
+      setQuoteTime(90);
+      setTotalOutputAmount(0);
+      setNetworkFee(0);
+      inputTokens.map((token, index) => {
+        getQuote(token, index);
+      });
+    }
   };
 
   const readyForPreview = !!inputNetwork && !!outputNetwork && inputTokens.length > 0;
