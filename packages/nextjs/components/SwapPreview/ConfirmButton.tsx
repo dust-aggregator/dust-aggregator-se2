@@ -141,7 +141,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
           isV3: _quoteSwapData[index].swapInput.isV3,
           path: ethers.utils.hexlify(_quoteSwapData[index].swapInput.path),
           amount: amountInWei > balanceInWei ? balanceInWei : amountInWei,
-          minAmountOut: parseUnits(_quoteSwapData[index].swapInput.minAmountOut.toString(), decimals),
+          minAmountOut: parseUnits(_quoteSwapData[index].swapInput.minAmountOut.toString(), outputToken.decimals),
           token: address,
         };
       });
@@ -187,13 +187,13 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         functionName,
         args,
 
-        // gasPrice: BigInt(14000000000),
+        // gasPrice: BigInt(39000000000),
 
         // Throwing veeeery high D:
         // maxFeePerGas: result.maxFeePerGas,
         // maxPriorityFeePerGas: result.maxPriorityFeePerGas,
-        // maxFeePerGas: BigInt(5000000000),
-        // maxPriorityFeePerGas: BigInt(5000000000),
+        // maxFeePerGas: BigInt(40000000000),
+        // maxPriorityFeePerGas: BigInt(40000000000),
       });
       if (isSameNetwork) setSameChainSwapPending(true);
     } catch (error) {
