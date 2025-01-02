@@ -24,7 +24,7 @@ type GlobalState = {
   targetNetwork: ChainWithAttributes;
   setTargetNetwork: (newTargetNetwork: ChainWithAttributes) => void;
   outputNetwork: Network | null;
-  setOutputNetwork: (newOutputNetwork: Network) => void;
+  setOutputNetwork: (newOutputNetwork: Network | null) => void;
   outputToken: OutputToken | null;
   setOutputToken: (newOutputToken: Token | null) => void;
   inputTokens: SelectedToken[];

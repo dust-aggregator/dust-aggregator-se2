@@ -196,7 +196,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         account.address,
         tokenIn,
         tokenOut,
-        _token.balance.toString(),
+        _token.amount.toString(),
       );
 
       const result = await fetch(`/api/cmc/quotesLatest?symbols=${nativeInputSymbol},${outputToken.symbol}`);
