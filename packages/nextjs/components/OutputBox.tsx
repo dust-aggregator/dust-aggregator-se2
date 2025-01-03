@@ -27,9 +27,8 @@ const networkOptions = [
 ];
 
 const OutputBox = () => {
-  const { outputNetwork, setOutputNetwork, outputToken, setOutputToken } = useGlobalState();
+  const { outputNetwork, setOutputNetwork, outputToken, setOutputToken, recipient, setRecipient } = useGlobalState();
   const [receiverWalletMode, setReceiverWalletMode] = useState<string>("");
-  const [receiverWallet, setReceiverWallet] = useState("");
   const [understoodRisk, setUnderstoodRisk] = useState(false);
 
   const isBitcoin = outputNetwork?.id === "bitcoin";
@@ -64,10 +63,10 @@ const OutputBox = () => {
 
   const handlePaste = async () => {
     const copiedAdd = await navigator.clipboard.readText();
-    if (copiedAdd) setReceiverWallet(copiedAdd);
+    if (copiedAdd) setRecipient(copiedAdd);
   };
 
-  const isSwapDisabled = receiverWalletMode !== "connected" && (!understoodRisk || !receiverWallet);
+  const isSwapDisabled = receiverWalletMode !== "connected" && (!understoodRisk || !recipient);
 
   return (
     <UserActionBoxContainer>
@@ -140,8 +139,8 @@ const OutputBox = () => {
                     placeholder={"Destination Address"}
                     name={"destinationAddress"}
                     type="string"
-                    value={receiverWallet}
-                    onChange={e => setReceiverWallet(e.target.value)}
+                    value={recipient}
+                    onChange={e => setRecipient(e.target.value)}
                   />
                   <Image
                     onClick={handlePaste}
