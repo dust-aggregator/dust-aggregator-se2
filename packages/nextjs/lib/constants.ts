@@ -36,7 +36,8 @@ export const SUPPORTED_INPUT_NETWORKS: Network[] = [
   },
   {
     ...base,
-    contractAddress: "0x2dB3bF70B10007cDC1b33eB2Fcf7dfB876c2A981",
+    contractAddress: "0x04b869e9e9b557314935085ec8213662AfE7c956",
+    // contractAddress: "0x2dB3bF70B10007cDC1b33eB2Fcf7dfB876c2A981", => old
     zrc20Address: "0x1de70f3e971B62A0707dA18100392af14f7fB677",
     alchemyName: "base-mainnet",
     wNativeAddress: "0x4200000000000000000000000000000000000006",
