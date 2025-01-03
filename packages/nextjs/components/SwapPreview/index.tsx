@@ -3,7 +3,6 @@ import Image from "next/image";
 import ConfirmButton from "./ConfirmButton";
 import InputToken from "./InputToken";
 import { Token } from "@uniswap/sdk-core";
-import { ethers } from "ethers";
 import { zeroAddress } from "viem";
 import { useAccount, useSwitchChain } from "wagmi";
 import { useApprovePermit2 } from "~~/hooks/dust/useApprovePermit2";
@@ -31,28 +30,46 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   const previewModalRef = useRef<HTMLDialogElement>(null);
   const callApprovePermit2 = useApprovePermit2();
-  const [quoteTime, setQuoteTime] = useState(90);
+  const [quoteTime, setQuoteTime] = useState(120);
   const [approvalCount, setApprovalCount] = useState(0);
-  const [tokensApproveStates, setTokensApproveStates] = useState<{ [key: number]: string }>({});
+  const [tokensApproveStates, setTokensApproveStates] = useState<{ [key: string]: string }>({});
   const [totalOutputAmount, setTotalOutputAmount] = useState(0);
   const [networkFee, setNetworkFee] = useState(0);
-  const [callApprovalRefresh, setCallApprovalRefresh] = useState(false);
-  const [quoteSwapData, setQuoteSwapData] = useState<{ [key: number]: QuoteSwapData }>({});
+  const [quoteSwapData, setQuoteSwapData] = useState<{ [key: string]: QuoteSwapData }>({});
+  const [readyToSwap, setReadyToSwap] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const callSetTokenHasApproval = (index: number) => {
+  //============================================================
+  // ===================== Approvals logic =====================
+  //============================================================
+
+  const callSetTokenHasApproval = (tokenAddress: string, state: string) => {
     setTokensApproveStates(prev => ({
       ...prev,
-      [index]: "success",
+      [tokenAddress]: state,
     }));
   };
 
-  const callSetTokensMinAmountOut = (index: number, amount: number) => {
+  useEffect(() => {
+    let count = 0;
+
+    inputTokens.forEach(token => {
+      const tokenAddress = token.address;
+      if (tokensApproveStates[tokenAddress] === "success") {
+        count += 1;
+      }
+    });
+
+    setApprovalCount(count);
+  }, [tokensApproveStates, inputTokens]);
+
+  const callSetTokensMinAmountOut = (tokenAddress: string, amount: number) => {
     setQuoteSwapData(prevData => ({
       ...prevData,
-      [index]: {
-        ...prevData[index],
+      [tokenAddress]: {
+        ...prevData[tokenAddress],
         swapInput: {
-          ...prevData[index].swapInput,
+          ...prevData[tokenAddress].swapInput,
           minAmountOut: amount,
         },
       },
@@ -61,45 +78,42 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
 
   const handleApproveTokens = async () => {
     for (const token of inputTokens) {
-      const index = inputTokens.indexOf(token);
-
-      if (tokensApproveStates[index] === "success") {
-        console.log(`Token at index ${index} is already approved, skipping...`);
+      if (tokensApproveStates[token.address] === "success") {
+        console.log(`Token ${token.address} is already approved, skipping...`);
         continue;
       }
 
       setTokensApproveStates(prev => ({
         ...prev,
-        [index]: "loading",
+        [token.address]: "loading",
       }));
       const result = await callApprovePermit2(token.address, PERMIT2_BASE_SEPOLIA);
       if (result.success) {
         setTokensApproveStates(prev => ({
           ...prev,
-          [index]: "success",
+          [token.address]: "success",
         }));
 
         setApprovalCount(prev => prev + 1);
       } else {
         setTokensApproveStates(prev => ({
           ...prev,
-          [index]: "error",
+          [token.address]: "error",
         }));
       }
     }
   };
 
-  const handlePreviewSwap = async () => {
-    if (account.chainId !== inputNetwork?.id) {
-      if (!inputNetwork) return;
-      await switchChain({ chainId: inputNetwork?.id });
-    }
+  useEffect(() => {
+    setReadyToSwap(false);
+    if (inputTokens.length > 0 && approvalCount === inputTokens.length) setReadyToSwap(true);
+  }, [approvalCount, inputTokens.length]);
 
-    togglePreviewModal();
-    getQuotes();
-  };
+  //============================================================
+  // ==================== Quote/Route logic ====================
+  //============================================================
 
-  const getQuote = async (_token: SelectedToken, _index: number) => {
+  const getQuote = async (_token: SelectedToken) => {
     if (!inputNetwork || inputTokens.length <= 0 || !outputToken?.address || !outputNetwork || !account.address) {
       alert("Missing params, make sure to select input tokens, otput token, output network");
       return;
@@ -107,8 +121,8 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
 
     setQuoteSwapData(prevData => ({
       ...prevData,
-      [_index]: {
-        ...prevData[_index],
+      [_token.address]: {
+        ...prevData[_token.address],
         quoteError: false,
         displayOutput: 0,
         estimatedOutput: 0,
@@ -120,6 +134,8 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         },
       },
     }));
+
+    setLoading(true);
 
     if (inputNetwork.id === outputNetwork.id) {
       // ================ we call smart-order-router normally ================
@@ -148,12 +164,12 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         _token.amount.toString(),
       );
 
-      console.log(_quoteSwapData.displayOutput);
+      // console.log(_quoteSwapData.displayOutput);
 
       setQuoteSwapData(prevData => ({
         ...prevData,
-        [_index]: {
-          ...prevData[_index],
+        [_token.address]: {
+          ...prevData[_token.address],
           displayOutput: _quoteSwapData.displayOutput,
           estimatedOutput: _quoteSwapData.estimatedOutput,
           quoteError: _quoteSwapData.quoteError,
@@ -208,12 +224,12 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
       const finalOutputAmount = wrappedInputUsdValue / tokenOutputPrice;
       // console.log(`FINAL OUTPUT ${finalOutputAmount} ${outputToken.symbol}`);
 
-      console.log(finalOutputAmount);
+      // console.log(finalOutputAmount);
 
       setQuoteSwapData(prevData => ({
         ...prevData,
-        [_index]: {
-          ...prevData[_index],
+        [_token.address]: {
+          ...prevData[_token.address],
           displayOutput: finalOutputAmount,
           estimatedOutput: _quoteSwapData.estimatedOutput,
           quoteError: _quoteSwapData.quoteError,
@@ -229,13 +245,43 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
 
   const getQuotes: () => void = () => {
     if (previewModalRef.current?.open) {
-      setQuoteTime(90);
+      setQuoteTime(120);
       setTotalOutputAmount(0);
       setNetworkFee(0);
-      inputTokens.map((token, index) => {
-        getQuote(token, index);
+      inputTokens.map(token => {
+        getQuote(token);
       });
     }
+  };
+
+  useEffect(() => {
+    if (inputTokens.length > 0) {
+      let allRoutesReady = true;
+
+      inputTokens.forEach(token => {
+        if (quoteSwapData[token.address]) {
+          if (!quoteSwapData[token.address].swapInput.path) {
+            allRoutesReady = false;
+            return;
+          }
+        }
+      });
+
+      if (allRoutesReady) setLoading(false);
+    }
+  }, [inputTokens, quoteSwapData]);
+
+  //============================================================
+  //============================================================
+
+  const handlePreviewSwap = async () => {
+    if (account.chainId !== inputNetwork?.id) {
+      if (!inputNetwork) return;
+      await switchChain({ chainId: inputNetwork?.id });
+    }
+
+    togglePreviewModal();
+    getQuotes();
   };
 
   const readyForPreview = !!inputNetwork && !!outputNetwork && inputTokens.length > 0;
@@ -246,17 +292,12 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const estimatedReturn = totalOutputAmount - commission;
 
   useEffect(() => {
-    setApprovalCount(0);
-    setCallApprovalRefresh(!callApprovalRefresh);
-  }, [inputTokens]);
-
-  useEffect(() => {
     const interval = setInterval(() => {
       if (readyForPreview) {
         setQuoteTime(quoteTime => {
           if (quoteTime === 1) {
             getQuotes();
-            return 90;
+            return 120;
           }
           return quoteTime - 1;
         });
@@ -264,11 +305,6 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
     }, 1000);
     return () => clearInterval(interval);
   });
-
-  useEffect(() => {
-    const count = Object.values(tokensApproveStates).filter((state: string) => state === "success").length;
-    setApprovalCount(count);
-  }, [tokensApproveStates]);
 
   return (
     <div>
@@ -298,16 +334,14 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
           <div className="text-[#9D9D9D]">
             <span>{inputNetwork?.name}</span>
             <ul className="flex flex-col gap-3">
-              {inputTokens.map((token, index) => (
+              {inputTokens.map(token => (
                 <li key={token.symbol} className="flex justify-between">
                   <InputToken
-                    _index={index}
                     _token={token}
-                    _approveIndexState={tokensApproveStates[index]}
+                    _approveIndexState={tokensApproveStates[token.address]}
                     _setTokenHasApproval={callSetTokenHasApproval}
                     _setTokensMinAmountOut={callSetTokensMinAmountOut}
-                    _callRefresh={callApprovalRefresh}
-                    _quoteSwapData={quoteSwapData[index]}
+                    _quoteSwapData={quoteSwapData[token.address]}
                   />
                 </li>
               ))}
@@ -328,7 +362,9 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
           )}
           <div className="text-[#9D9D9D]">
             <div className="w-full flex justify-center">
-              <p>new quote in: 0:{String(quoteTime).padStart(2, "0")}</p>
+              <p>
+                new quote in: {Math.floor(quoteTime / 60)}:{String(quoteTime % 60).padStart(2, "0")}
+              </p>
             </div>
 
             <div className="flex justify-between">
@@ -343,7 +379,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 </div>
               </div>
 
-              <span className="text-[#FFFFFF]">{Number(networkFee.toFixed(3)) * 3} USD</span>
+              <span className="text-[#FFFFFF]">{(networkFee * 3).toFixed(3)} USD</span>
             </div>
             <div className="flex justify-between">
               <div className="flex gap-2 items-center relative">
@@ -383,6 +419,8 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
               _handleApproveTokens={handleApproveTokens}
               _quoteSwapData={quoteSwapData}
               estimatedReturn={estimatedReturn}
+              _buttonText={readyToSwap ? "Swap dust" : "Approve dust"}
+              _loading={loading}
             />
             <button
               style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}

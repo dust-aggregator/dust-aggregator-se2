@@ -7,27 +7,23 @@ import { useGlobalState } from "~~/services/store/store";
 import { QuoteSwapData } from "~~/types/quote-swap-data";
 
 interface Props {
-  _index: number;
   _token: SelectedToken;
   _approveIndexState: string;
-  _setTokenHasApproval: (index: number) => void;
-  _setTokensMinAmountOut: (index: number, amount: number) => void;
-  _callRefresh: boolean;
+  _setTokenHasApproval: (tokenAddress: string, state: string) => void;
+  _setTokensMinAmountOut: (tokenAddress: string, amount: number) => void;
   _quoteSwapData: QuoteSwapData;
 }
 
 const InputToken = ({
-  _index,
   _token,
   _approveIndexState,
   _setTokenHasApproval,
   _setTokensMinAmountOut,
-  _callRefresh,
   _quoteSwapData,
 }: Props) => {
   const _fixedAmount = Number(_token.amount).toFixed(18);
   const parsedAmount = parseUnits(_fixedAmount, _token.decimals);
-  const { hasApproval, refresh } = useTokenHasPermit2Approval(_token.address, parsedAmount);
+  const { hasApproval } = useTokenHasPermit2Approval(_token.address, parsedAmount);
   const [slippage, setSlippage] = useState(0);
   const [tokenQuote, setTokenQuote] = useState("");
 
@@ -39,24 +35,20 @@ const InputToken = ({
       setSlippage(slippageValue);
       const minAmountWithSlippage =
         _quoteSwapData?.estimatedOutput - (_quoteSwapData?.estimatedOutput * slippageValue) / 100;
-      _setTokensMinAmountOut(_index, minAmountWithSlippage);
+      _setTokensMinAmountOut(_token.address, minAmountWithSlippage);
     }
   };
 
   useEffect(() => {
-    // forcing refresh cause sometimes it shows incrrctl
-    refresh();
-  }, [_callRefresh]);
-
-  useEffect(() => {
-    if (hasApproval) _setTokenHasApproval(_index);
+    const state = hasApproval ? "success" : "";
+    _setTokenHasApproval(_token.address, state);
   }, [hasApproval]);
 
   useEffect(() => {
     if (_quoteSwapData?.displayOutput) {
       const value = Number(_quoteSwapData?.displayOutput).toFixed(7);
       setTokenQuote(value);
-      console.log(value);
+      // console.log(value);
     }
   }, [_quoteSwapData?.displayOutput]);
 
@@ -121,13 +113,11 @@ const InputToken = ({
             />
             <span className="absolute right-2 text-sm text-gray-500">%</span>
           </div>
-
         </div>
       </div>
 
       <div className="flex justify-center">
         <div className="flex items-center gap-2">
-
           {_quoteSwapData?.quoteError ? (
             <span className="text-[#ff3333] text-xs font-bold">Quote not found for requested pair</span>
           ) : (

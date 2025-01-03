@@ -46,6 +46,23 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
     return error.message.split(" (")[0]; // Extract the main error message
   };
 
+  // can't handle the freaking error correctly. i hate wagmi's error catching
+  const getErrorMessage = () => {
+    let errorMessage = "An unexpected error occurred.";
+
+    if (error && typeof error.message === "string") {
+      const firstLine = error.message.split("\n")[0];
+
+      if (firstLine.includes("User rejected the request")) {
+        errorMessage = "Transaction rejected by the user.";
+      } else {
+        errorMessage = firstLine;
+      }
+    }
+
+    return errorMessage;
+  };
+
   const getErrorDetails = (error: any) => {
     if (!error) return null;
     const details = error.message.split(" (")[1]?.split(")")[0];
@@ -101,12 +118,13 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
           {isError && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4 w-3/4 text-center">
               <strong className="font-bold">Error: </strong>
-              <span className="block sm:inline">{parseErrorMessage(error)}</span>
-              {getErrorDetails(error) && (
+              {/* <span className="block sm:inline">{parseErrorMessage(error)}</span> */}
+              <span className="block sm:inline">{getErrorMessage()}</span>
+              {/* {getErrorDetails(error) && (
                 <div className="text-xs mt-2">
                   <span>{getErrorDetails(error)}</span>
                 </div>
-              )}
+              )} */}
             </div>
           )}
           {isError && (
