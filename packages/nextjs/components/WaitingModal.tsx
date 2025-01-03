@@ -116,7 +116,7 @@ const WaitingModal = ({ open, swapHash, estimatedReturn }: Props) => {
               </a>
             </div>
 
-            {isZetaChain && (
+            {!isZetaChain && (
               <>
                 <Image src={arrowSVG} alt="arrow" className="ml-1" />
 
@@ -145,7 +145,9 @@ const WaitingModal = ({ open, swapHash, estimatedReturn }: Props) => {
                     {estimatedReturn.toFixed(5)} {outputToken?.name}
                   </span>
                 </div>
-                <progress className="progress progress-success w-56" value={percentageComplete} max="100"></progress>
+                {isZetaChain && (
+                  <progress className="progress progress-success w-56" value={percentageComplete} max="100"></progress>
+                )}
               </div>
               <a href="">
                 <Image
