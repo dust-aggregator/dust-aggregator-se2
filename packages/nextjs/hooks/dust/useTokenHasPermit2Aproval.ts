@@ -5,7 +5,6 @@ import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
 
 export const useTokenHasPermit2Approval = (tokenAddress: string, amount: bigint) => {
   const [hasApproval, setHasApproval] = useState<boolean>(false);
-  const [needsRefresh, setNeedsRefresh] = useState<boolean>(false);
   const { address } = useAccount();
 
   const enabled = !!address && !!tokenAddress && !!amount;
@@ -26,12 +25,11 @@ export const useTokenHasPermit2Approval = (tokenAddress: string, amount: bigint)
     if (approvedAmount !== undefined && !isError) {
       if (approvedAmount >= BigInt(amount)) {
         setHasApproval(true);
+      } else {
+        setHasApproval(false);
       }
-      setNeedsRefresh(false);
     }
-  }, [approvedAmount, isError, amount, needsRefresh]);
+  }, [approvedAmount, isError, amount]);
 
-  const refresh = () => setNeedsRefresh(true);
-
-  return { hasApproval, isLoading, isError, refresh };
+  return { hasApproval, isLoading, isError };
 };

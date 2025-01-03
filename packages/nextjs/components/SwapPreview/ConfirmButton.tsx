@@ -6,7 +6,7 @@ import { ethers } from "ethers";
 import { encodeFunctionData, parseUnits, zeroAddress } from "viem";
 import { zetachain } from "viem/chains";
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { estimateFeesPerGas, estimateGas, getAccount, getBlockNumber } from "wagmi/actions";
+import { getAccount, getBlockNumber } from "wagmi/actions";
 import { useDustEventHistory } from "~~/hooks/dust";
 import dustAbi from "~~/lib/abis/EvmDustTokens.json";
 import { GA_EVENTS } from "~~/lib/constants";
@@ -20,11 +20,20 @@ import { QuoteSwapData } from "~~/types/quote-swap-data";
 interface Props {
   togglePreviewModal: () => void;
   _handleApproveTokens: () => void;
-  _quoteSwapData: { [key: number]: QuoteSwapData };
+  _quoteSwapData: { [key: string]: QuoteSwapData };
   estimatedReturn: number;
+  _buttonText: string;
+  _loading: boolean;
 }
 
-const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapData, estimatedReturn }: Props) => {
+const ConfirmButton = ({
+  togglePreviewModal,
+  _handleApproveTokens,
+  _quoteSwapData,
+  estimatedReturn,
+  _buttonText,
+  _loading,
+}: Props) => {
   const [resultModalOpen, setResultModalOpen] = useState(false);
   const [waitingModalOpen, setWaitingModalOpen] = useState(false);
   const [sameChainSwapPending, setSameChainSwapPending] = useState(false);
@@ -134,14 +143,14 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
 
       console.log(inputTokens);
 
-      const tokenSwaps: TokenSwap[] = inputTokens.map(({ address, amount, balance, decimals }, index) => {
+      const tokenSwaps: TokenSwap[] = inputTokens.map(({ address, amount, balance, decimals }) => {
         const amountInWei = parseUnits(amount, decimals);
         const balanceInWei = parseUnits(balance.toString(), decimals);
         return {
-          isV3: _quoteSwapData[index].swapInput.isV3,
-          path: ethers.utils.hexlify(_quoteSwapData[index].swapInput.path),
+          isV3: _quoteSwapData[address].swapInput.isV3,
+          path: ethers.utils.hexlify(_quoteSwapData[address].swapInput.path),
           amount: amountInWei > balanceInWei ? balanceInWei : amountInWei,
-          minAmountOut: parseUnits(_quoteSwapData[index].swapInput.minAmountOut.toString(), outputToken.decimals),
+          minAmountOut: parseUnits(_quoteSwapData[address].swapInput.minAmountOut.toString(), outputToken.decimals),
           token: address,
         };
       });
@@ -161,39 +170,11 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         permit.signature,
       ];
 
-      // IT GOES TO VALHALLA
-      // const result = await estimateFeesPerGas(wagmiConfig, {
-      //   chainId: inputNetwork?.id as 1 | 8453 | 137 | 7000 | 56 | undefined,
-      //   formatUnits: "wei",
-      // });
-
-      // console.log(result);
-
-      // THROWS ERROR
-      // const estimatedGas = await estimateGas(wagmiConfig, {
-      //   to: inputNetwork?.contractAddress,
-      //   data: encodeFunctionData({
-      //     abi: dustAbi,
-      //     functionName,
-      //     args,
-      //   }),
-      // });
-
-      // console.log(estimatedGas);
-
       writeContract({
         address: inputNetwork?.contractAddress as string,
         abi: dustAbi,
         functionName,
         args,
-
-        // gasPrice: BigInt(39000000000),
-
-        // Throwing veeeery high D:
-        // maxFeePerGas: result.maxFeePerGas,
-        // maxPriorityFeePerGas: result.maxPriorityFeePerGas,
-        // maxFeePerGas: BigInt(40000000000),
-        // maxPriorityFeePerGas: BigInt(40000000000),
       });
       if (isSameNetwork) setSameChainSwapPending(true);
     } catch (error) {
@@ -207,7 +188,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
 
   useEffect(() => {
     if (isError) {
-      console.error("Error performing swap and bridge transaction:", error.message);
+      console.error(error);
       togglePreviewModal();
       setResultModalOpen(true);
     }
@@ -232,7 +213,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
     setOutputToken(null);
   };
 
-  const showSpinner = swapTxPending || (!!swapHash && sameChainSwapPending);
+  const showSpinner = swapTxPending || (!!swapHash && sameChainSwapPending) || _loading;
 
   return (
     <>
@@ -242,7 +223,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         className="flex-1 px-6 hover:brightness-50 bg-no-repeat bg-center bg-cover min-h-0 h-10 btn rounded-lg bg-transparent hover:bg-transparent border-0"
         disabled={showSpinner}
       >
-        {showSpinner ? <span className="loading loading-spinner loading-md"></span> : "Approve"}
+        {showSpinner ? <span className="loading loading-spinner loading-md"></span> : _buttonText}
       </button>
       <SwapResultModal
         // togglePreviewModal={togglePreviewModal}
@@ -250,7 +231,7 @@ const ConfirmButton = ({ togglePreviewModal, _handleApproveTokens, _quoteSwapDat
         retryOperation={retryOperation}
         open={resultModalOpen}
         isError={isError}
-        error={error}
+        error={error?.message}
         amountReceived={amountReceived}
       />
       {waitingModalOpen && (
