@@ -80,7 +80,7 @@ const OutputBox = () => {
             selectedOption={formattedOuputNetwork}
           />
           <div className="flex justify-center">
-            <p className="text-[#9D9D9D] text-xs my-1">And</p>
+            <p className="text-[#9D9D9D] text-xs my-1">and</p>
           </div>
           <Select
             disabled={isNonEthereumNetwork || !outputNetwork}
@@ -122,6 +122,7 @@ const OutputBox = () => {
                   });
                   setReceiverWalletMode("recipient");
                 }}
+                disabled
               >
                 <span
                   className={`${receiverWalletMode === "recipient" && "drop-shadow-[0_0_3px_rgba(0,_187,_255,_1)]"}`}

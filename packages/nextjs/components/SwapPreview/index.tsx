@@ -430,6 +430,14 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
               Cancel
             </button>
           </div>
+          <div className="mt-3 text-xs font-montserrat flex justify-center">
+            <span className="text-[#9D9D9D]">
+              By approving you accept the{" "}
+              <a href="#" className="text-[#FBFBFB] font-bold underline">
+                terms and conditions
+              </a>
+            </span>
+          </div>
         </div>
       </dialog>
     </div>

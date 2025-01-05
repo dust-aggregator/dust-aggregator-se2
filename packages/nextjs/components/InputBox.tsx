@@ -325,7 +325,12 @@ const InputBox = () => {
             </div>
             <p className="font-bold m-0">Input</p>
 
-            <TokenSelector _options={updatedOptions2} _updateSpecificOption={updateSpecificOption} _comps={comps} />
+            <TokenSelector
+              _options={updatedOptions2}
+              _updateSpecificOption={updateSpecificOption}
+              _comps={comps}
+              _dustThresholdValue={dustThresholdValue}
+            />
 
             <div className="p-[0.4px] bg-[#FFFFFF] rounded my-4"></div>
             <div className="overflow-scroll h-40 mb-4">

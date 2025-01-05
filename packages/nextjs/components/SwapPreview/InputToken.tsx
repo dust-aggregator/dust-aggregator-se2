@@ -18,7 +18,7 @@ const InputToken = ({
   _token,
   _approveIndexState,
   _setTokenHasApproval,
-  _setTokensMinAmountOut,
+  // _setTokensMinAmountOut,
   _quoteSwapData,
 }: Props) => {
   const _fixedAmount = Number(_token.amount).toFixed(18);
@@ -33,9 +33,10 @@ const InputToken = ({
     if (_quoteSwapData?.estimatedOutput) {
       const slippageValue = Number(e);
       setSlippage(slippageValue);
-      const minAmountWithSlippage =
-        _quoteSwapData?.estimatedOutput - (_quoteSwapData?.estimatedOutput * slippageValue) / 100;
-      _setTokensMinAmountOut(_token.address, minAmountWithSlippage);
+      // For now we keep a fixed slippage of 5%
+      // const minAmountWithSlippage =
+      //   _quoteSwapData?.estimatedOutput - (_quoteSwapData?.estimatedOutput * slippageValue) / 100;
+      // _setTokensMinAmountOut(_token.address, minAmountWithSlippage);
     }
   };
 
