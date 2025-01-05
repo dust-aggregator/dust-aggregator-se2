@@ -23,9 +23,10 @@ interface Props {
   _options?: Option[];
   _updateSpecificOption: any;
   _comps: JSX.Element[];
+  _dustThresholdValue: number;
 }
 
-const TokenSelector = ({ _options, _updateSpecificOption, _comps }: Props) => {
+const TokenSelector = ({ _options, _updateSpecificOption, _comps, _dustThresholdValue }: Props) => {
   const [tokensSelected, setTokensSelected] = useState(false);
   const [hover, setHover] = useState(false);
 
@@ -53,8 +54,7 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps }: Props) => {
       <button
         // disabled={!readyForPreview}
         style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-        className={`text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4 ${
-          tokensSelected ? "bg-green-500" : ""
+        className={`text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4 ${tokensSelected ? "bg-green-500" : ""
         }`}
         onClick={togglePreviewModal}
         onMouseEnter={() => setHover(true)}
@@ -69,12 +69,17 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps }: Props) => {
             <div className="flex flex-col gap-2">
               <span className="font-bold text-lg">Token Selection</span>
 
+              <span className="font-montserrat opacity-50 text-xs">
+                Select the tokens you wanna swap, from the list of elegible tokens according to the selected threshold
+              </span>
+
               <div onClick={() => sendGAEvent({ name: GA_EVENTS.selectInputTokensMenu })} className="flex gap-2">
                 <CategorySelectInputBox
                   title="Select tokens"
                   options={_options}
                   // onSelect={updateSpecificOption}
                   onChange={_updateSpecificOption}
+                  _dustThresholdValue={_dustThresholdValue}
                 />
               </div>
               <div className="overflow-x-auto overflow-y-scroll scrollbar-hide h-[300px]">{_comps}</div>

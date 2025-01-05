@@ -94,7 +94,7 @@ export const getExpressQuote = async (
       isV3: firstRoute.protocol === "V3",
       path: encodedPath,
       amount: ethers.utils.parseUnits(Number(_amountIn).toFixed(_tokenIn.decimals), _tokenIn.decimals),
-      minAmountOut: Number(data.readableAmount) * 0.98,
+      minAmountOut: Number(data.readableAmount) * 0.95,
     };
   } else {
     quoteSwapData.quoteError = true;
