@@ -114,8 +114,8 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   //============================================================
 
   const getQuote = async (_token: SelectedToken) => {
-    if (!inputNetwork || inputTokens.length <= 0 || !outputToken?.address || !outputNetwork || !account.address) {
-      alert("Missing params, make sure to select input tokens, otput token, output network");
+    if (!inputNetwork || inputTokens.length <= 0 || !outputToken || !outputNetwork || !account.address) {
+      alert("Missing params, make sure to select input tokens, output token, output network");
       return;
     }
 

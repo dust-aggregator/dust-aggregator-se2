@@ -7,7 +7,8 @@ import { encodeFunctionData, parseUnits, zeroAddress } from "viem";
 import { zetachain } from "viem/chains";
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { getAccount, getBlockNumber } from "wagmi/actions";
-import { useDustEventHistory } from "~~/hooks/dust";
+import { useWaitForEvmOutput } from "~~/hooks/dust";
+import { useWaitForBitcoinOutput } from "~~/hooks/dust/useWaitForBitcoinOutput";
 import dustAbi from "~~/lib/abis/EvmDustTokens.json";
 import { GA_EVENTS } from "~~/lib/constants";
 import { TokenSwap } from "~~/lib/types";
@@ -38,7 +39,7 @@ const ConfirmButton = ({
   const [waitingModalOpen, setWaitingModalOpen] = useState(false);
   const [sameChainSwapPending, setSameChainSwapPending] = useState(false);
   const [amountReceived, setAmountReceived] = useState<bigint>();
-  const [blockNumBeforeSwap, setBlockNumBeforeSwap] = useState<bigint>(0n);
+
   const { address } = useAccount();
   const {
     outputNetwork,
@@ -53,35 +54,17 @@ const ConfirmButton = ({
   } = useGlobalState();
   const isSameNetwork = outputNetwork?.id === inputNetwork?.id;
   const isBitcoin = outputNetwork?.id === "bitcoin";
-  const isZetaChain = outputNetwork?.id === zetachain.id;
-  const isNonEthereumNetwork = isBitcoin || isZetaChain;
+
+  const handleSuccess = (amountReceived: bigint) => {
+    setSameChainSwapPending(false);
+    setWaitingModalOpen(false);
+    setAmountReceived(amountReceived);
+    setResultModalOpen(true);
+  };
+  useWaitForEvmOutput(handleSuccess);
+  useWaitForBitcoinOutput(handleSuccess);
 
   const { writeContract, data: swapHash, isError, error, isPending: swapTxPending } = useWriteContract();
-
-  useEffect(() => {
-    if (!outputNetwork || isBitcoin) return;
-    getBlockNumber(wagmiConfig, { chainId: outputNetwork?.id as 1 | 8453 | 137 | 7000 | 56 | undefined }).then(
-      blockNum => setBlockNumBeforeSwap(blockNum),
-    );
-  }, [outputNetwork]);
-
-  const successEventName = isSameNetwork ? "Swapped" : "Withdrawn";
-
-  const { data: successEvents } = useDustEventHistory({
-    eventName: successEventName,
-    fromBlock: BigInt(blockNumBeforeSwap),
-    enabled: !!blockNumBeforeSwap,
-  });
-
-  useEffect(() => {
-    const event = successEvents?.find((event: any) => event.args["0"] === (recipient || address));
-    if (event) {
-      setSameChainSwapPending(false);
-      setWaitingModalOpen(false);
-      setAmountReceived(event.args["2"]);
-      setResultModalOpen(true);
-    }
-  }, [successEvents, recipient, address]);
 
   const { chainId } = getAccount(wagmiConfig);
 
@@ -90,6 +73,9 @@ const ConfirmButton = ({
     sendGAEvent({
       name: GA_EVENTS.approveSwap,
     });
+
+    const isZetaChain = outputNetwork?.id === zetachain.id;
+    const isNonEthereumNetwork = isBitcoin || isZetaChain;
 
     if (!outputNetwork) return;
     if (!isNonEthereumNetwork && (!outputToken || !inputTokens.length)) return;
@@ -120,13 +106,12 @@ const ConfirmButton = ({
       return { deadline, nonce, signature };
     };
 
-    // if (!outputToken && !isNonEthereumNetwork) {
-    if (!outputToken) {
+    if (!outputToken && !isNonEthereumNetwork) {
       throw new Error("No output token");
     }
 
     const gasLimit = isNonEthereumNetwork ? BigInt(130000) : getGasLimitByOutputToken(outputToken?.address);
-    const recipientAddress = (recipient || address) as `0x${string}`;
+    const recipientAddress = isNonEthereumNetwork ? address : ((recipient || address) as `0x${string}`);
     const targetChainCounterparty = isNonEthereumNetwork ? recipientAddress : outputNetwork.contractAddress;
 
     try {
@@ -138,6 +123,7 @@ const ConfirmButton = ({
         outputToken?.address as `0x${string}`,
         BigInt(1),
         isNonEthereumNetwork,
+        isZetaChain,
       );
 
       console.log(inputTokens);

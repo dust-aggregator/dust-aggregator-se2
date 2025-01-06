@@ -64,15 +64,18 @@ const encodeZetachainPayload = (
   outputToken: `0x${string}`,
   minAmount: bigint,
   isNonEthereumNetwork: boolean,
+  isZetaChain: boolean,
 ) => {
   const destinationPayload = isNonEthereumNetwork ? "0x" : encodeDestinationPayload(recipient, outputToken, minAmount);
+
+  const counterparty = isZetaChain ? concatHex([pad(targetChainCounterparty, { size: 20 })]) : targetChainCounterparty;
 
   const params = {
     targetChainToken,
     gasLimit,
     minAmount,
     originalSender: recipient,
-    targetChainCounterparty: concatHex([pad(targetChainCounterparty, { size: 20 })]),
+    targetChainCounterparty: counterparty,
     destinationPayload,
   };
 

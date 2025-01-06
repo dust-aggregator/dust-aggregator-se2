@@ -87,7 +87,8 @@ export const useDustEventHistory = <
   });
   const [isFirstRender, setIsFirstRender] = useState(true);
 
-  const { data: blockNumber } = useBlockNumber({ watch: watch, chainId: outputNetwork?.id });
+  const isBitcoin = outputNetwork?.id === "bitcoin";
+  const { data: blockNumber } = useBlockNumber({ watch: watch, chainId: isBitcoin ? 1 : outputNetwork?.id });
 
   const event = (dustAbi as Abi).find(part => part.type === "event" && part.name === eventName) as AbiEvent;
 

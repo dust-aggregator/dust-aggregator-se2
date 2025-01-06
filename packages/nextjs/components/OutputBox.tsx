@@ -10,6 +10,7 @@ import { useAccount } from "wagmi";
 import { useTokenWhitelist } from "~~/hooks/dust";
 import {
   BitcoinNetwork,
+  BitcoinToken,
   GA_EVENTS,
   SUPPORTED_INPUT_NETWORKS,
   WrappedZetaToken,
@@ -27,10 +28,12 @@ const networkOptions = [
 ];
 
 const OutputBox = () => {
-  const { outputNetwork, setOutputNetwork, outputToken, setOutputToken, recipient, setRecipient } = useGlobalState();
+  const { inputNetwork, outputNetwork, setOutputNetwork, outputToken, setOutputToken, recipient, setRecipient } =
+    useGlobalState();
   const [receiverWalletMode, setReceiverWalletMode] = useState<string>("");
   const [understoodRisk, setUnderstoodRisk] = useState(false);
 
+  const isSameNetwork = outputNetwork?.id === inputNetwork?.id;
   const isBitcoin = outputNetwork?.id === "bitcoin";
   const isZetaChain = outputNetwork?.id === zetachain.id;
   const isNonEthereumNetwork = isBitcoin || isZetaChain;
@@ -45,7 +48,7 @@ const OutputBox = () => {
     });
     if (network.value === "bitcoin") {
       setOutputNetwork(BitcoinNetwork);
-      setOutputToken(null);
+      setOutputToken(BitcoinToken);
       setReceiverWalletMode("");
     } else if (network.value === zetachain.id) {
       setOutputNetwork(ZetaChainNetwork);
@@ -122,7 +125,7 @@ const OutputBox = () => {
                   });
                   setReceiverWalletMode("recipient");
                 }}
-                disabled
+                disabled={isSameNetwork}
               >
                 <span
                   className={`${receiverWalletMode === "recipient" && "drop-shadow-[0_0_3px_rgba(0,_187,_255,_1)]"}`}

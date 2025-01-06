@@ -119,3 +119,10 @@ export const WrappedZetaToken = {
   symbol: "ZETA",
   address: "0x5F0b1a82749cb4E2278EC87F8BF6B618dC71a8bf",
 };
+
+export const BitcoinToken = {
+  decimals: 8,
+  logo: "zetachain-icon.svg",
+  name: "Bitcoin",
+  symbol: "BTC",
+};
