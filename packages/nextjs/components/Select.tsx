@@ -29,7 +29,7 @@ const Select = ({ disabled, title, options, selectedOption, onChange }: Props) =
     onChange(option);
   };
   return (
-    <div className="dropdown w-full text-[#E4E4E4]">
+    <div className={`dropdown w-full text-[#E4E4E4] ${disabled && "pointer-events-none"}`}>
       <div
         tabIndex={disabled ? -1 : 0}
         role="button"

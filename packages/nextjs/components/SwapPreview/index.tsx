@@ -433,7 +433,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
           <div className="mt-3 text-xs font-montserrat flex justify-center">
             <span className="text-[#9D9D9D]">
               By approving you accept the{" "}
-              <a href="#" className="text-[#FBFBFB] font-bold underline">
+              <a href="/terms" target="_blank" className="text-[#FBFBFB] font-bold underline">
                 terms and conditions
               </a>
             </span>

@@ -52,11 +52,14 @@ const ConfirmButton = ({
     setOutputToken,
   } = useGlobalState();
   const isSameNetwork = outputNetwork?.id === inputNetwork?.id;
+  const isBitcoin = outputNetwork?.id === "bitcoin";
+  const isZetaChain = outputNetwork?.id === zetachain.id;
+  const isNonEthereumNetwork = isBitcoin || isZetaChain;
 
   const { writeContract, data: swapHash, isError, error, isPending: swapTxPending } = useWriteContract();
 
   useEffect(() => {
-    if (!outputNetwork) return;
+    if (!outputNetwork || isBitcoin) return;
     getBlockNumber(wagmiConfig, { chainId: outputNetwork?.id as 1 | 8453 | 137 | 7000 | 56 | undefined }).then(
       blockNum => setBlockNumBeforeSwap(blockNum),
     );
@@ -87,10 +90,6 @@ const ConfirmButton = ({
     sendGAEvent({
       name: GA_EVENTS.approveSwap,
     });
-
-    const isBitcoin = outputNetwork?.id === "bitcoin";
-    const isZetaChain = outputNetwork?.id === zetachain.id;
-    const isNonEthereumNetwork = isBitcoin || isZetaChain;
 
     if (!outputNetwork) return;
     if (!isNonEthereumNetwork && (!outputToken || !inputTokens.length)) return;
