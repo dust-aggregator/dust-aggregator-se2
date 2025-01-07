@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useAccount } from "wagmi";
 import FAQ from "~~/components/FAQ";
 import InputBox from "~~/components/InputBox";
+import { MobileModal } from "~~/components/MobileModal";
 import OutputBox from "~~/components/OutputBox";
 import gearHubSVG from "~~/public/assets/gear_hub.svg";
 
@@ -41,6 +42,7 @@ export default function Component() {
       <div id="faq">
         <FAQ />
       </div>
+      <MobileModal />
     </div>
   );
 }
