@@ -77,7 +77,7 @@ export const useDustEventHistory = <
   blockData,
   transactionData,
   receiptData,
-  watch = true,
+  watch,
   enabled = true,
 }: UseScaffoldEventHistoryConfig<TContractName, TEventName, TBlockData, TTransactionData, TReceiptData>) => {
   const contractName = "EvmDustTokens";

@@ -11,6 +11,8 @@ export const useWaitForEvmOutput = (onSuccess: (amountReceived: bigint) => void)
   const [blockNumBeforeSwap, setBlockNumBeforeSwap] = useState<bigint>(0n);
 
   const isBitcoin = outputNetwork?.id === "bitcoin";
+  const isSameNetwork = outputNetwork?.id === inputNetwork?.id;
+  const successEventName = isSameNetwork ? "Swapped" : "Withdrawn";
 
   useEffect(() => {
     if (!outputNetwork || isBitcoin) return;
@@ -19,13 +21,11 @@ export const useWaitForEvmOutput = (onSuccess: (amountReceived: bigint) => void)
     );
   }, [outputNetwork, isBitcoin]);
 
-  const isSameNetwork = outputNetwork?.id === inputNetwork?.id;
-  const successEventName = isSameNetwork ? "Swapped" : "Withdrawn";
-
   const { data: successEvents } = useDustEventHistory({
     eventName: successEventName,
     fromBlock: BigInt(blockNumBeforeSwap),
     enabled: !!blockNumBeforeSwap,
+    watch: true,
   });
 
   useEffect(() => {

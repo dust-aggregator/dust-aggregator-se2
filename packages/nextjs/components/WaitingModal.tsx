@@ -44,10 +44,6 @@ const WaitingModal = ({ open, swapHash, estimatedReturn }: Props) => {
     if (!swapReceipt) return;
     setInputNetworkSuccess(true);
   }, [swapReceipt]);
-  // useWaitForOutput(() => {
-  //   setZetaNetworkSuccess(true);
-  //   setOutputNetworkSuccess(true);
-  // });
 
   useEffect(() => {
     if (inputNetworkSuccess && zetaNetworkSuccess && outputNetworkSuccess) {
