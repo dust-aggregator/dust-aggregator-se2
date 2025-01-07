@@ -2,6 +2,7 @@ import { RefObject, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import ConfirmButton from "./ConfirmButton";
 import InputToken from "./InputToken";
+import QuoteTimer from "./QuoteTimer";
 import { Token } from "@uniswap/sdk-core";
 import { zeroAddress } from "viem";
 import { useAccount, useSwitchChain } from "wagmi";
@@ -30,7 +31,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
   const { outputNetwork, outputToken, inputTokens, inputNetwork } = useGlobalState();
   const previewModalRef = useRef<HTMLDialogElement>(null);
   const callApprovePermit2 = useApprovePermit2();
-  const [quoteTime, setQuoteTime] = useState(120);
+
   const [approvalCount, setApprovalCount] = useState(0);
   const [tokensApproveStates, setTokensApproveStates] = useState<{ [key: string]: string }>({});
   const [totalOutputAmount, setTotalOutputAmount] = useState(0);
@@ -245,7 +246,6 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
 
   const getQuotes: () => void = () => {
     if (previewModalRef.current?.open) {
-      setQuoteTime(120);
       setTotalOutputAmount(0);
       setNetworkFee(0);
       inputTokens.map(token => {
@@ -290,21 +290,6 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
 
   const commission = (totalOutputAmount * 2) / 100;
   const estimatedReturn = totalOutputAmount - commission;
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (readyForPreview) {
-        setQuoteTime(quoteTime => {
-          if (quoteTime === 1) {
-            getQuotes();
-            return 120;
-          }
-          return quoteTime - 1;
-        });
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  });
 
   return (
     <div>
@@ -362,9 +347,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
           )}
           <div className="text-[#9D9D9D]">
             <div className="w-full flex justify-center">
-              <p>
-                new quote in: {Math.floor(quoteTime / 60)}:{String(quoteTime % 60).padStart(2, "0")}
-              </p>
+              <QuoteTimer getQuotes={getQuotes} />
             </div>
 
             <div className="flex justify-between">
