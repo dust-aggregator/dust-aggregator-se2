@@ -275,8 +275,9 @@ const InputBox = () => {
   useEffect(() => {
     let inputNetworkName = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
     if (inputNetworkName === "Matic") inputNetworkName = "Polygon";
+    if (inputNetworkName === "Binance") inputNetworkName = "BNB Smart Chain";
     const inputNetwork = SUPPORTED_INPUT_NETWORKS.find(network => network.name === inputNetworkName);
-
+    console.log(inputNetwork);
     setInputNetwork(inputNetwork || null);
     setInputNetworkLocal(inputNetworkName);
   }, [networkOptions2, networkOptions2.length]);

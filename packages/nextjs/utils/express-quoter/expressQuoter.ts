@@ -2,8 +2,8 @@ import { Token } from "@uniswap/sdk-core";
 import { ethers } from "ethers";
 import { QuoteSwapData } from "~~/types/quote-swap-data";
 
-function encodePath(tokenPath: any, pools: any, protocol: string) {
-  if (protocol === "V3") {
+function encodePath(tokenPath: any, pools: any, protocol: string | number) {
+  if (protocol === "V3" || protocol === 1) {
     const types = [];
     const values = [];
 
@@ -63,7 +63,8 @@ export const getExpressQuote = async (
     },
   };
 
-  const quoterUrl = "https://express-quoter-production.up.railway.app"; // http://localhost:8000
+  const quoterUrl = "http://localhost:8000";
+  // const quoterUrl = "https://express-quoter-production.up.railway.app"; // http://localhost:8000
   const quoteRoute = _chainId === 56 ? "/quote-pancakeswap" : "/quote";
 
   const res = await fetch(`${quoterUrl}${quoteRoute}`, {
@@ -81,17 +82,27 @@ export const getExpressQuote = async (
 
     quoteSwapData.estimatedOutput = Number(data.readableAmount) * 0.99;
     quoteSwapData.displayOutput = Number(data.readableAmount) * 0.99;
+
     const gasValue = ethers.utils.formatUnits(
-      data.route.estimatedGasUsedUSD.numerator[0].toString(),
-      data.route.estimatedGasUsedUSD.currency.decimals,
+      _chainId === 56
+        ? data.tradeResponse.gasEstimateInUSD.numerator
+        : data.route.estimatedGasUsedUSD.numerator[0].toString(),
+      _chainId === 56
+        ? data.tradeResponse.gasEstimateInUSD.currency.decimals
+        : data.route.estimatedGasUsedUSD.currency.decimals,
     );
     quoteSwapData.estimatedGasUsedUSD = gasValue;
 
-    const firstRoute = data.route.route[0];
-    const encodedPath = encodePath(firstRoute.tokenPath, firstRoute.route.pools, firstRoute.protocol);
+    const firstRoute = _chainId === 56 ? data.tradeResponse.routes[0] : data.route.route[0];
+    const _protocol = _chainId === 56 ? firstRoute.pools[0].type : firstRoute.protocol;
+    const encodedPath = encodePath(
+      _chainId === 56 ? firstRoute.path : firstRoute.tokenPath,
+      _chainId === 56 ? firstRoute.pools : firstRoute.route.pools,
+      _protocol,
+    );
 
     quoteSwapData.swapInput = {
-      isV3: firstRoute.protocol === "V3",
+      isV3: _protocol === "V3" || _protocol === 1,
       path: encodedPath,
       amount: ethers.utils.parseUnits(Number(_amountIn).toFixed(_tokenIn.decimals), _tokenIn.decimals),
       minAmountOut: Number(data.readableAmount) * 0.95,
