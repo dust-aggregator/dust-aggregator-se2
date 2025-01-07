@@ -98,8 +98,8 @@ contract EvmDustTokens is Ownable2Step {
         address[] memory _tokenList
     ) payable Ownable(_initialOwner) {
         if (
-            address(_gateway) == address(0) || address(_swapRouter) == address(0) || _wNativeToken == address(0)
-                || address(_permit2) == address(0)
+            address(_gateway) == address(0) || address(_swapRouter) == address(0) || _universalDApp == address(0)
+                || _wNativeToken == address(0) || address(_permit2) == address(0)
         ) revert InvalidAddress();
         gateway = _gateway;
         swapRouter = _swapRouter;
