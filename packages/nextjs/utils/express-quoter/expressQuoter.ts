@@ -63,8 +63,7 @@ export const getExpressQuote = async (
     },
   };
 
-  const quoterUrl = "http://localhost:8000";
-  // const quoterUrl = "https://express-quoter-production.up.railway.app"; // http://localhost:8000
+  const quoterUrl = "https://express-quoter-production.up.railway.app"; // http://localhost:8000
   const quoteRoute = _chainId === 56 ? "/quote-pancakeswap" : "/quote";
 
   const res = await fetch(`${quoterUrl}${quoteRoute}`, {
