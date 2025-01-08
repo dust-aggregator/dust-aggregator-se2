@@ -91,6 +91,7 @@ export const GAS_LIMIT_BY_TOKEN_TYPE = {
   native: 100000,
   wNative: 130000,
   erc20: 250000,
+  bsc: 270000,
 };
 
 export const WRAPPED_NATIVE_TOKENS = SUPPORTED_INPUT_NETWORKS.map(network => network.wNativeAddress);

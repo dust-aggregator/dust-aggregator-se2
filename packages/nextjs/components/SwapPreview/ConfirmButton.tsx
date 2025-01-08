@@ -110,7 +110,9 @@ const ConfirmButton = ({
       throw new Error("No output token");
     }
 
-    const gasLimit = isNonEthereumNetwork ? BigInt(130000) : getGasLimitByOutputToken(outputToken?.address);
+    const gasLimit = isNonEthereumNetwork
+      ? BigInt(130000)
+      : getGasLimitByOutputToken(outputToken?.address, outputNetwork.id);
     const recipientAddress = isNonEthereumNetwork ? address : ((recipient || address) as `0x${string}`);
     const targetChainCounterparty = isNonEthereumNetwork ? recipientAddress : outputNetwork.contractAddress;
 
