@@ -20,7 +20,8 @@ export const truncateToDecimals = (value: string, decimals: number) => {
   return `${integerPart}.${decimalPart}`;
 };
 
-export const getGasLimitByOutputToken = (address: string): bigint => {
+export const getGasLimitByOutputToken = (address: string, outputChainId: number): bigint => {
+  if (outputChainId === 56) return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.bsc);
   if (address === zeroAddress) return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.native);
   if (WRAPPED_NATIVE_TOKENS.includes(address)) return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.wNative);
   return BigInt(GAS_LIMIT_BY_TOKEN_TYPE.erc20);
