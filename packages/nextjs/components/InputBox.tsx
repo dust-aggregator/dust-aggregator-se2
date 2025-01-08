@@ -4,12 +4,12 @@ import TokenSelector from "./TokenSelector";
 import UserActionBoxContainer from "./UserActionBoxContainer";
 import { RainbowKitCustomConnectButton } from "./scaffold-eth/RainbowKitCustomConnectButton";
 import { sendGAEvent } from "@next/third-parties/google";
+import { formatUnits } from "ethers/lib/utils";
 import { useAccount } from "wagmi";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { GA_EVENTS, SUPPORTED_INPUT_NETWORKS, networks } from "~~/lib/constants";
 import { formatDecimal } from "~~/lib/utils";
 import { useGlobalState } from "~~/services/store/store";
-import { formatUnits } from "ethers/lib/utils";
 
 const InputBox = () => {
   const [dustThresholdValue, setDustThresholdValue] = useState<number>(50);
@@ -273,13 +273,15 @@ const InputBox = () => {
   const setInputNetwork = useGlobalState(({ setInputNetwork }) => setInputNetwork);
 
   useEffect(() => {
-    let inputNetworkName = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
-    if (inputNetworkName === "Matic") inputNetworkName = "Polygon";
-    if (inputNetworkName === "Binance") inputNetworkName = "BNB Smart Chain";
-    const inputNetwork = SUPPORTED_INPUT_NETWORKS.find(network => network.name === inputNetworkName);
+    let inputNetworkNameWc = networkOptions2.find(item => item.options.some((option: any) => option.selected))?.section;
+    let inputNetworkNameSupported = inputNetworkNameWc;
+
+    if (inputNetworkNameWc === "Matic") inputNetworkNameWc = "Polygon";
+    if (inputNetworkNameWc === "Binance") inputNetworkNameSupported = "BNB Smart Chain";
+    const inputNetwork = SUPPORTED_INPUT_NETWORKS.find(network => network.name === inputNetworkNameSupported);
     console.log(inputNetwork);
     setInputNetwork(inputNetwork || null);
-    setInputNetworkLocal(inputNetworkName);
+    setInputNetworkLocal(inputNetworkNameWc);
   }, [networkOptions2, networkOptions2.length]);
 
   let updatedOptions2: any[] = [];
