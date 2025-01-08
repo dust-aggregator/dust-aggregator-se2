@@ -15,7 +15,7 @@ export default function Component() {
     <div className="flex-col items-center justify-center h-500 mt-20 px-24">
       <div className="flex justify-center">
         <h1 className="text-4xl text-center font-theory">
-          Combine All Small Token Balances in Your Wallet into One Asset with a Single Transaction
+          Combine All Small Token Balances in Your Wallet into One Asset in a Single Transaction
         </h1>
       </div>
       <div className="flex justify-center">
