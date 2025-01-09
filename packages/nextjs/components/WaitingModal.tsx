@@ -98,7 +98,12 @@ const WaitingModal = ({ open, swapHash, estimatedReturn }: Props) => {
         <div className="p-6 rounded-lg border border-gray-200">
           <div className="text-sm font-bold flex flex-col gap-1">
             <div className="flex items-center gap-3">
-              <Image src={inputNetworkSuccess ? successSVG : inputNetwork?.logo} alt={"network"} />
+              <Image
+                src={inputNetworkSuccess ? successSVG : inputNetwork?.logo}
+                alt={"network"}
+                width={32}
+                height={32}
+              />
               <div className="opacity-50">
                 <span>Swapping via {inputNetwork?.name}</span>
                 <div>
@@ -133,7 +138,12 @@ const WaitingModal = ({ open, swapHash, estimatedReturn }: Props) => {
             <Image src={arrowSVG} alt="arrow" className="ml-1" />
 
             <div className="flex items-center gap-3">
-              <Image src={outputNetworkSuccess ? successSVG : outputNetwork?.logo} alt={"network"} />
+              <Image
+                width={32}
+                height={32}
+                src={outputNetworkSuccess ? successSVG : outputNetwork?.logo}
+                alt={"network"}
+              />
               <div className="opacity-50">
                 <span>Swapping via {outputNetwork?.name}</span>
                 <div>

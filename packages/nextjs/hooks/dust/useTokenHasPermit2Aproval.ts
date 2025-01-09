@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { erc20Abi, parseUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
-import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
+import { PERMIT2_ADDRESS } from "~~/lib/constants";
 
 export const useTokenHasPermit2Approval = (tokenAddress: string, amount: bigint) => {
   const [hasApproval, setHasApproval] = useState<boolean>(false);
@@ -17,7 +17,7 @@ export const useTokenHasPermit2Approval = (tokenAddress: string, amount: bigint)
     abi: erc20Abi,
     address: tokenAddress,
     functionName: "allowance",
-    args: [address, PERMIT2_BASE_SEPOLIA],
+    args: [address, PERMIT2_ADDRESS],
     enabled,
   });
 

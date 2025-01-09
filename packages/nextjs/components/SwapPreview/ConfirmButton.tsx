@@ -55,10 +55,10 @@ const ConfirmButton = ({
   const isSameNetwork = outputNetwork?.id === inputNetwork?.id;
   const isBitcoin = outputNetwork?.id === "bitcoin";
 
-  const handleSuccess = (amountReceived: bigint) => {
+  const handleSuccess = (_amountReceived: bigint) => {
     setSameChainSwapPending(false);
     setWaitingModalOpen(false);
-    setAmountReceived(amountReceived);
+    setAmountReceived(_amountReceived);
     setResultModalOpen(true);
   };
   useWaitForEvmOutput(handleSuccess);
@@ -213,7 +213,6 @@ const ConfirmButton = ({
         {showSpinner ? <span className="loading loading-spinner loading-md"></span> : _buttonText}
       </button>
       <SwapResultModal
-        // togglePreviewModal={togglePreviewModal}
         rebootMachine={rebootMachine}
         retryOperation={retryOperation}
         open={resultModalOpen}
