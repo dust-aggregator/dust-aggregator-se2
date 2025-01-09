@@ -1,14 +1,12 @@
-import { readLocalnetAddresses } from "./zetachainUtils";
 import { sendGAEvent } from "@next/third-parties/google";
 import { Network as AlchemyNetwork } from "alchemy-sdk";
-import { zeroAddress } from "viem";
 import { base, bsc, polygon, zetachain } from "viem/chains";
-import { walletConnect } from "wagmi/connectors";
 import { Network } from "~~/lib/types";
 import baseSVG from "~~/public/base.svg";
 import bnbSVG from "~~/public/bnb.svg";
-import dustSVG from "~~/public/logo2.svg";
+import btcSVG from "~~/public/btc.svg";
 import polSVG from "~~/public/pol.svg";
+import zetaSVG from "~~/public/zetachain-icon.svg";
 
 export const networks = [
   { key: "Ethereum", alchemyEnum: AlchemyNetwork.ETH_MAINNET, chainId: 1 },
@@ -18,7 +16,7 @@ export const networks = [
   // { key: "Optimism", alchemyEnum: AlchemyNetwork.OPT_MAINNET, chainId: 10 },
 ];
 
-export const PERMIT2_BASE_SEPOLIA = "0x000000000022D473030F116dDEE9F6B43aC78BA3";
+export const PERMIT2_ADDRESS = "0x000000000022D473030F116dDEE9F6B43aC78BA3";
 
 export const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
@@ -61,6 +59,8 @@ export const ZetaChainNetwork = {
   ...zetachain,
   zrc20Address: "0x5F0b1a82749cb4E2278EC87F8BF6B618dC71a8bf",
   numBlocksForConfirmation: 0,
+  blockTime: 5,
+  logo: zetaSVG,
 };
 
 export const BitcoinNetwork = {
@@ -68,6 +68,8 @@ export const BitcoinNetwork = {
   id: "bitcoin",
   zrc20Address: "0x13A0c5930C028511Dc02665E7285134B6d11A5f4",
   numBlocksForConfirmation: 3,
+  blockTime: 600,
+  logo: btcSVG,
 };
 
 export const SUPPORTED_OUTPUT_NETWORKS_BY_ECOSYSTEM = [
@@ -123,7 +125,7 @@ export const WrappedZetaToken = {
 
 export const BitcoinToken = {
   decimals: 8,
-  logo: "zetachain-icon.svg",
+  logo: btcSVG,
   name: "Bitcoin",
   symbol: "BTC",
 };

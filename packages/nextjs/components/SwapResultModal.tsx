@@ -88,7 +88,7 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
           ${isError ? "border-[#FF6161]" : "border-[#00BBFF]"}`}
       >
         <div className={`${isError ? "my-32" : "gap-12 my-12"} items-center flex flex-col justify-center`}>
-          <h1 className="font-bold text-4xl">{isError ? "SWAP FAILED" : "SUCCESSFULLY"}</h1>
+          <h1 className="font-bold text-4xl">{isError ? "SWAP FAILED" : "SUCCESSFUL"}</h1>
           <div className="text-[#fffff] text-xl w-3/4 text-center leading-none mt-2 flex flex-col gap-3 items-center">
             {isError ? (
               <>

@@ -7,7 +7,7 @@ import { Token } from "@uniswap/sdk-core";
 import { zeroAddress } from "viem";
 import { useAccount, useSwitchChain } from "wagmi";
 import { useApprovePermit2 } from "~~/hooks/dust/useApprovePermit2";
-import { PERMIT2_BASE_SEPOLIA } from "~~/lib/constants";
+import { PERMIT2_ADDRESS } from "~~/lib/constants";
 import { SelectedToken } from "~~/lib/types";
 import infoSVG from "~~/public/assets/info.svg";
 import requiredApprovalsSVG from "~~/public/assets/required-approvals.svg";
@@ -88,7 +88,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         ...prev,
         [token.address]: "loading",
       }));
-      const result = await callApprovePermit2(token.address, PERMIT2_BASE_SEPOLIA);
+      const result = await callApprovePermit2(token.address, PERMIT2_ADDRESS);
       if (result.success) {
         setTokensApproveStates(prev => ({
           ...prev,
