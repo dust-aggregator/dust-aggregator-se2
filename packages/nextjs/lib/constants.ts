@@ -1,10 +1,11 @@
 import { sendGAEvent } from "@next/third-parties/google";
 import { Network as AlchemyNetwork } from "alchemy-sdk";
-import { base, bsc, polygon, zetachain } from "viem/chains";
+import { base, bsc, mainnet, polygon, zetachain } from "viem/chains";
 import { Network } from "~~/lib/types";
 import baseSVG from "~~/public/base.svg";
 import bnbSVG from "~~/public/bnb.svg";
 import btcSVG from "~~/public/btc.svg";
+import ethSVG from "~~/public/eth.svg";
 import polSVG from "~~/public/pol.svg";
 import zetaSVG from "~~/public/zetachain-icon.svg";
 
@@ -22,9 +23,18 @@ export const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffff
 
 export const SUPPORTED_INPUT_NETWORKS: Network[] = [
   {
+    ...mainnet,
+    contractAddress: "0xf1f2dA117F7B8a965943125c7FdE37C45355c9E2",
+    zrc20Address: "0xd97B1de3619ed2c6BEb3860147E30cA8A7dC9891",
+    alchemyName: "eth-mainnet",
+    wNativeAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    numBlocksForConfirmation: 32,
+    blockTime: 15,
+    logo: ethSVG,
+  },
+  {
     ...polygon,
     contractAddress: "0xA1eB3a8e2E84528DB3391b2A4AB39cc4Dd073185",
-    // contractAddress: "0xC4b1221701ED9EeCbA01d5f52D60Cb95a9d492a2", => old
     zrc20Address: "0xADF73ebA3Ebaa7254E859549A44c74eF7cff7501",
     alchemyName: "polygon-mainnet",
     wNativeAddress: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
