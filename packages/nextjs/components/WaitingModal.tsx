@@ -108,7 +108,7 @@ const WaitingModal = ({ open, swapHash, estimatedReturn }: Props) => {
                 <span>Swapping via {inputNetwork?.name}</span>
                 <div>
                   {inputTokens.map(({ name, address, amount }) => (
-                    <span key={address}>{`${amount} ${name}`}</span>
+                    <span key={address}>{`${Number(amount).toFixed(5)} ${name}`}</span>
                   ))}
                 </div>
               </div>
