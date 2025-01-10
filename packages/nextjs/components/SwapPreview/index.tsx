@@ -288,7 +288,10 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
 
   const togglePreviewModal = getToggleModal(previewModalRef);
 
-  const commission = (totalOutputAmount * 2) / 100;
+  // temporarily zero for internal release
+  // TODO: pull commission from contract
+  const commission = 0;
+  // const commission = (totalOutputAmount * 2) / 100;
   const estimatedReturn = totalOutputAmount - commission;
 
   return (
@@ -366,7 +369,10 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
             </div>
             <div className="flex justify-between">
               <div className="flex gap-2 items-center relative">
-                <span className="font-bold">Commission (2%)</span>
+                <span className="font-bold">
+                  {/* temporarily 0% for internal release */}
+                  Commission (<span className="line-through">2%</span> 0%)
+                </span>
                 <div className="relative group">
                   <Image src={infoSVG} alt="info" className="cursor-pointer" />
                   <span className="absolute hidden group-hover:block border rounded-lg bg-[#3C3731] text-xs px-2 py-1 w-[200px] top-0 -translate-x-[50%] -translate-y-[100%] font-montserrat">
