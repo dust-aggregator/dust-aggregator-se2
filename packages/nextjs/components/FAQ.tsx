@@ -30,7 +30,7 @@ const frequentlyAskedQuestions: Question[] = [
     answer: (
       <p>
         We are audited by the RatherLabs team, you can read the report
-        <a className="text-blue-600 ml-2 font-bold underline" target="_blank" href="#">
+        <a className="text-blue-600 ml-2 font-bold underline" target="_blank" href="/security_review.pdf">
           here.
         </a>
       </p>
