@@ -82,21 +82,6 @@ export const BitcoinNetwork = {
   logo: btcSVG,
 };
 
-export const SUPPORTED_OUTPUT_NETWORKS_BY_ECOSYSTEM = [
-  {
-    ecosystem: "Ethereum",
-    networks: SUPPORTED_INPUT_NETWORKS,
-  },
-  {
-    ecosystem: "ZetaChain",
-    networks: [ZetaChainNetwork],
-  },
-  {
-    ecosystem: "Bitcoin",
-    networks: [BitcoinNetwork],
-  },
-];
-
 export const UNIVERSAL_DAPP_ADDRESS = "0x78357ACa2F46b0aC0783368d17CA9cEc7d8aBCE6";
 
 export const GAS_LIMIT_BY_TOKEN_TYPE = {

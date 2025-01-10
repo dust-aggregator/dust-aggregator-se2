@@ -23,8 +23,8 @@ const evmNetworkOptions = SUPPORTED_INPUT_NETWORKS.map(({ id, name }) => ({ labe
 
 const networkOptions = [
   { ecosystem: "ZetaChain", options: [{ label: "ZetaChain", value: zetachain.id }] },
-  { ecosystem: "Bitcoin", options: [{ label: "Bitcoin", value: "bitcoin" }] },
   { ecosystem: "Ethereum", options: evmNetworkOptions },
+  { ecosystem: "Bitcoin (Coming Soon)", options: [] },
 ];
 
 const OutputBox = () => {
