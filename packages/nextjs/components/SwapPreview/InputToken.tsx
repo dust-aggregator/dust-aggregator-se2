@@ -99,7 +99,7 @@ const InputToken = ({
             Auto
           </button>
 
-          <div
+          {/* <div
             className={`w-[55px] p-1 text-sm rounded-lg ${slippage > 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)]  text-black"}`}
           >
             <input
@@ -113,7 +113,7 @@ const InputToken = ({
               placeholder="0.5"
             />
             <span className="absolute right-2 text-sm text-gray-500">%</span>
-          </div>
+          </div> */}
         </div>
       </div>
 
