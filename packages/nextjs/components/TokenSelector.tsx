@@ -24,9 +24,10 @@ interface Props {
   _updateSpecificOption: any;
   _comps: JSX.Element[];
   _dustThresholdValue: number;
+  _refetchTokens: () => void;
 }
 
-const TokenSelector = ({ _options, _updateSpecificOption, _comps, _dustThresholdValue }: Props) => {
+const TokenSelector = ({ _options, _updateSpecificOption, _comps, _dustThresholdValue, _refetchTokens }: Props) => {
   const [tokensSelected, setTokensSelected] = useState(false);
   const [hover, setHover] = useState(false);
 
@@ -72,6 +73,17 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps, _dustThreshold
               <span className="font-montserrat opacity-50 text-xs">
                 Select the tokens you wanna swap, from the list of elegible tokens according to the selected threshold
               </span>
+
+              <div className="w-full flex justify-center gap-2 items-center">
+                <span className="font-montserrat opacity-50 text-xs">Don´t see your tokens?</span>
+                <button
+                  style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
+                  className="text-[#FFFFFF] my-0 pb-1 text-xs bg-center btn  min-h-0 h-10 rounded-lg"
+                  onClick={_refetchTokens}
+                >
+                  Refresh
+                </button>
+              </div>
 
               <div onClick={() => sendGAEvent({ name: GA_EVENTS.selectInputTokensMenu })} className="flex gap-2">
                 <CategorySelectInputBox

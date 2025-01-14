@@ -32,30 +32,31 @@ const InputBox = () => {
 
   const [isLoadingTokens, setIsLoadingTokens] = useState(false);
 
-  useEffect(() => {
-    async function fn() {
-      if (connectedAccount?.address === undefined) return;
+  async function fn() {
+    if (connectedAccount?.address === undefined) return;
 
-      setIsLoadingTokens(true);
-      const apiResponse = await fetch("/api/walletconnect/fetch-wallet-balance", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          address: connectedAccount.address,
-        }),
-      });
+    setIsLoadingTokens(true);
+    const apiResponse = await fetch("/api/walletconnect/fetch-wallet-balance", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        address: connectedAccount.address,
+      }),
+    });
 
-      if (apiResponse.ok) {
-        const apiResponseJson = await apiResponse.json();
+    if (apiResponse.ok) {
+      const apiResponseJson = await apiResponse.json();
 
-        setWalletConnectBalances(apiResponseJson.balances);
-        console.log(apiResponseJson.balances);
-      }
-
-      setIsLoadingTokens(false);
+      setWalletConnectBalances(apiResponseJson.balances);
+      console.log(apiResponseJson.balances);
     }
+
+    setIsLoadingTokens(false);
+  }
+
+  useEffect(() => {
     fn();
   }, [connectedAccount?.address]);
   // const { price } = useTokenPricesUniswap();
@@ -72,11 +73,11 @@ const InputBox = () => {
       const updatedOptions: any[] = prevNetworkOptions2.map((section: any) =>
         section.section === sectionKey
           ? {
-              ...section,
-              options: section.options.map((option: any) =>
-                option.value === optionValue ? { ...option, selected, amountToDust: amountToDust } : option,
-              ),
-            }
+            ...section,
+            options: section.options.map((option: any) =>
+              option.value === optionValue ? { ...option, selected, amountToDust: amountToDust } : option,
+            ),
+          }
           : section,
       );
 
@@ -333,6 +334,7 @@ const InputBox = () => {
               _updateSpecificOption={updateSpecificOption}
               _comps={comps}
               _dustThresholdValue={dustThresholdValue}
+              _refetchTokens={fn}
             />
 
             <div className="p-[0.4px] bg-[#FFFFFF] rounded my-4"></div>
