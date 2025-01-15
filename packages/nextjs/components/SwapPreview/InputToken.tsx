@@ -27,7 +27,7 @@ const InputToken = ({
   const [slippage, setSlippage] = useState(0);
   const [tokenQuote, setTokenQuote] = useState("");
 
-  const { outputToken } = useGlobalState();
+  const { outputToken, setInputTokens, inputTokens } = useGlobalState();
 
   const handleSlippageChange = (e: string) => {
     if (_quoteSwapData?.estimatedOutput) {
@@ -38,6 +38,10 @@ const InputToken = ({
       //   _quoteSwapData?.estimatedOutput - (_quoteSwapData?.estimatedOutput * slippageValue) / 100;
       // _setTokensMinAmountOut(_token.address, minAmountWithSlippage);
     }
+  };
+
+  const removeToken = () => {
+    setInputTokens(inputTokens.filter(token => token.address !== _token.address));
   };
 
   useEffect(() => {
@@ -57,7 +61,7 @@ const InputToken = ({
     <div className="w-full flex flex-col gap-2">
       <div className="w-full flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <span className="">•</span>
+          <Image className="cursor-pointer" src={"/Vector.png"} alt="" width={8} height={8} onClick={removeToken} />
           <span className="text-xs">
             {_token.name} ({_token.symbol})
           </span>

@@ -277,6 +277,10 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
     }
   }, [inputTokens, quoteSwapData]);
 
+  useEffect(() => {
+    if (!inputTokens.length) previewModalRef.current?.close();
+  }, [inputTokens]);
+
   //============================================================
   //============================================================
 
@@ -329,15 +333,14 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
             <span>{inputNetwork?.name}</span>
             <ul className="flex flex-col gap-3">
               {inputTokens.map(token => (
-                <li key={token.symbol} className="flex justify-between">
-                  <InputToken
-                    _token={token}
-                    _approveIndexState={tokensApproveStates[token.address]}
-                    _setTokenHasApproval={callSetTokenHasApproval}
-                    _setTokensMinAmountOut={callSetTokensMinAmountOut}
-                    _quoteSwapData={quoteSwapData[token.address]}
-                  />
-                </li>
+                <InputToken
+                  key={token.address}
+                  _token={token}
+                  _approveIndexState={tokensApproveStates[token.address]}
+                  _setTokenHasApproval={callSetTokenHasApproval}
+                  _setTokensMinAmountOut={callSetTokensMinAmountOut}
+                  _quoteSwapData={quoteSwapData[token.address]}
+                />
               ))}
             </ul>
           </div>
