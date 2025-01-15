@@ -31,13 +31,16 @@ const CategorySelect = ({ className, title, options, selectedOption, onChange }:
       <div
         tabIndex={0}
         role="button"
-        className={`min-h-0 h-8 py-1 px-2 leading-tight shadow-inner-xl flex items-center border-2 border-slate-50 w-full text-xs select bg-[#3C3731] ${
+        className={`min-h-0 h-8 py-1 px-2 leading-tight flex items-center w-full text-xs select bg-[#FFFFFF]/15 border border-[#d1d1e0]/10 ${
           selectedOption ? "text-[#E4E4E4]" : "text-[#9D9D9D]"
         }`}
       >
         {selectedOption?.label || title}
       </div>
-      <ul tabIndex={0} className="w-full dropdown-content menu rounded-box z-[1] p-2 shadow-inner-xl mt-1 bg-[#3C3731]">
+      <ul
+        tabIndex={0}
+        className="w-full dropdown-content menu rounded-box z-[1] p-2 shadow-inner-xl mt-1 bg-black/90 backdrop-blur-3xl"
+      >
         {options.map(({ ecosystem, options }) => (
           <div key={ecosystem}>
             <p className="text-sm text-bold my-1 px-2">{ecosystem}</p>

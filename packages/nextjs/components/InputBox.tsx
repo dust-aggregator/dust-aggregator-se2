@@ -326,9 +326,9 @@ const InputBox = () => {
               </div>
             </div>
             <div className="flex gap-4 mb-4">
-              <div className="relative w-2/3">
+              <div className="relative w-full">
                 <input
-                  className="input rounded-lg p-1 bg-btn1 shadow-inner-xl p-2 h-8 pr-7 w-full appearance-none
+                  className="input bg-[#FFFFFF]/15 rounded-lg p-1 shadow-inner-xl p-3 h-8 pr-7 w-full appearance-none
                   [&::-webkit-inner-spin-button]:appearance-none 
                   [&::-webkit-outer-spin-button]:appearance-none 
                   [&::-moz-appearance]:textfield"
@@ -351,7 +351,7 @@ const InputBox = () => {
               _refetchTokens={fn}
             />
 
-            <div className="p-[0.4px] bg-[#FFFFFF] rounded my-4"></div>
+            <div className="h-px bg-[#d1d1e0]/15 rounded my-4"></div>
             <div className="overflow-scroll h-40 mb-4">
               {compsShort}
               {/* <AllTokensPrices /> */}

@@ -69,7 +69,7 @@ const WaitingModal = ({ open, swapHash, estimatedReturn }: Props) => {
 
   return (
     <dialog ref={ref} className="modal">
-      <div className="modal-box box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded-xl flex flex-col gap-4">
+      <div className="modal-box box rounded-xl flex flex-col gap-4 bg-black/70 backdrop-blur-3xl border border-[#d1d1e0]/10">
         <span className="text-[#fffff] text-xl font-bold">Estimated wait time</span>
 
         <div className="flex justify-between">
@@ -95,7 +95,7 @@ const WaitingModal = ({ open, swapHash, estimatedReturn }: Props) => {
           </div>
         </div>
 
-        <div className="p-6 rounded-lg border border-gray-200">
+        <div className="p-6 rounded-lg border border-[#d1d1e0]/20 bg-[#FFFFFF]/10">
           <div className="text-sm font-bold flex flex-col gap-1">
             <div className="flex items-center gap-3">
               <Image

@@ -55,31 +55,19 @@ const FAQ = () => {
   };
 
   return (
-    <div className="w-full flex flex-col gap-3 my-8">
+    <div className="w-full flex flex-col gap-6 my-8">
       {frequentlyAskedQuestions.map((faqElem, index) => {
         return (
-          <div key={index} className="flex flex-col w-full items-center">
-            <div className="w-full h-[70px] 2xl:h-[100px] relative">
-              <div className="absolute w-full top-0 left-0 flex justify-center">
-                <Image
-                  src={faqBg}
-                  className={`w-full transition-all duration-500 ${openIndexes[index] && "drop-shadow-[0_0_10px_rgba(0,_187,_255,_1)]"}`}
-                  alt="faq question"
-                />
-              </div>
-
-              <div className="absolute w-full top-0 left-0 flex justify-center z-20">
-                <Image src={faqBg} className="w-full" alt="faq question" />
-              </div>
-
+          <div key={index} className="flex flex-col w-full items-center bg-black/40">
+            <div className="w-full h-[70px] 2xl:h-[100px]">
               <button
-                className="absolute w-full h-full top-0 left-0 flex justify-between items-center pb-[1%] px-[3%] z-30"
+                className="w-full h-full flex justify-between items-center px-12 z-30 border-b border-[#a3a3c2]/20"
                 onClick={() => toggleOpen(index)}
               >
                 <span className="text-start font-montserrat font-bold text-lg">{faqElem.question}</span>
                 <Image
                   src={polygon}
-                  className={`w-[50px] ${openIndexes[index] ? "" : "rotate-180"} transition-all duration-500`}
+                  className={`w-[50px] ${openIndexes[index] ? "rotate-180" : ""} transition-all duration-500`}
                   alt="arrow"
                 />
               </button>
@@ -92,7 +80,7 @@ const FAQ = () => {
                 w-[96%] flex z-0`}
             >
               {openIndexes[index] && (
-                <div className="w-full px-6 pb-[2%] pt-[4%] bg-gradient-radial border rounded-lg -mt-[3%]">
+                <div className="w-full px-6 pb-[2%] pt-[4%] bg-gradient-radial rounded-lg -mt-[3%]">
                   <span className="text-[#9D9D9D] font-montserrat text-md">{faqElem.answer}</span>
                 </div>
               )}

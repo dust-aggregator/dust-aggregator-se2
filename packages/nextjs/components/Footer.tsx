@@ -1,12 +1,7 @@
-import Image from "next/image";
 import React from "react";
-import dfLogo from "~~/public/df-logo.svg";
-import footerSVG from "~~/public/assets/footer.svg";
-import discordIcon from "~~/public/assets/discord_icon.svg";
-import instagramIcon from "~~/public/assets/instagram_icon.svg";
-import tiktokIcon from "~~/public/assets/tiktok_icon.svg";
-import youtubeIcon from "~~/public/assets/youtube_icon.svg";
+import Image from "next/image";
 import Link from "next/link";
+import dfLogo from "~~/public/df-logo.svg";
 
 /**
  * Site footer
@@ -40,27 +35,10 @@ export const Footer = () => {
         </div>
       </div>
 
-      <div className="w-full flex justify-center relative">
-        {/* SVG Image */}
-        <Image className="w-[95%]" src={footerSVG} alt="footer" />
-
-        <div className="absolute inset-0 flex justify-center items-center mb-5">
-          <div className="flex justify-center">
-            {/* <Link href="https://discord.com/invite/zetachain" className="mx-3">
-              <Image src={discordIcon} alt="discord" />
-            </Link>
-            <Link href="https://discord.com/invite/zetachain" className="mx-3">
-              <Image src={instagramIcon} alt="instagram" />
-            </Link>
-            <Link href="https://discord.com/invite/zetachain" className="mx-3">
-              <Image src={tiktokIcon} alt="tiktok" />
-            </Link>
-            <Link href="https://www.youtube.com/@ZetaBlockchain" className="mx-3">
-              <Image src={youtubeIcon} alt="youtube" />
-            </Link> */}
-            <span className="font-montserrat font-bold opacity-50">Made by UNDR Collective</span>
-          </div>
-        </div>
+      <div className="w-full flex justify-center items-center gap-2">
+        <hr className="w-1/6 bg-[#9D9D9D] opacity-50" />
+        <span className="font-montserrat font-bold opacity-50">Made by UNDR Collective</span>
+        <hr className="w-1/6 bg-[#9D9D9D] opacity-50" />
       </div>
     </div>
   );

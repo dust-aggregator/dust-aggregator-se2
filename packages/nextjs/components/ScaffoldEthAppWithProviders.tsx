@@ -19,7 +19,7 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <div className="flex flex-col min-h-screen bg-gradient-radial from-[#353D3D] to-[#212424]">
+      <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="">{children}</main>
         <Footer />
@@ -50,10 +50,7 @@ export const ScaffoldEthAppWithProviders = ({ children }: { children: React.Reac
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <ProgressBar height="3px" color="#2299dd" />
-        <RainbowKitProvider
-          avatar={BlockieAvatar}
-          theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
-        >
+        <RainbowKitProvider avatar={BlockieAvatar} theme={darkTheme()}>
           <ScaffoldEthApp>{children}</ScaffoldEthApp>
         </RainbowKitProvider>
       </QueryClientProvider>

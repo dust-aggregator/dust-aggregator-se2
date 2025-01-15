@@ -33,7 +33,7 @@ const Select = ({ disabled, title, options, selectedOption, onChange }: Props) =
       <div
         tabIndex={disabled ? -1 : 0}
         role="button"
-        className={`min-h-0 h-8 py-1 px-2 leading-tight shadow-inner-xl flex items-center border-2 border-slate-50 w-full text-xs select bg-[#3C3731] ${!!selectedOption ? "text-[#E4E4E4]" : "text-[#9D9D9D]"
+        className={`min-h-0 h-8 py-1 px-2 leading-tight flex items-center w-full text-xs select bg-[#FFFFFF]/15 border border-[#d1d1e0]/10 ${!!selectedOption ? "text-[#E4E4E4]" : "text-[#9D9D9D]"
         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         {selectedOption?.name || title}
@@ -41,7 +41,7 @@ const Select = ({ disabled, title, options, selectedOption, onChange }: Props) =
       {options.length > 0 ? (
         <ul
           tabIndex={0}
-          className="w-full dropdown-content menu rounded-box z-[1] p-2 shadow-inner-xl mt-1 bg-[#3C3731]"
+          className="w-full dropdown-content menu rounded-box z-[1] p-2 shadow-inner-xl mt-1 bg-black/90 backdrop-blur-3xl"
         >
           {options.map(option => {
             const _disabled =
@@ -69,7 +69,7 @@ const Select = ({ disabled, title, options, selectedOption, onChange }: Props) =
       ) : (
         <ul
           tabIndex={0}
-          className="w-full dropdown-content menu rounded-box z-[1] p-2 shadow-inner-xl mt-1 bg-[#3C3731]"
+          className="w-full dropdown-content menu rounded-box z-[1] p-2 shadow-inner-xl mt-1 bg-black/90 backdrop-blur-3xl"
         >
           <li>
             <a className={`text-xs text-[#9D9D9D] px-2 py-1 flex justify-between relative group`}>

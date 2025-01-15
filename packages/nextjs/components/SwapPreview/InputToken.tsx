@@ -97,7 +97,7 @@ const InputToken = ({
         </div>
         <div className="rounded-lg border flex items-center bg-[#3C3731]">
           <button
-            className={`w-[55px] p-1 text-sm rounded-lg ${slippage === 0 && "bg-[#e6ffff] drop-shadow-[0_0_5px_rgba(0,_187,_255,_1)] text-black"}`}
+            className={`w-[55px] p-1 text-sm rounded-lg ${slippage === 0 && "bg-[#e6ffff] text-black"}`}
             onClick={() => handleSlippageChange("0")}
           >
             Auto
@@ -127,14 +127,14 @@ const InputToken = ({
             <span className="text-[#ff3333] text-xs font-bold">Quote not found for requested pair</span>
           ) : (
             <>
-              <span className="text-[#00ccff] text-xs font-bold">Estimated output:</span>
+              <span className="text-[#DAFF15] text-xs font-bold">Estimated output:</span>
               {_quoteSwapData?.estimatedOutput ? (
-                <span className="text-[#00ccff] text-xs">
+                <span className="text-[#DAFF15] text-xs">
                   {tokenQuote} {outputToken?.symbol}
                 </span>
               ) : (
                 <svg
-                  className="w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-[#00ff99]"
+                  className="w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-[#DAFF15]"
                   viewBox="0 0 100 101"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"

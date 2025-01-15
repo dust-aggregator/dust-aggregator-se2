@@ -6,7 +6,7 @@ export const TokenRow = ({ token, updateSpecificOption, networkName }) => {
   const [rawVal, setRawVal] = useState(token.amountToDust);
   return (
     <div
-      className={`px-4 h-10 leading-tight shadow-inner-xl flex items-center w-full text-xs justify-between rounded-lg border bg-[#514B44] shadow-inner shadow-[inset_0_1px_30px_rgba(0,0,0,1)]`}
+      className={`px-4 h-10 leading-tight flex items-center w-full text-xs justify-between rounded-lg bg-[#FFFFFF]/15 border border-[#d1d1e0]/10`}
       key={token.address}
     >
       <div className="flex gap-2">
@@ -50,11 +50,11 @@ export const TokenRow = ({ token, updateSpecificOption, networkName }) => {
               setRawVal("");
             }
           }}
-          className="w-[70px] text-xs h-full px-1 rounded border bg-[#3C3731] shadow-inner shadow-[inset_0_1px_13px_rgba(0,0,0,0.7)]"
+          className="w-[70px] text-xs h-full px-1 rounded bg-[#FFFFFF]/15 border border-[#d1d1e0]/10"
         />
 
         <button
-          className="h-full px-2 text-xs rounded-lg border bg-[#4C463F]"
+          className="h-full px-2 text-xs rounded-lg bg-[#FFFFFF]/15 border border-[#d1d1e0]/10"
           onClick={() => {
             updateSpecificOption(networkName, token.value, token.selected, token.tokenBalance);
             setRawVal(token.tokenBalance);

@@ -308,8 +308,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
     <div>
       <button
         disabled={!readyForPreview || isDisabled}
-        style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-        className="text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4"
+        className="text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4 bg-[#FFFFFF]/15 border border-[#d1d1e0]/10"
         // onClick={togglePreviewModal}
         onClick={() => {
           handlePreviewSwap();
@@ -318,13 +317,12 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         Preview Swap
       </button>
       <dialog ref={previewModalRef} className="modal">
-        <div className="modal-box bg-[url('/assets/preview_bg2.svg')] bg-no-repeat bg-center bg-auto rounded">
+        <div className="modal-box bg-[#000000]/70 border border-[#d1d1e0]/10 rounded-xl">
           <div className="flex justify-between items-center bg-auto">
             <h3 className="font-bold text-xl">Input Tokens</h3>
-            <div className="relative">
-              <Image src={requiredApprovalsSVG} alt="required" className="w-[220px]" />
-              <div className="absolute top-0 left-0 w-full h-full flex justify-center">
-                <span className="text-xs mt-1 font-bold">{`Tokens Required Approval: ${approvalCount}/${inputTokens.length}`}</span>
+            <div className="">
+              <div className="w-full h-full flex justify-center bg-[#A66CFF] p-1 px-2 rounded-lg">
+                <span className="text-xs font-bold">{`Tokens Required Approval: ${approvalCount}/${inputTokens.length}`}</span>
               </div>
             </div>
           </div>
@@ -352,7 +350,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
                 <span className="px-2">•</span>
                 <span>{outputToken?.name}</span>
               </div>
-              <span className="text-[#F0BF26] flex font-bold">
+              <span className="text-[#F0BF26] flex">
                 {totalOutputAmount.toFixed(5)} {outputToken?.symbol}
               </span>
             </div>
@@ -411,10 +409,9 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
             </div>
             <div className="text=[#FFFFF]"></div>
           </div>
-          <div className="w-full flex justify-center mt-6">
+          <div className="w-full flex justify-center mt-6 gap-2">
             <button
-              style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-              className="flex-1 text-[#FFFFFF] my-0 text-sm bg-center btn  min-h-0 h-10 rounded-lg"
+              className="flex-1 text-[#FFFFFF] my-0 text-sm btn min-h-0 h-10 rounded-lg bg-[#FFFFFF]/15 border border-[#d1d1e0]/10"
               onClick={togglePreviewModal}
             >
               Cancel

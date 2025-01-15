@@ -79,8 +79,7 @@ const CategorySelectInputBox = ({
         tabIndex={0}
         role="button"
         onClick={handleToggleDropdown}
-        className={`min-h-0 h-8 py-1 px-2 leading-tight shadow-inner-xl flex items-center border-2 border-slate-50 w-full text-xs select bg-[#3C3731] ${
-          selectedOption ? "text-[#E4E4E4]" : "text-[#9D9D9D]"
+        className={`min-h-0 h-8 py-1 px-2 leading-tight shadow-inner-xl flex items-center w-full text-xs select bg-[#FFFFFF]/15 border border-[#d1d1e0]/10 ${selectedOption ? "text-[#E4E4E4]" : "text-[#9D9D9D]"
         }`}
       >
         {title}
@@ -88,7 +87,7 @@ const CategorySelectInputBox = ({
       {isOpen && (
         <ul
           tabIndex={0}
-          className="w-full dropdown-content menu rounded-box z-[1] shadow-inner-xl mt-1 bg-[#3C3731] flex flex-col overflow-y-scroll h-[280px] flex-nowrap"
+          className="w-full dropdown-content menu rounded-box z-[1] shadow-inner-xl mt-1 flex flex-col overflow-y-scroll h-[280px] flex-nowrap bg-black"
         >
           {options && options?.length > 0 ? (
             <>
@@ -139,17 +138,11 @@ const CategorySelectInputBox = ({
                                   });
                                   disabled = !disabled;
                                 }}
-                                className="text-xs text-[#9D9D9D] py-1 grid grid-cols-3 gap-2 w-full"
+                                className="text-xs text-[#9D9D9D] my-1 gap-2 w-full py-0 bg-[#FFFFFF]/15 border border-[#d1d1e0]/10 flex justify-between"
                               >
-                                <p className="truncate">{label}</p>
-                                <div className="flex items-center gap-1">
-                                  <p>{formatDecimal(tokenBalance)}</p>
-                                  <Image src={"/particles.png"} alt="" width={"12"} height={"12"} className="h-4" />
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <p>$</p>
-                                  <p>{usdValue?.toFixed(2)}</p>
-                                </div>
+                                <p className="w-1/3">{label}</p>
+                                <p className="w-1/3 text-center">{formatDecimal(tokenBalance)}</p>
+                                <p className="w-1/3 text-end">${usdValue?.toFixed(2)}</p>
                               </a>
                             </li>
                           );
