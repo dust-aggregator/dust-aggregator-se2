@@ -102,7 +102,7 @@ const OutputBox = () => {
               <button
                 disabled={isBitcoin}
                 style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-                className={`${receiverWalletMode === "connected" && "drop-shadow-[0_0_3px_rgba(0,_187,_255,_1)]"} text-[#FFFFFF] text-sm p-0 bg-center btn w-1/2 min-h-0 h-8 rounded-lg font-normal text-xs transition-all duration-700`}
+                className={` text-[#FFFFFF] text-sm p-0 bg-center btn w-1/2 min-h-0 h-8 rounded-lg font-normal text-xs transition-all duration-700`}
                 onClick={() => {
                   sendGAEvent({
                     name: GA_EVENTS.sendToConnectedWallet,
@@ -118,7 +118,7 @@ const OutputBox = () => {
               </button>
               <button
                 style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-                className={`${receiverWalletMode === "recipient" && "drop-shadow-[0_0_3px_rgba(0,_187,_255,_1)]"} text-[#FFFFFF] text-sm p-0 bg-center btn w-1/2 min-h-0 h-8 rounded-lg font-normal text-xs transition-all duration-700`}
+                className={` text-[#FFFFFF] text-sm p-0 bg-center btn w-1/2 min-h-0 h-8 rounded-lg font-normal text-xs transition-all duration-700`}
                 onClick={() => {
                   sendGAEvent({
                     name: GA_EVENTS.sendToCustomWallet,

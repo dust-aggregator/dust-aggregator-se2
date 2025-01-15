@@ -53,11 +53,8 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps, _dustThreshold
   return (
     <div>
       <button
-        // disabled={!readyForPreview}
-        style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-        className={`text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4 ${
-          tokensSelected ? "bg-green-500" : ""
-        }`}
+        className={`text-[#FFFFFF] bg-[#FFFFFF]/15 text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4 ${tokensSelected ? "bg-green-500" : ""
+          }`}
         onClick={togglePreviewModal}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
@@ -66,8 +63,8 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps, _dustThreshold
       </button>
       {/*  =============== Token Selection Modal  ==================== */}
       <dialog ref={previewModalRef} className="modal">
-        <div className="modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded-lg">
-          <div className="w-full h-full h-[530px] flex flex-col justify-between">
+        <div className="modal-box bg-[#000000]/70 rounded-lg border border-[#d1d1e0]/10">
+          <div className="w-full h-[530px] flex flex-col justify-between">
             <div className="flex flex-col gap-2">
               <span className="font-bold text-lg">Token Selection</span>
 
@@ -78,8 +75,7 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps, _dustThreshold
               <div className="w-full flex justify-center gap-2 items-center">
                 <span className="font-montserrat opacity-50 text-xs">Don´t see your tokens?</span>
                 <button
-                  style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-                  className="text-[#FFFFFF] my-0 pb-1 text-xs bg-center btn  min-h-0 h-10 rounded-lg"
+                  className="text-[#FFFFFF] bg-[#FFFFFF]/15 border border-[#d1d1e0]/10 my-0 text-xs bg-center btn  min-h-0 h-10 rounded-lg"
                   onClick={_refetchTokens}
                 >
                   Refresh
@@ -97,22 +93,23 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps, _dustThreshold
               </div>
               <div className="overflow-x-auto overflow-y-scroll scrollbar-hide h-[300px]">{_comps}</div>
             </div>
-            <form method="dialog" className="w-full flex justify-between gap-2">
-              <button
-                style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-                className="flex-1 text-[#FFFFFF] my-0 pb-1 text-sm bg-center btn  min-h-0 h-10 rounded-lg"
-                onClick={togglePreviewModal}
-              >
-                Cancel
-              </button>
-              <button
-                style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-                className="flex-1 text-[#FFFFFF] my-0 pb-1 text-sm bg-center btn  min-h-0 h-10 rounded-lg"
-                onClick={handleConfirm}
-              >
-                Confirm
-              </button>
-            </form>
+            <div className="flex justify-end">
+              <form method="dialog" className="w-1/2 flex justify-between gap-2">
+                <button
+                  className="flex-1 text-[#FFFFFF] my-0 pb-1 text-sm btn min-h-0 h-10 rounded-lg bg-[#FFFFFF]/15 border border-[#d1d1e0]/10"
+                  onClick={togglePreviewModal}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="flex-1 text-black my-0 pb-1 text-sm btn  min-h-0 h-10 rounded-lg bg-[#DAFF15]"
+                  onClick={handleConfirm}
+                >
+                  Confirm
+                </button>
+              </form>
+            </div>
+
           </div>
         </div>
       </dialog>

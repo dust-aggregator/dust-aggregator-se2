@@ -23,6 +23,12 @@
 
 body {
   min-height: 100vh;
+  background-color: black;
+  background-image: url("/bg-black.jpg");
+  background-size: cover;
+  background-position: bottom;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 h1,

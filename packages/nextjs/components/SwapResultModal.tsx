@@ -83,10 +83,7 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
 
   return (
     <dialog ref={ref} className="modal">
-      <div
-        className={`modal-box bg-[url('/assets/preview_bg.svg')] bg-no-repeat bg-center bg-auto rounded-xl border-4
-          ${isError ? "border-[#FF6161]" : "border-[#00BBFF]"}`}
-      >
+      <div className={`modal-box rounded-xl bg-black/70 backdrop-blur-3xl border border-[#d1d1e0]/10`}>
         <div className={`${isError ? "my-32" : "gap-12 my-12"} items-center flex flex-col justify-center`}>
           <h1 className="font-bold text-4xl">{isError ? "SWAP FAILED" : "SUCCESSFUL"}</h1>
           <div className="text-[#fffff] text-xl w-3/4 text-center leading-none mt-2 flex flex-col gap-3 items-center">
@@ -97,8 +94,8 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
               </>
             ) : (
               <>
-                <div className="flex gap-1 items-center drop-shadow-[0_3px_3px_rgba(0,_187,_255,_1)]">
-                  <Image src={SuccessSVG} alt="success" />
+                <div className="flex gap-1 items-center text-[#57FF8C]">
+                  <Image src={SuccessSVG} alt="success" className="fill-[#57FF8C]" />
                   <span className="font-montserrat font-bold text-3xl">
                     {amount} {outputToken?.symbol}
                   </span>
@@ -107,10 +104,10 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
               </>
             )}
           </div>
-          <form method="dialog" className="w-full flex justify-center mt-6">
+          <form method="dialog" className="w-full flex justify-center mt-6 px-12">
             <button
               onClick={isError ? retryOperation : rebootMachine}
-              className="flex-1 px-6 hover:brightness-50 bg-[url('/button2.png')] bg-no-repeat bg-center bg-cover h-10"
+              className="flex-1 px-6 hover:brightness-50 h-10 bg-[#DAFF15] rounded-lg text-black font-bold"
             >
               {isError ? "Retry Operation" : "Reset Swap Machine"}
             </button>

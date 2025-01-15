@@ -4,11 +4,7 @@ import Link from "next/link";
 import { RainbowKitCustomConnectButton } from "./scaffold-eth";
 import { sendGAEvent } from "@next/third-parties/google";
 import { GA_EVENTS, sendEvent } from "~~/lib/constants";
-import closeSVG from "~~/public/assets/close.svg";
-import navBottomSVG from "~~/public/assets/nav-bottom.svg";
-import navbarMobileSVG from "~~/public/assets/navbar-mobile.svg";
-import navbarSVG from "~~/public/assets/navbar.svg";
-import openSVG from "~~/public/assets/open.svg";
+import LogoSVG from "~~/public/df-logo.svg";
 
 /**
  * Site navbar
@@ -19,34 +15,29 @@ export const Navbar = () => {
   return (
     <div className="min-h-0 py-5 px-1 mb-11 lg:mb-0">
       {/* ========== DESKTOP ========== */}
-      <div className="w-full md:flex justify-center relative hidden">
-        {/* SVG Image */}
-        <Image className="w-[95%]" src={navbarSVG} alt="navbar" />
+      <div className="w-full flex justify-between items-center mb-5 px-[7%]">
+        <div className="w-1/4 h-1/2">
+          <Link href="/" className="w-1/3 h-full flex">
+            <Image className="w-[100px]" src={LogoSVG} alt="logo" />
+          </Link>
+        </div>
 
-        <div className="absolute inset-0 flex justify-between items-center mb-5 px-[7%]">
-          <div className="w-1/4 h-1/2">
-            <Link href="/" className="w-1/3 h-full flex">
-              <span className=""></span>
-            </Link>
-          </div>
+        <div className="w-1/4 flex justify-evenly text-xs lg:text-sm 2xl:text-base">
+          <Link href="https://fingerpump.gitbook.io/dust.fun" className="" target="_blank" rel="noopener noreferrer">
+            <span className="text-white font-bold">HOW IT WORKS</span>
+          </Link>
+          <Link href="#faq" className="">
+            <span className="text-white font-bold">F.A.Q</span>
+          </Link>
+          <Link href="https://discord.com/invite/FTSeFc9Yh4" target="_blank" rel="noopener noreferrer">
+            <span className="text-white font-bold">SUPPORT</span>
+          </Link>
+        </div>
 
-          <div className="w-1/4 flex justify-evenly text-xs lg:text-sm 2xl:text-base">
-            <Link href="https://fingerpump.gitbook.io/dust.fun" className="" target="_blank" rel="noopener noreferrer">
-              <span className="text-white font-bold">HOW IT WORKS</span>
-            </Link>
-            <Link href="#faq" className="">
-              <span className="text-white font-bold">F.A.Q</span>
-            </Link>
-            <Link href="https://discord.com/invite/FTSeFc9Yh4" target="_blank" rel="noopener noreferrer">
-              <span className="text-white font-bold">SUPPORT</span>
-            </Link>
-          </div>
-
-          <div onClick={() => sendGAEvent({ name: GA_EVENTS.walletConnect })} className="w-1/4 flex justify-around">
-            {/* <ConnectButton _chain="sol" /> */}
-            {/* <ConnectButton _chain="eth" /> */}
-            <RainbowKitCustomConnectButton />
-          </div>
+        <div onClick={() => sendGAEvent({ name: GA_EVENTS.walletConnect })} className="w-1/4 flex justify-around">
+          {/* <ConnectButton _chain="sol" /> */}
+          {/* <ConnectButton _chain="eth" /> */}
+          <RainbowKitCustomConnectButton />
         </div>
       </div>
 
@@ -57,11 +48,10 @@ export const Navbar = () => {
       <div className="w-full flex justify-center md:hidden">
         {/* ====================>>>>> delete max-w- !! */}
         <div className="w-full flex flex-col justify-center items-center relative">
-          <Image className="w-full z-10" src={navbarMobileSVG} alt="navbar" />
 
           <div className="absolute top-0 left-0 w-full h-full flex justify-end z-20">
             <button className="w-1/3 h-full flex" onClick={() => setOpen(!open)}>
-              <Image src={open ? closeSVG : openSVG} alt="toggle nav" className="ml-[25%] mt-[15%] h-[35%]" />
+              {/* <Image src={open ? closeSVG : openSVG} alt="toggle nav" className="ml-[25%] mt-[15%] h-[35%]" /> */}
             </button>
           </div>
 
@@ -87,7 +77,7 @@ export const Navbar = () => {
                   <RainbowKitCustomConnectButton />
                 </div>
 
-                <Image
+                {/* <Image
                   src={navBottomSVG}
                   alt="nav bottom"
                   className="absolute w-[105%] max-w-[105%] -bottom-[5%] left-1/2 transform -translate-x-1/2 drop-shadow-[0_0_10px_rgba(0,_187,_255,_1)] flex -z-20"
@@ -97,7 +87,7 @@ export const Navbar = () => {
                   src={navBottomSVG}
                   alt="nav bottom"
                   className="absolute w-[105%] max-w-[105%] -bottom-[5%] left-1/2 transform -translate-x-1/2 z-20"
-                />
+                /> */}
               </div>
             )}
           </div>

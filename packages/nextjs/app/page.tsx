@@ -6,7 +6,7 @@ import FAQ from "~~/components/FAQ";
 import InputBox from "~~/components/InputBox";
 import { MobileModal } from "~~/components/MobileModal";
 import OutputBox from "~~/components/OutputBox";
-import gearHubSVG from "~~/public/assets/gear_hub.svg";
+import arrowSVG from "~~/public/assets/arrow.svg";
 
 export default function Component() {
   const account = useAccount();
@@ -29,9 +29,9 @@ export default function Component() {
       ) : (
         <></>
       )}
-      <div className="flex justify-center mb-12">
+      <div className="flex justify-center mb-12 gap-12">
         <InputBox />
-        <Image className="w-[500px] mx-[-15px]" src={gearHubSVG} alt="gears" />
+        <Image className="w-[30px]" src={arrowSVG} alt="gears" />
         <OutputBox />
       </div>
       <div className="flex justify-center items-center">

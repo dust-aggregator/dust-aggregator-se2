@@ -206,8 +206,7 @@ const ConfirmButton = ({
     <>
       <button
         onClick={handleConfirm}
-        style={{ backgroundImage: "url('/button2.png')" }}
-        className="flex-1 px-6 hover:brightness-50 bg-no-repeat bg-center bg-cover min-h-0 h-10 btn rounded-lg bg-transparent hover:bg-transparent border-0"
+        className="flex-1 px-6 min-h-0 h-10 btn rounded-lg border-0 bg-[#DAFF15] text-black"
         disabled={showSpinner}
       >
         {showSpinner ? <span className="loading loading-spinner loading-md"></span> : _buttonText}
