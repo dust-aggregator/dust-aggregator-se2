@@ -412,6 +412,13 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
             <div className="text=[#FFFFF]"></div>
           </div>
           <div className="w-full flex justify-center mt-6">
+            <button
+              style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
+              className="flex-1 text-[#FFFFFF] my-0 text-sm bg-center btn  min-h-0 h-10 rounded-lg"
+              onClick={togglePreviewModal}
+            >
+              Cancel
+            </button>
             <ConfirmButton
               togglePreviewModal={togglePreviewModal}
               _handleApproveTokens={handleApproveTokens}
@@ -420,13 +427,6 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
               _buttonText={readyToSwap ? "Swap dust" : "Approve dust"}
               _loading={loading}
             />
-            <button
-              style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-              className="flex-1 text-[#FFFFFF] my-0 text-sm bg-center btn  min-h-0 h-10 rounded-lg"
-              onClick={togglePreviewModal}
-            >
-              Cancel
-            </button>
           </div>
           <div className="mt-3 text-xs font-montserrat flex justify-center">
             <span className="text-[#9D9D9D]">

@@ -55,7 +55,8 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps, _dustThreshold
       <button
         // disabled={!readyForPreview}
         style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
-        className={`text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4 ${tokensSelected ? "bg-green-500" : ""
+        className={`text-[#FFFFFF] text-sm p-0 bg-center my-2 btn w-full min-h-0 h-8 rounded-lg mt-4 ${
+          tokensSelected ? "bg-green-500" : ""
         }`}
         onClick={togglePreviewModal}
         onMouseEnter={() => setHover(true)}
@@ -100,16 +101,16 @@ const TokenSelector = ({ _options, _updateSpecificOption, _comps, _dustThreshold
               <button
                 style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
                 className="flex-1 text-[#FFFFFF] my-0 pb-1 text-sm bg-center btn  min-h-0 h-10 rounded-lg"
-                onClick={handleConfirm}
+                onClick={togglePreviewModal}
               >
-                Confirm
+                Cancel
               </button>
               <button
                 style={{ backgroundImage: "url('/assets/confirm_btn.svg')" }}
                 className="flex-1 text-[#FFFFFF] my-0 pb-1 text-sm bg-center btn  min-h-0 h-10 rounded-lg"
-                onClick={togglePreviewModal}
+                onClick={handleConfirm}
               >
-                Cancel
+                Confirm
               </button>
             </form>
           </div>
