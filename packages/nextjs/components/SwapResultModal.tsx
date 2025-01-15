@@ -112,7 +112,7 @@ const SwapResultModal = ({ isError, error, open, retryOperation, rebootMachine, 
               onClick={isError ? retryOperation : rebootMachine}
               className="flex-1 px-6 hover:brightness-50 bg-[url('/button2.png')] bg-no-repeat bg-center bg-cover h-10"
             >
-              {isError ? "Retry Operation" : "Reboot machine"}
+              {isError ? "Retry Operation" : "Reset Swap Machine"}
             </button>
           </form>
           {isError && (
