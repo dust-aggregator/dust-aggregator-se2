@@ -58,7 +58,7 @@ const FAQ = () => {
     <div className="w-full flex flex-col gap-6 my-8">
       {frequentlyAskedQuestions.map((faqElem, index) => {
         return (
-          <div key={index} className="flex flex-col w-full items-center bg-black/50">
+          <div key={index} className="flex flex-col w-full items-center bg-black/40">
             <div className="w-full h-[70px] 2xl:h-[100px]">
               <button
                 className="w-full h-full flex justify-between items-center px-12 z-30 border-b border-[#a3a3c2]/20"
