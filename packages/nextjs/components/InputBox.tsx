@@ -28,12 +28,12 @@ const InputBox = () => {
 
   const [walletConnectBalances, setWalletConnectBalances] = useState<any[]>([]);
 
-  const connectedAccount = useAccount();
+  const { address } = useAccount();
 
   const [isLoadingTokens, setIsLoadingTokens] = useState(false);
 
   async function fn() {
-    if (connectedAccount?.address === undefined) return;
+    if (address === undefined) return;
 
     setIsLoadingTokens(true);
     const apiResponse = await fetch("/api/walletconnect/fetch-wallet-balance", {
@@ -42,7 +42,7 @@ const InputBox = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        address: connectedAccount.address,
+        address: address,
       }),
     });
 
@@ -53,12 +53,26 @@ const InputBox = () => {
       console.log(apiResponseJson.balances);
     }
 
+    // const fakeBalances = [
+    //   {
+    //     address: "eip155:1:0x8457CA5040ad67fdebbCC8EdCE889A335Bc0fbFB",
+    //     chainId: "eip155:1",
+    //     iconUrl: "https://cdn.zerion.io/0x8457CA5040ad67fdebbCC8EdCE889A335Bc0fbFB.png",
+    //     name: "AltLayer Token",
+    //     price: 0.9,
+    //     quantity: { decimals: "18", numeric: "1000" },
+    //     symbol: "ALT",
+    //     value: 97,
+    //   },
+    // ];
+    // setWalletConnectBalances(fakeBalances);
+
     setIsLoadingTokens(false);
   }
 
   useEffect(() => {
     fn();
-  }, [connectedAccount?.address]);
+  }, [address]);
   // const { price } = useTokenPricesUniswap();
 
   const [networkOptions2, setNetworkOptions2] = useState<any[]>([]);
@@ -296,7 +310,7 @@ const InputBox = () => {
 
   return (
     <UserActionBoxContainer>
-      {connectedAccount?.address ? (
+      {address ? (
         isLoadingTokens ? (
           <p>{"Loading Tokens..."}</p>
         ) : (

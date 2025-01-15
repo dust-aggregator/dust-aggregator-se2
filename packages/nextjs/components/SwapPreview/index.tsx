@@ -145,6 +145,7 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
       if (tokenOutAddress === zeroAddress) {
         if (outputNetwork.id === 137) tokenOutAddress = "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
         else if (outputNetwork.id === 8453) tokenOutAddress = "0x4200000000000000000000000000000000000006";
+        else if (outputNetwork.id === 1) tokenOutAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
         else tokenOutAddress = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
       }
 
@@ -195,6 +196,11 @@ const SwapPreview = ({ isDisabled }: { isDisabled: boolean }) => {
         nativeInputSymbol = "POL";
       } else if (inputNetwork.id === 8453) {
         wrappedInputAddress = "0x4200000000000000000000000000000000000006";
+        wrappedInputSymbol = "WETH";
+        wrappedInputName = "Wrapped ETH";
+        nativeInputSymbol = "ETH";
+      } else if (inputNetwork.id === 1) {
+        wrappedInputAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
         wrappedInputSymbol = "WETH";
         wrappedInputName = "Wrapped ETH";
         nativeInputSymbol = "ETH";
