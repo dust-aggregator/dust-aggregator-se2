@@ -30,7 +30,9 @@ export const useTokenWhitelist = () => {
     const getAllTokenMetadata = async addresses => {
       const allTokenData = await Promise.all(
         addresses.map(async address => {
-          const tokenMetadata = await alchemy.core.getTokenMetadata(address);
+          let tokenMetadata = await alchemy.core.getTokenMetadata(address);
+          if (tokenMetadata.symbol === "WMATIC")
+            tokenMetadata = { ...tokenMetadata, symbol: "WPOL", name: "Wrapped POL" };
           return { address, ...tokenMetadata };
         }),
       );
