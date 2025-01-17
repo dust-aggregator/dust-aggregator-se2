@@ -56,6 +56,7 @@ const OutputBox = () => {
     } else {
       const newInputNetwork = SUPPORTED_INPUT_NETWORKS.find(({ id }) => id === network.value);
       setOutputNetwork(newInputNetwork);
+      setOutputToken(null);
     }
   };
 
