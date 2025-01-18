@@ -74,6 +74,14 @@ const ConfirmButton = ({
       name: GA_EVENTS.approveSwap,
     });
 
+    // remove tokens with zero output
+    inputTokens.forEach(token => {
+      const displayedOutput = +Number(_quoteSwapData[token.address]?.displayOutput).toFixed(7);
+      if (displayedOutput === 0) {
+        setInputTokens(inputTokens.filter(t => t.address !== token.address));
+      }
+    });
+
     const isZetaChain = outputNetwork?.id === zetachain.id;
     const isNonEthereumNetwork = isBitcoin || isZetaChain;
 

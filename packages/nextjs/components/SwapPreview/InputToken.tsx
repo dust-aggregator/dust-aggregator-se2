@@ -57,8 +57,11 @@ const InputToken = ({
     }
   }, [_quoteSwapData?.displayOutput]);
 
+  const zeroOutput = _quoteSwapData?.estimatedOutput && Number(tokenQuote) === 0;
+  const estimateTextClass = zeroOutput ? "" : "text-[#DAFF15]";
+
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div className={zeroOutput ? "opacity-50" : "" + " w-full flex flex-col gap-2"}>
       <div className="w-full flex justify-between items-center">
         <div className="flex items-center gap-3">
           <Image className="cursor-pointer" src={"/Vector.png"} alt="" width={8} height={8} onClick={removeToken} />
@@ -127,10 +130,10 @@ const InputToken = ({
             <span className="text-[#ff3333] text-xs font-bold">Quote not found for requested pair</span>
           ) : (
             <>
-              <span className="text-[#DAFF15] text-xs font-bold">Estimated output:</span>
+              <span className={estimateTextClass + " text-xs font-bold"}>Estimated output:</span>
               {_quoteSwapData?.estimatedOutput ? (
-                <span className="text-[#DAFF15] text-xs">
-                  {tokenQuote} {outputToken?.symbol}
+                <span className="text-xs">
+                  {tokenQuote} {outputToken?.symbol} {zeroOutput && "(Will not be swapped)"}
                 </span>
               ) : (
                 <svg
